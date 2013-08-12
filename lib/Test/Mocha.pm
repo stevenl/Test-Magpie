@@ -84,7 +84,7 @@ This module exports the following functions by default:
 
 All other functions need to be imported explicitly.
 
-=for Pod::Coverage at_least at_most inspect when
+=for Pod::Coverage inspect
 
 =cut
 
@@ -94,10 +94,7 @@ our @EXPORT = qw(
     verify
 );
 our @EXPORT_OK = qw(
-    at_least
-    at_most
     inspect
-    when
 );
 
 =func mock
@@ -135,10 +132,6 @@ an exception.
     stub($mock)->invalid(@args)->dies('exception');
 
 =cut
-
-# old name for stub() deprecated because of potential clash
-# with given/when switch statements
-*when = \&stub;
 
 sub stub {
     my ($mock) = @_;
@@ -243,40 +236,6 @@ sub inspect {
         unless defined $mock && MockType->check($mock);
 
     return Inspect->new(mock => $mock);
-}
-
-sub at_least {
-    warnings::warnif('deprecated', 'at_least() is deprecated');
-
-    my ($n) = @_;
-    croak "at_least() must be given a number"
-        unless ! defined $n || looks_like_number $n;
-
-    return sub {
-        my ($num_calls, $called, $test_name, $tb) = @_;
-
-        $test_name = sprintf '%s was called at least %u time(s)', $called, $n
-            unless defined $test_name;
-
-        $tb->cmp_ok($num_calls, '>=', $n, $test_name);
-    }
-}
-
-sub at_most {
-    warnings::warnif('deprecated', 'at_most() is deprecated');
-
-    my ($n) = @_;
-    croak "at_most() must be given a number"
-        unless ! defined $n || looks_like_number $n;
-
-    return sub {
-        my ($num_calls, $called, $test_name, $tb) = @_;
-
-        $test_name = sprintf '%s was called at most %u time(s)', $called, $n
-            unless defined $test_name;
-
-        $tb->cmp_ok($num_calls, '<=', $n, $test_name);
-    }
 }
 
 1;

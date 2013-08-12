@@ -2,11 +2,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 28;
+use Test::More tests => 22;
 use Test::Fatal;
 use Test::Builder::Tester;
 
-BEGIN { use_ok 'Test::Mocha', qw(mock verify at_least at_most) }
+BEGIN { use_ok 'Test::Mocha' }
 
 my $file = __FILE__;
 my $err;
@@ -92,31 +92,6 @@ ERR
     test_test 'at_least not reached';
 }
 
-# subtest 'at_least()' => sub {
-{
-    like exception { verify($mock, times => at_least('string')) },
-        qr/at_least\(\) must be given a number/, 'invalid at_least()';
-
-    my $name = 'once() was called at least 1 time(s)';
-    test_out "ok 1 - $name";
-    verify($mock, times => at_least(1))->once;
-    test_test 'at_least()';
-
-    $name = 'once() was called at least 2 time(s)';
-    my $line = __LINE__ + 10;
-    test_out "not ok 1 - $name";
-    chomp($err = <<ERR);
-#   Failed test '$name'
-#   at $file line $line.
-#     '1'
-#         >=
-#     '2'
-ERR
-    test_err $err;
-    verify($mock, times => at_least(2))->once;
-    test_test( title => 'at_least() not reached', skip_err => 1 );
-}
-
 # subtest 'at_most' => sub {
 {
     like exception { verify($mock, at_most => 'string') },
@@ -139,31 +114,6 @@ ERR
     test_err $err;
     verify($mock, at_most => 1)->twice;
     test_test 'at_most exceeded';
-}
-
-# subtest 'at_most()' => sub {
-{
-    like exception { verify($mock, times => at_most('string')) },
-        qr/^at_most\(\) must be given a number/, 'invalid at_most()';
-
-    my $name = 'twice() was called at most 2 time(s)';
-    test_out "ok 1 - $name";
-    verify($mock, times => at_most(2))->twice;
-    test_test 'at_most()';
-
-    $name = 'twice() was called at most 1 time(s)';
-    my $line = __LINE__ + 10;
-    test_out "not ok 1 - $name";
-    chomp($err = <<ERR);
-#   Failed test '$name'
-#   at $file line $line.
-#     '2'
-#         <=
-#     '1'
-ERR
-    test_err $err;
-    verify($mock, times => at_most(1))->twice;
-    test_test( title => 'at_most exceeded', skip_err => 1 );
 }
 
 # subest 'between' => sub {

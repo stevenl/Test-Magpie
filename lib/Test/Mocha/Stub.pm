@@ -35,10 +35,6 @@ has '_executions' => (
 # Pushes a stub method that will return the given values to the end of the
 # execution queue.
 
-# old names for returns() and dies() methods kept for backwards compatibility
-*then_return = \&returns;
-*then_die    = \&dies;
-
 sub returns {
     my ($self, @return_values) = @_;
 

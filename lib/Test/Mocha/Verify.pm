@@ -6,7 +6,7 @@ use namespace::autoclean;
 
 use aliased 'Test::Mocha::Invocation';
 
-use MooseX::Types::Moose qw( Num Str CodeRef );
+use MooseX::Types::Moose qw( Num Str );
 use Test::Builder;
 use Test::Mocha::Types qw( NumRange );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
@@ -23,7 +23,7 @@ has 'test_name' => (
 );
 
 has 'times' => (
-    isa => Num|CodeRef,
+    isa => Num,
     reader => '_times',
 );
 has 'at_least' => (
@@ -41,10 +41,9 @@ has 'between' => (
 
 sub AUTOLOAD {
     my $self = shift;
-    my $method_name = extract_method_name($AUTOLOAD);
 
     my $observe = Invocation->new(
-        name => $method_name,
+        name => extract_method_name($AUTOLOAD),
         args => \@_,
     );
 
@@ -56,17 +55,10 @@ sub AUTOLOAD {
     my $test_name = $self->_test_name;
 
     if (defined $self->_times) {
-        if ( CodeRef->check($self->_times) ) {
-            # handle use of deprecated at_least() and at_most()
-            $self->_times->(
-                $matches, $observe->as_string, $test_name, $TB);
-        }
-        else {
-            $test_name = sprintf '%s was called %u time(s)',
-                $observe->as_string, $self->_times
-                    unless defined $test_name;
-            $TB->is_num( $matches, $self->_times, $test_name );
-        }
+        $test_name = sprintf '%s was called %u time(s)',
+            $observe->as_string, $self->_times
+                unless defined $test_name;
+        $TB->is_num( $matches, $self->_times, $test_name );
     }
     elsif (defined $self->_at_least) {
         $test_name = sprintf '%s was called at least %u time(s)',

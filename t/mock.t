@@ -5,7 +5,7 @@ use warnings;
 use Test::More;
 use Test::Fatal;
 
-BEGIN { use_ok 'Test::Mocha', qw(mock when) }
+BEGIN { use_ok 'Test::Mocha' }
 
 use Test::Mocha::ArgumentMatcher qw( anything );
 use Test::Mocha::Util qw( get_attribute_value );
