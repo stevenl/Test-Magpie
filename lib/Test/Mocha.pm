@@ -1,65 +1,46 @@
 use strict;
 use warnings;
 package Test::Mocha;
-# ABSTRACT: Test Spy Framework
+# ABSTRACT: Test Spy/Stub Framework
 
 =head1 SYNOPSIS
 
+Test::Mocha is a test spy framework for testing code that has dependencies on
+other objects.
+
+    use Test::More tests => 2;
     use Test::Mocha;
 
-    # create the mock object and stub
-    my $baker = mock;
-    stub($mock)->bake_loaf('white')->returns($bread);
+    # set up the mock, and stub method calls
+    my $warehouse = mock;
+    stub($warehouse)->has_inventory($item1, 50)->returns(1);
 
     # execute the code under test
-    my $bakery = Bakery->new( bakers => [ $baker ] );
-    my @loaves = $bakery->buy_loaf( amount => 2, type => 'white' );
+    my $order = Order->new(item => $item1, quantity => 50);
+    $order->fill($warehouse);
 
-    # verify the interactions with the mock object
-    verify($baker, times => 2)->bake_loaf('white');
+    # verify interactions with the dependent object
+    ok( $order->is_filled, 'Order is filled' );
+    verify( $warehouse, '... and inventory is removed' )
+        ->remove_inventory($item1, 50);
 
 =head1 DESCRIPTION
 
-Test::Mocha is a test double framework heavily inspired by the Mockito
-framework for Java, and also the Python-Mockito project. In Mockito, you "spy"
-on objects for their behaviour, rather than being upfront about what should
-happen. I find this approach to be significantly more flexible and easier to
-work with than mocking systems like EasyMock, so I created a Perl
-implementation.
+We find all sorts of excuses to avoid writing tests for our code. Often it
+seems too hard to isolate the code we want to test from the objects it is
+dependent on. Mocking frameworks are available to help us with this. But it
+still takes too long to set up the mock objects before you can get on with
+testing the actual code in question.
 
-=begin :list
-
-= Mock objects
-
-Mock objects, represented by L<Test::Mocha::Mock> objects, are objects that
-pretend to be everything you could ever want them to be. A mock object can have
-any method called on it, does every roles, and isa subclass of any superclass.
-This allows you to easily throw a mock object around it will be treated as
-though it was a real object.
-
-= Method stubbing
-
-Any method can be called on a mock object, and it will be logged as an
-invocation. By default, method calls return C<undef> in scalar context or an
-empty list in list context. Often, though, clients will be interested in the
-result of calling a method with some arguments. So you may specify how a
-method stub should respond when it is called.
-
-= Verify interactions
-
-After calling your concrete code (the code under test) you may want to check
-that the code did operate correctly on the mock. To do this, you can use
-verifications to make sure code was called, with correct parameters and the
-correct amount of times.
-
-= Argument matching
-
-Mocha gives you some helpful methods to validate arguments passed in to calls.
-You can check equality between arguments, or consume a general type of argument,
-or consume multiple arguments. See L<Test::Mocha::ArgumentMatcher> for the
-juicy details.
-
-=end :list
+Test::Mocha offers a simpler and more intuitive approach. Rather than setting
+up the expected interactions beforehand, you ask questions about interactions
+after the execution. The mocks can be created in almost no time. Yet they are
+ready to be used out-of-the-box by pretending to be any type you want them to
+be and accepting any method call on them. Explicit stubbing is only required
+when the dependent object is expected to return a response. After executing
+the code under test, you can selectively verify the interactions that you are
+interested in. As you verify behaviour, you focus on external interfaces
+rather than on internal state.
 
 =cut
 
@@ -73,21 +54,6 @@ use Exporter qw( import );
 use Scalar::Util qw( looks_like_number );
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 
-=head1 EXPORTS
-
-This module exports the following functions by default:
-
-=for :list
-* mock
-* stub
-* verify
-
-All other functions need to be imported explicitly.
-
-=for Pod::Coverage inspect
-
-=cut
-
 our @EXPORT = qw(
     mock
     stub
@@ -99,16 +65,22 @@ our @EXPORT_OK = qw(
 
 =func mock
 
-C<mock()> constructs a new instance of a mock object.
+C<mock()> creates a new mock object.
 
-    $mock = mock;
-    $mock->method(@args);
+    my $mock = mock;
 
-C<$class> is an optional argument to set the type that the mock object is
-blessed into. This value will be returned when C<ref()> is called on the object.
+By default, the mock object pretends to be anything you want it to be. Calling
+C<isa()> or C<does()> on the object will always return true.
 
-    $mock = mock($class);
-    is( ref($mock), $class );
+    ok( $mock->isa('AnyClass') );
+    ok( $mock->does('AnyRole') );
+    ok( $mock->DOES('AnyRole') );
+
+It will also accept any method call on it. By default, any method call will
+return C<undef> (in scalar context) or an empty list (in list context).
+
+    ok( $mock->can('any_method') );
+    is( $mock->any_method(@args), undef );
 
 =cut
 
@@ -125,11 +97,41 @@ sub mock {
 
 =func stub
 
-C<stub()> is used to tell the method stub to return some value(s) or to raise
-an exception.
+C<stub()> is used when you need a method to respond with something other than
+returning C<undef>. Use it to tell a method to return some value(s) or to
+raise an exception.
 
-    stub($mock)->method(@args)->returns(1, 2, 3);
-    stub($mock)->invalid(@args)->dies('exception');
+    stub($mock)->method_that_returns(@args)->returns(1, 2, 3);
+    stub($mock)->method_that_dies(@args)->dies('exception');
+
+    is_deeply( [ $mock->method_that_returns(@args) ], [ 1, 2, 3 ] );
+    ok( exception { $mock->method_that_dies(@args) } );
+
+The stub applies to the exact method and arguments specified.
+
+    stub($list)->get(0)->returns('first');
+    stub($list)->get(1)->returns('second');
+
+    is( $list->get(0), 'first' );
+    is( $list->get(1), 'second' );
+    is( $list->get(2), undef );
+
+A stubbed response will persist until it is overridden.
+
+    stub($warehouse)->has_inventory($item, 10)->returns(1);
+    ok( $warehouse->has_inventory($item, 10) ) for 1 .. 5;
+
+    stub($warehouse)->has_inventory($item, 10)->returns(0);
+    ok( !$warehouse->has_inventory($item, 10) ) for 1 .. 5;
+
+You may chain responses together to provide a series of responses.
+
+    stub($iterator)->next
+        ->returns(1)->returns(2)->returns(3)->dies('exhuasted');
+    ok( $iterator->next == 1 );
+    ok( $iterator->next == 2 );
+    ok( $iterator->next == 3 );
+    ok( exception { $iterator->next } );
 
 =cut
 
@@ -144,26 +146,21 @@ sub stub {
 
 =func verify
 
-C<verify()> is used to check the interactions on your mock object and prints
-the test result. C<verify()> plays nicely with L<Test::Simple> and Co - it
-depends on them for setting a test plan and its calls are counted in the test
-plan.
+    verify($mock, [%option], [$test_name])->method(@args)
 
-    verify($mock)->method(@args)
-    # prints: ok 1 - method("foo") was called 1 time(s)
+C<verify()> is used to test the interactions with the mock object. C<verify()>
+plays nicely with L<Test::Simple> and Co - it will print the test result along
+with your other tests and calls to C<verify()> are counted in the test plan.
 
-C<verify()> accepts an optional C<$test_name> to print a custom name for the
-test instead of the default.
+    verify($warehouse)->remove($item, 50);
+    # prints: ok 1 - remove("coffee", 50) was called 1 time(s)
 
-    verify($mock, $test_name)->method(@args)
-    # prints: ok 1 - record inserted into database'
+An option may be specified to constrain the test.
 
-C<verify()> accepts a few options to help your verifications:
-
-    verify( $mock, times    => 3,     )->method(@args)
-    verify( $mock, at_least => 3      )->method(@args)
-    verify( $mock, at_most  => 5      )->method(@args)
-    verify( $mock, between  => [3, 5] )->method(@args)
+    verify( $mock, times => 3 )->method(@args)
+    verify( $mock, at_least => 3 )->method(@args)
+    verify( $mock, at_most => 5 )->method(@args)
+    verify( $mock, between => [3, 5] )->method(@args)
 
 =for :list
 = times
@@ -179,9 +176,15 @@ called.
 Specifies the minimum and maximum number of times the given method is expected
 to be called.
 
-A C<$test_name> may also be supplied after the option.
+An optional C<$test_name> may be specified to be printed instead of the
+default.
 
-    verify($mock, times => 3, $test_name)->method(@args)
+    verify( $warehouse, 'inventory removed')->remove_inventory($item, 50);
+    # prints: ok 1 - inventory removed
+
+    verify( $warehouse, times => 0, 'inventory not removed')
+        ->remove_inventory($item, 50);
+    # prints: ok 2 - inventory not removed
 
 =cut
 
@@ -229,6 +232,9 @@ sub verify {
     return Verify->new(mock => $mock, %options);
 }
 
+=for Pod::Coverage inspect
+=cut
+
 sub inspect {
     my ($mock) = @_;
 
@@ -239,3 +245,24 @@ sub inspect {
 }
 
 1;
+
+=head1 TO DO
+
+=for :list
+* Rethink Matchers
+* Ordered verifications
+* Function to clear interaction history
+
+=head1 ACKNOWLEDGEMENTS
+
+This module is a fork from L<Test::Magpie> originally written by Oliver
+Charles (CYCLES).
+
+It is inspired by L<Mockito|http://code.google.com/p/mockito/> for Java and
+Python by Szczepan Faber.
+
+=head1 SEE ALSO
+
+L<Test::MockObject>
+
+=cut

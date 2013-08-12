@@ -11,11 +11,9 @@ plan skip_all => "Pod::Coverage::TrustPod required for testing POD coverage"
   if $@;
 
 # test public modules only
-plan tests => 4;
+plan tests => 2;
 pod_coverage_ok($_, {coverage_class => 'Pod::Coverage::TrustPod'})
     foreach qw(
         Test::Mocha
         Test::Mocha::ArgumentMatcher
-        Test::Mocha::Invocation
-        Test::Mocha::Mock
     );
