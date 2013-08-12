@@ -1,4 +1,4 @@
-Revision history for Test-Magpie
+Revision history for Test-Mocha
 
 0.10    2013-08-12
         Changed when->then_return to stub->returns.

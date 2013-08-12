@@ -1,13 +1,13 @@
-package Test::Magpie::Stubber;
+package Test::Mocha::Stubber;
 # ABSTRACT: Create methods stubs for mock objects
 
 use Moose;
 use namespace::autoclean;
 
-use aliased 'Test::Magpie::Stub';
-use Test::Magpie::Util qw( extract_method_name get_attribute_value );
+use aliased 'Test::Mocha::Stub';
+use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 
-with 'Test::Magpie::Role::HasMock';
+with 'Test::Mocha::Role::HasMock';
 
 our $AUTOLOAD;
 

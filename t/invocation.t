@@ -4,12 +4,12 @@ use warnings;
 
 use Test::More tests => 8;
 
-BEGIN { use_ok 'Test::Magpie' }
+BEGIN { use_ok 'Test::Mocha' }
 
-use aliased 'Test::Magpie::Invocation';
+use aliased 'Test::Mocha::Invocation';
 
-use Test::Magpie::ArgumentMatcher qw( anything );
-use Test::Magpie::Util qw( get_attribute_value );
+use Test::Mocha::ArgumentMatcher qw( anything );
+use Test::Mocha::Util qw( get_attribute_value );
 
 my $mock = mock;
 ok ! $mock->foo(123, bar => 456), 'mock method invoked';

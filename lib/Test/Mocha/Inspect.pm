@@ -1,15 +1,15 @@
-package Test::Magpie::Inspect;
+package Test::Mocha::Inspect;
 # ABSTRACT: Inspect method calls on mock objects
 
 use Moose;
 use namespace::autoclean;
 
-use aliased 'Test::Magpie::Invocation';
+use aliased 'Test::Mocha::Invocation';
 
 use List::Util qw( first );
-use Test::Magpie::Util qw( extract_method_name get_attribute_value );
+use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 
-with 'Test::Magpie::Role::HasMock';
+with 'Test::Mocha::Role::HasMock';
 
 our $AUTOLOAD;
 

@@ -6,7 +6,7 @@ use Test::More tests => 28;
 use Test::Fatal;
 use Test::Builder::Tester;
 
-BEGIN { use_ok 'Test::Magpie', qw(mock verify at_least at_most) }
+BEGIN { use_ok 'Test::Mocha', qw(mock verify at_least at_most) }
 
 my $file = __FILE__;
 my $err;
@@ -17,7 +17,7 @@ $mock->twice() for 1..2;
 
 subtest 'verify()' => sub {
     my $spy = verify($mock);
-    isa_ok $spy, 'Test::Magpie::Verify';
+    isa_ok $spy, 'Test::Mocha::Verify';
 
     like exception { verify },
         qr/^verify\(\) must be given a mock object/,

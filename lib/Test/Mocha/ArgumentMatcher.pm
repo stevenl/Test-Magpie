@@ -1,4 +1,4 @@
-package Test::Magpie::ArgumentMatcher;
+package Test::Mocha::ArgumentMatcher;
 # ABSTRACT: Various templates to catch arguments
 
 use strict;
@@ -8,7 +8,7 @@ use Devel::PartialDump;
 use Exporter qw( import );
 use MooseX::Types::Moose qw( Str CodeRef );
 use Set::Object ();
-use Test::Magpie::Util;
+use Test::Mocha::Util;
 
 use overload '""' => sub { $_[0]->{name} }, fallback => 1;
 
@@ -48,7 +48,7 @@ sub hash {
             my %hash = @_;
             for (keys %template) {
                 if (my $v = delete $hash{$_}) {
-                    return unless Test::Magpie::Util::match($v, $template{$_});
+                    return unless Test::Mocha::Util::match($v, $template{$_});
                 }
                 else {
                     return;
@@ -101,8 +101,8 @@ sub match {
 
 =head1 SYNOPSIS
 
-    use Test::Magpie;
-    use Test::Magpie::ArgumentMatcher qw( anything );
+    use Test::Mocha;
+    use Test::Mocha::ArgumentMatcher qw( anything );
 
     my $mock = mock;
     $mock->push( button => 'red' );
@@ -123,7 +123,7 @@ validation.
 =head2 Custom argument validators
 
 An argument validator is just a subroutine that is blessed as
-C<Test::Magpie::ArgumentMatcher>. You are welcome to subclass this package if
+C<Test::Mocha::ArgumentMatcher>. You are welcome to subclass this package if
 you wish to use a different storage system (like a traditional hash-reference),
 though a single sub routine is normally all you will need.
 

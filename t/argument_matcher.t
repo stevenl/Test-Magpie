@@ -7,7 +7,7 @@ use Test::Fatal;
 
 use MooseX::Types::Moose qw( Int );
 
-use constant ArgumentMatcher => 'Test::Magpie::ArgumentMatcher';
+use constant ArgumentMatcher => 'Test::Mocha::ArgumentMatcher';
 
 BEGIN { use_ok ArgumentMatcher, qw(anything custom_matcher hash set type) }
 

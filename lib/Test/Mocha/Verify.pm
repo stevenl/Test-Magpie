@@ -1,17 +1,17 @@
-package Test::Magpie::Verify;
+package Test::Mocha::Verify;
 # ABSTRACT: Verify interactions with a mock object by looking into its invocation history
 
 use Moose;
 use namespace::autoclean;
 
-use aliased 'Test::Magpie::Invocation';
+use aliased 'Test::Mocha::Invocation';
 
 use MooseX::Types::Moose qw( Num Str CodeRef );
 use Test::Builder;
-use Test::Magpie::Types qw( NumRange );
-use Test::Magpie::Util qw( extract_method_name get_attribute_value );
+use Test::Mocha::Types qw( NumRange );
+use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 
-with 'Test::Magpie::Role::HasMock';
+with 'Test::Mocha::Role::HasMock';
 
 our $AUTOLOAD;
 

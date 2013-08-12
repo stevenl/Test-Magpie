@@ -9,9 +9,9 @@ use 5.010001;
 # because we are using smartmatching
 
 use Test::More;
-use Test::Magpie qw( mock inspect );
+use Test::Mocha qw( mock inspect );
 
-use constant Invocation => 'Test::Magpie::Invocation';
+use constant Invocation => 'Test::Mocha::Invocation';
 
 subtest 'Array' => sub {
     my $mock = mock;

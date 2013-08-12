@@ -5,14 +5,14 @@ use warnings;
 use Test::More;
 use Test::Fatal;
 
-BEGIN { use_ok 'Test::Magpie', qw(mock when) }
+BEGIN { use_ok 'Test::Mocha', qw(mock when) }
 
-use Test::Magpie::ArgumentMatcher qw( anything );
-use Test::Magpie::Util qw( get_attribute_value );
+use Test::Mocha::ArgumentMatcher qw( anything );
+use Test::Mocha::Util qw( get_attribute_value );
 
 use constant {
-    Mock       => 'Test::Magpie::Mock',
-    Invocation => 'Test::Magpie::Invocation',
+    Mock       => 'Test::Mocha::Mock',
+    Invocation => 'Test::Mocha::Invocation',
 };
 
 subtest 'mock()' => sub {

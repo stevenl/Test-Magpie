@@ -7,8 +7,8 @@ use Test::More;
 
 use MooseX::Types::Moose qw( Int );
 
-use Test::Magpie;
-use Test::Magpie::ArgumentMatcher qw( type custom_matcher );
+use Test::Mocha;
+use Test::Mocha::ArgumentMatcher qw( type custom_matcher );
 
 subtest 'Lets verify some behaviour!' => sub {
     my $mocked_list = mock;

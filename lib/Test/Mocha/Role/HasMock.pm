@@ -1,4 +1,4 @@
-package Test::Magpie::Role::HasMock;
+package Test::Mocha::Role::HasMock;
 # ABSTRACT: A role for objects that wrap around a mock
 
 use Moose::Role;

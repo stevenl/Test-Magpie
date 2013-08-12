@@ -1,11 +1,11 @@
 use strict;
 use warnings;
-package Test::Magpie;
-# ABSTRACT: Mocking framework with method stubs and behaviour verification
+package Test::Mocha;
+# ABSTRACT: Test Spy Framework
 
 =head1 SYNOPSIS
 
-    use Test::Magpie;
+    use Test::Mocha;
 
     # create the mock object and stub
     my $baker = mock;
@@ -20,7 +20,7 @@ package Test::Magpie;
 
 =head1 DESCRIPTION
 
-Test::Magpie is a test double framework heavily inspired by the Mockito
+Test::Mocha is a test double framework heavily inspired by the Mockito
 framework for Java, and also the Python-Mockito project. In Mockito, you "spy"
 on objects for their behaviour, rather than being upfront about what should
 happen. I find this approach to be significantly more flexible and easier to
@@ -31,7 +31,7 @@ implementation.
 
 = Mock objects
 
-Mock objects, represented by L<Test::Magpie::Mock> objects, are objects that
+Mock objects, represented by L<Test::Mocha::Mock> objects, are objects that
 pretend to be everything you could ever want them to be. A mock object can have
 any method called on it, does every roles, and isa subclass of any superclass.
 This allows you to easily throw a mock object around it will be treated as
@@ -54,24 +54,24 @@ correct amount of times.
 
 = Argument matching
 
-Magpie gives you some helpful methods to validate arguments passed in to calls.
+Mocha gives you some helpful methods to validate arguments passed in to calls.
 You can check equality between arguments, or consume a general type of argument,
-or consume multiple arguments. See L<Test::Magpie::ArgumentMatcher> for the
+or consume multiple arguments. See L<Test::Mocha::ArgumentMatcher> for the
 juicy details.
 
 =end :list
 
 =cut
 
-use aliased 'Test::Magpie::Inspect';
-use aliased 'Test::Magpie::Mock';
-use aliased 'Test::Magpie::Stubber';
-use aliased 'Test::Magpie::Verify';
+use aliased 'Test::Mocha::Inspect';
+use aliased 'Test::Mocha::Mock';
+use aliased 'Test::Mocha::Stubber';
+use aliased 'Test::Mocha::Verify';
 
 use Carp qw( croak );
 use Exporter qw( import );
 use Scalar::Util qw( looks_like_number );
-use Test::Magpie::Types 'NumRange', Mock => { -as => 'MockType' };
+use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 
 =head1 EXPORTS
 

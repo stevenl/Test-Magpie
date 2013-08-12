@@ -1,14 +1,14 @@
-package Test::Magpie::Role::MethodCall;
+package Test::Mocha::Role::MethodCall;
 # ABSTRACT: A role that represents a method call
 
 use Moose::Role;
 use namespace::autoclean;
 
-use aliased 'Test::Magpie::ArgumentMatcher';
+use aliased 'Test::Mocha::ArgumentMatcher';
 
 use Devel::PartialDump;
 use MooseX::Types::Moose qw( ArrayRef Str );
-use Test::Magpie::Util qw( match );
+use Test::Mocha::Util qw( match );
 
 # cause string overloaded objects (ArgumentMatchers) to be stringified
 my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);

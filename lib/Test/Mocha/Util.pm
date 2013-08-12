@@ -1,5 +1,5 @@
-package Test::Magpie::Util;
-# ABSTRACT: Internal utility functions for Test::Magpie
+package Test::Mocha::Util;
+# ABSTRACT: Internal utility functions for Test::Mocha
 
 use strict;
 use warnings;

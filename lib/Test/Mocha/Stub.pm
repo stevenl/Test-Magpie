@@ -1,10 +1,10 @@
-package Test::Magpie::Stub;
+package Test::Mocha::Stub;
 # ABSTRACT: The declaration of a stubbed method
 
 # Represents a stub method - a method that may have some sort of action when
 # called. Stub methods are created by invoking the method name (with a set of
 # possible argument matchers/arguments) on the object returned by C<when> in
-# L<Test::Magpie>.
+# L<Test::Mocha>.
 #
 # Stub methods have a stack of executions. Every time the stub method is called
 # (matching arguments), the next execution is taken from the front of the queue
@@ -18,11 +18,11 @@ use Carp qw( croak );
 use MooseX::Types::Moose qw( ArrayRef );
 use Scalar::Util qw( blessed );
 
-with 'Test::Magpie::Role::MethodCall';
+with 'Test::Mocha::Role::MethodCall';
 
-# croak() messages should not trace back to Magpie modules
+# croak() messages should not trace back to Mocha modules
 # to facilitate debugging of user test scripts
-our @CARP_NOT = qw( Test::Magpie::Mock );
+our @CARP_NOT = qw( Test::Mocha::Mock );
 
 has '_executions' => (
     isa     => ArrayRef,

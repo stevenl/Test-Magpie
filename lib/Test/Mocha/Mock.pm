@@ -1,10 +1,10 @@
-package Test::Magpie::Mock;
+package Test::Mocha::Mock;
 # ABSTRACT: Mock objects
 
 =head1 SYNOPSIS
 
     # create a mock object
-    my $mock = mock(); # from Test::Magpie
+    my $mock = mock(); # from Test::Mocha
     my $mock_with_class = mock('AnyRef');
 
     # mock objects pretend to be anything you want them to be
@@ -30,13 +30,13 @@ occured.
 
 =cut
 
-use Moose -metaclass => 'Test::Magpie::Meta::Class';
+use Moose;
 use namespace::autoclean;
 
-use aliased 'Test::Magpie::Invocation';
-use aliased 'Test::Magpie::Stub';
+use aliased 'Test::Mocha::Invocation';
+use aliased 'Test::Mocha::Stub';
 
-use Test::Magpie::Util qw(
+use Test::Mocha::Util qw(
     extract_method_name
     get_attribute_value
     has_caller_package

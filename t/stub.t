@@ -5,21 +5,21 @@ use warnings;
 use Test::More tests => 8;
 use Test::Fatal;
 
-BEGIN { use_ok 'Test::Magpie' }
+BEGIN { use_ok 'Test::Mocha' }
 
-use aliased 'Test::Magpie::Invocation';
+use aliased 'Test::Mocha::Invocation';
 use Exception::Tiny;
-use Test::Magpie::Util qw( get_attribute_value );
-use Test::Magpie::ArgumentMatcher qw( anything );
+use Test::Mocha::Util qw( get_attribute_value );
+use Test::Mocha::ArgumentMatcher qw( anything );
 
-use constant Stub => 'Test::Magpie::Stub';
+use constant Stub => 'Test::Mocha::Stub';
 
 my $mock  = mock;
 my $stubs = get_attribute_value($mock, 'stubs');
 
 subtest 'stub()' => sub {
     my $stubber = stub($mock);
-    isa_ok $stubber, 'Test::Magpie::Stubber';
+    isa_ok $stubber, 'Test::Mocha::Stubber';
 
     like exception { stub() },
         qr/^stub\(\) must be given a mock object/,

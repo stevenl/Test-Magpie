@@ -1,10 +1,10 @@
-package Test::Magpie::Invocation;
+package Test::Mocha::Invocation;
 # ABSTRACT: Represents an invocation of a method
 
 use Moose;
 use namespace::autoclean;
 
-with 'Test::Magpie::Role::MethodCall';
+with 'Test::Mocha::Role::MethodCall';
 
 __PACKAGE__->meta->make_immutable;
 1;
