@@ -7,7 +7,7 @@ use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha', qw(mock inspect) }
 
-use Test::Mocha::ArgumentMatcher qw( anything );
+use Test::Mocha::Matcher qw( anything );
 
 my $mock = mock;
 $mock->foo;

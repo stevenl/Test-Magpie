@@ -1,4 +1,4 @@
-package Test::Mocha::ArgumentMatcher;
+package Test::Mocha::Matcher;
 # ABSTRACT: Various templates to catch arguments
 
 use strict;
@@ -102,7 +102,7 @@ sub match {
 =head1 SYNOPSIS
 
     use Test::Mocha;
-    use Test::Mocha::ArgumentMatcher qw( anything );
+    use Test::Mocha::Matcher qw( anything );
 
     my $mock = mock;
     $mock->push( button => 'red' );
@@ -123,7 +123,7 @@ validation.
 =head2 Custom argument validators
 
 An argument validator is just a subroutine that is blessed as
-C<Test::Mocha::ArgumentMatcher>. You are welcome to subclass this package if
+C<Test::Mocha::Matcher>. You are welcome to subclass this package if
 you wish to use a different storage system (like a traditional hash-reference),
 though a single sub routine is normally all you will need.
 

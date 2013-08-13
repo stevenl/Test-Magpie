@@ -7,7 +7,7 @@ use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::ArgumentMatcher qw( anything );
+use Test::Mocha::Matcher qw( anything );
 use Test::Mocha::Util qw( get_attribute_value );
 
 use constant {

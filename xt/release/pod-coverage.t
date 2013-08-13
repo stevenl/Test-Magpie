@@ -15,5 +15,5 @@ plan tests => 2;
 pod_coverage_ok($_, {coverage_class => 'Pod::Coverage::TrustPod'})
     foreach qw(
         Test::Mocha
-        Test::Mocha::ArgumentMatcher
+        Test::Mocha::Matcher
     );

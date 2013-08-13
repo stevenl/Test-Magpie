@@ -4,13 +4,13 @@ package Test::Mocha::Role::MethodCall;
 use Moose::Role;
 use namespace::autoclean;
 
-use aliased 'Test::Mocha::ArgumentMatcher';
+use aliased 'Test::Mocha::Matcher';
 
 use Devel::PartialDump;
 use MooseX::Types::Moose qw( ArrayRef Str );
 use Test::Mocha::Util qw( match );
 
-# cause string overloaded objects (ArgumentMatchers) to be stringified
+# cause string overloaded objects (Matchers) to be stringified
 my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);
 
 has 'name' => (
@@ -44,12 +44,12 @@ sub satisfied_by {
     my @expected = $self->args;
     my @input    = $invocation->args;
     # invocation arguments can't be argument matchers
-    ### assert: ! grep { ref($_) eq 'ArgumentMatcher' } @input
+    ### assert: ! grep { ref($_) eq 'Matcher' } @input
 
     while (@input && @expected) {
         my $matcher = shift @expected;
 
-        if (ref($matcher) eq ArgumentMatcher) {
+        if (ref($matcher) eq Matcher) {
             @input = $matcher->match(@input);
         }
         else {

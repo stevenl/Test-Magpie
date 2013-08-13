@@ -10,7 +10,7 @@ BEGIN { use_ok 'Test::Mocha' }
 use aliased 'Test::Mocha::Invocation';
 use Exception::Tiny;
 use Test::Mocha::Util qw( get_attribute_value );
-use Test::Mocha::ArgumentMatcher qw( anything );
+use Test::Mocha::Matcher qw( anything );
 
 use constant Stub => 'Test::Mocha::Stub';
 
