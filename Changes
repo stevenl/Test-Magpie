@@ -1,5 +1,10 @@
 Revision history for Test-Mocha
 
+0.11    2013-08-16
+        Forked from Test-Magpie.
+        Removed deprecated functions.
+        Refined documentation.
+
 0.10    2013-08-12
         Changed when->then_return to stub->returns.
         Changed stubbing behaviour to match Mockito.
