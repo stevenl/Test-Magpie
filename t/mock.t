@@ -2,51 +2,42 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 15;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Matcher qw( anything );
 use Test::Mocha::Util qw( get_attribute_value );
 
-use constant {
-    Mock       => 'Test::Mocha::Mock',
-    Invocation => 'Test::Mocha::Invocation',
-};
+use constant Mock => 'Test::Mocha::Mock';
 
-subtest 'mock()' => sub {
-    my $mock = mock;
-    ok $mock, 'mock()';
+# creating a mock
+my $mock = mock();
+ok $mock, 'mock() creates a simple mock';
 
-    isa_ok $mock, 'Bar';
-    ok $mock->isa('Bar'),  'isa anything';
+# mocks pretend to be anything you want
+ok $mock->isa('Bar'),  'mock can isa(anything)';
+ok $mock->does('Baz'), 'mock can does(anything)';
+ok $mock->DOES('Baz'), 'mock can DOES(anything)';
 
-    ok $mock->does('Baz'), 'does anything';
-    ok $mock->DOES('Baz'), 'DOES anything';
+# mocks accept any methods call on them
+my $calls   = get_attribute_value($mock, 'calls');
+my $coderef = $mock->can('foo');
+ok $coderef,                    'mock can(anything)';
+is ref($coderef), 'CODE',       ' and can() returns a coderef';
+is $coderef->($mock, 1), undef, ' and can() coderef returns undef by default';
+is $calls->[-1]->as_string, 'foo(1)', ' and method call is recorded';
 
-    is ref($mock), Mock,   'no ref';
+is $mock->foo(bar => 1), undef,
+    'mock accepts any method call, returning undef by default';
+is $calls->[-1]->as_string, 'foo(bar: 1)', ' and method call is recorded';
 
-    subtest 'can' => sub {
-        can_ok $mock, qw(foo bar baz);
+# calling mock with a class
+my $mock1 = mock('Foo');
+ok $mock1,              'mock($class) creates a mock with a class';
+is $mock1->ref, 'Foo',  ' and class is returned with ref method';
+is ref($mock1), 'Foo',  ' and class is returned with ref function';
 
-        my $coderef = $mock->can('can_method');
-        $coderef->($mock, 'baz', 123);
-
-        my $method_call = get_attribute_value($mock, 'calls')->[-1];
-        is $method_call->name, 'can_method',          'name';
-        is_deeply [$method_call->args], ['baz', 123], 'args';
-    };
-};
-
-subtest 'mock(class)' => sub {
-    my $mock = mock('Foo');
-    ok $mock,             'mock(class)';
-    is ref($mock), 'Foo', 'ref';
-
-    like exception {mock($mock)},
-        qr/^The argument for mock\(\) must be a string/,
-        'arg exception';
-};
-
-done_testing(3);
+like exception {mock($mock1)},
+    qr/^The argument for mock\(\) must be a string/,
+    'the argument for mock() must be a string';

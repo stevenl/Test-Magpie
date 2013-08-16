@@ -2,155 +2,181 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 25;
 use Test::Fatal;
 use Test::Builder::Tester;
 
 BEGIN { use_ok 'Test::Mocha' }
 
+my $test_name;
 my $file = __FILE__;
+my $line;
 my $err;
 
 my $mock = mock;
 $mock->once;
 $mock->twice() for 1..2;
 
-subtest 'verify()' => sub {
-    my $spy = verify($mock);
-    isa_ok $spy, 'Test::Mocha::Verify';
-
-    like exception { verify },
-        qr/^verify\(\) must be given a mock object/,
-        'no arg';
-    like exception { verify('string') },
-        qr/^verify\(\) must be given a mock object/,
-        'invalid arg';
-};
-
-{
-    my $name = 'once() was called once';
-
-    test_out "ok 1 - $name";
-    verify($mock, $name)->once;
-    test_test 'name';
-
-    test_out "ok 1 - $name";
-    verify($mock, times => 1, $name)->once;
-    test_test 'name with other options';
-}
+# -----------------
+# simple verify() (with no options)
 
 test_out 'ok 1 - once() was called 1 time(s)';
 verify($mock)->once;
-test_test 'times default';
+test_test 'simple verify() that passes';
 
-# currently Test::Builder::Test (0.98) does not work with subtests
-# subtest 'times' => sub {
+$test_name = 'one() was called 1 time(s)';
+$line = __LINE__ + 10;
+test_out "not ok 1 - $test_name";
+chomp($err = <<ERR);
+#   Failed test '$test_name'
+#   at $file line $line.
+#          got: 0
+#     expected: 1
+ERR
+test_err $err;
 {
-    like exception { verify($mock, times => 'string') },
-        qr/^'times' option must be a number/, 'invalid times';
+    verify($mock)->one;
+}
+test_test 'simple verify() that fails';
 
-    test_out 'ok 1 - twice() was called 2 time(s)';
-    verify($mock, times => 2)->twice();
-    test_test 'times equal';
+$test_name = 'once() was called once';
+test_out "ok 1 - $test_name";
+verify($mock, $test_name)->once;
+test_test 'simple verify() with a test name';
 
-    my $name = 'twice() was called 1 time(s)';
-    my $line = __LINE__ + 9;
-    test_out "not ok 1 - $name";
-    chomp($err = <<ERR);
-#   Failed test '$name'
+test_out "ok 1 - $test_name";
+verify($mock, times => 1, $test_name)->once;
+test_test 'verify() with an option AND a name';
+
+# -----------------
+# verify() with 'times' option
+
+test_out 'ok 1 - twice() was called 2 time(s)';
+verify($mock, times => 2)->twice();
+test_test "verify() with 'times' option that passes";
+
+$test_name = 'twice() was called 1 time(s)';
+$line = __LINE__ + 10;
+test_out "not ok 1 - $test_name";
+chomp($err = <<ERR);
+#   Failed test '$test_name'
 #   at $file line $line.
 #          got: 2
 #     expected: 1
 ERR
-    test_err $err;
-    verify($mock, times => 1)->twice;
-    test_test 'times not equal';
-}
-
-# subtest 'at_least' => sub {
+test_err $err;
 {
-    like exception { verify($mock, at_least => 'string') },
-        qr/^'at_least' option must be a number/, 'invalid at_least';
+    verify($mock, times => 1)->twice;
+}
+test_test "verify() with 'times' option that fails";
 
-    my $name = 'once() was called at least 1 time(s)';
-    test_out "ok 1 - $name";
-    verify($mock, at_least => 1)->once;
-    test_test 'at_least';
+like exception { verify($mock, times => 'string') },
+    qr/^'times' option must be a number/,
+    "verify() with invalid 'times' value";
 
-    $name = 'once() was called at least 2 time(s)';
-    my $line = __LINE__ + 10;
-    test_out "not ok 1 - $name";
-    chomp($err = <<ERR);
-#   Failed test '$name'
+# -----------------
+# verify() with 'at_least' option
+
+test_out 'ok 1 - once() was called at least 1 time(s)';
+verify($mock, at_least => 1)->once;
+test_test "verify() with 'at_least' option that passes";
+
+$test_name = 'once() was called at least 2 time(s)';
+$line = __LINE__ + 11;
+test_out "not ok 1 - $test_name";
+chomp($err = <<ERR);
+#   Failed test '$test_name'
 #   at $file line $line.
 #     '1'
 #         >=
 #     '2'
 ERR
-    test_err $err;
-    verify($mock, at_least => 2)->once;
-    test_test 'at_least not reached';
-}
-
-# subtest 'at_most' => sub {
+test_err $err;
 {
-    like exception { verify($mock, at_most => 'string') },
-        qr/^'at_most' option must be a number/, 'invalid at_most';
+    verify($mock, at_least => 2)->once;
+}
+test_test "verify() with 'at_least' option that fails";
 
-    test_out 'ok 1 - twice() was called at most 2 time(s)';
-    verify($mock, at_most => 2)->twice;
-    test_test 'at_most';
+like exception { verify($mock, at_least => 'string') },
+    qr/^'at_least' option must be a number/,
+    "verify() with invalid 'at_least' value";
 
-    my $name = 'twice() was called at most 1 time(s)';
-    my $line = __LINE__ + 10;
-    test_out "not ok 1 - $name";
-    chomp($err = <<ERR);
-#   Failed test '$name'
+# -----------------
+# verify() with 'at_most' option
+
+test_out 'ok 1 - twice() was called at most 2 time(s)';
+verify($mock, at_most => 2)->twice;
+test_test "verify() with 'at_most' option that passes";
+
+$test_name = 'twice() was called at most 1 time(s)';
+$line = __LINE__ + 11;
+test_out "not ok 1 - $test_name";
+chomp($err = <<ERR);
+#   Failed test '$test_name'
 #   at $file line $line.
 #     '2'
 #         <=
 #     '1'
 ERR
-    test_err $err;
-    verify($mock, at_most => 1)->twice;
-    test_test 'at_most exceeded';
-}
-
-# subest 'between' => sub {
+test_err $err;
 {
-    like exception { verify($mock, between => 1)->twice },
-        qr/'between' option must be an arrayref with 2 numbers in ascending order/,
-        'between - not arrayref';
-    like exception { verify($mock, between => ['one', 'two'])->twice },
-        qr/'between' option must be an arrayref with 2 numbers in ascending order/,
-        'between - not numbers in arrayref';
-    like exception { verify($mock, between => [2, 1])->twice },
-        qr/'between' option must be an arrayref with 2 numbers in ascending order/,
-        'between - numbers in arrayref not in order';
-
-    my $name = 'twice() was called between 1 and 2 time(s)';
-    test_out "ok 1 - $name";
-    verify($mock, between => [1, 2])->twice;
-    test_test 'between 1';
-
-    $name = 'twice() was called between 2 and 3 time(s)';
-    test_out "ok 1 - $name";
-    verify($mock, between => [2, 3])->twice;
-    test_test 'between 2';
-
-    $name = 'twice() was called between 3 and 4 time(s)';
-    test_out "not ok 1 - $name";
-    test_fail +1;
-    verify($mock, between => [3, 4])->twice;
-    test_test 'not between 1';
-
-    $name = 'twice() was called between 0 and 1 time(s)';
-    test_out "not ok 1 - $name";
-    test_fail +1;
-    verify($mock, between => [0, 1])->twice;
-    test_test 'not between 2';
+    verify($mock, at_most => 1)->twice;
 }
+test_test "verify() with 'at_most' option that fails";
 
-like exception {
-    verify($mock, times => 2, at_least => 2, at_most => 2)->twice
-}, qr/^You can set only one of these options:/, 'multiple options';
+like exception { verify($mock, at_most => 'string') },
+    qr/^'at_most' option must be a number/,
+    "verify() with invalid 'at_most' value";
+
+# -----------------
+# verify() with 'between' option
+
+test_out 'ok 1 - twice() was called between 1 and 2 time(s)';
+verify($mock, between => [1, 2])->twice;
+test_test "verify() with 'between' option that passes (lower boundary)";
+
+test_out 'ok 1 - twice() was called between 2 and 3 time(s)';
+verify($mock, between => [2, 3])->twice;
+test_test "verify() with 'between' option that passes (upper boundary)";
+
+test_out 'not ok 1 - twice() was called between 0 and 1 time(s)';
+test_fail +1;
+verify($mock, between => [0, 1])->twice;
+test_test "verify() with 'between' option that fails (lower boundary)";
+
+test_out 'not ok 1 - twice() was called between 3 and 4 time(s)';
+test_fail +1;
+verify($mock, between => [3, 4])->twice;
+test_test "verify() with 'between' option that fails (upper boundary)";
+
+like exception { verify($mock, between => 1)->twice },
+    qr/'between' option must be an arrayref with 2 numbers in ascending order/,
+    "verify() with invalid 'between' value (not an arrayref)";
+
+like exception { verify($mock, between => [1])->twice },
+    qr/'between' option must be an arrayref with 2 numbers in ascending order/,
+    "verify() with invalid 'between' value (not a pair)";
+
+like exception { verify($mock, between => ['one', 'two'])->twice },
+    qr/'between' option must be an arrayref with 2 numbers in ascending order/,
+    "verify() with invalid 'between' value (pair are not numbers)";
+
+like exception { verify($mock, between => [2, 1])->twice },
+    qr/'between' option must be an arrayref with 2 numbers in ascending order/,
+    "verify() with invalid 'between' value (pair not ordered)";
+
+# -----------------
+# verify() exceptions
+
+like exception { verify() },
+    qr/^verify\(\) must be given a mock object/,
+    'verify() called without an argument';
+
+like exception { verify('string') },
+    qr/^verify\(\) must be given a mock object/,
+    'verify() called with an invalid argument';
+
+like exception {verify($mock, times => 2, at_least => 2, at_most => 2)->twice},
+    qr/^You can set only one of these options:/,
+    'verify() called with multiple options';
+
