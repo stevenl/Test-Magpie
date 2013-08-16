@@ -54,6 +54,7 @@ sub AUTOLOAD {
 
     my $test_name = $self->_test_name;
 
+    # uncoverable branch false count:4
     if (defined $self->_times) {
         $test_name = sprintf '%s was called %u time(s)',
             $observe->as_string, $self->_times

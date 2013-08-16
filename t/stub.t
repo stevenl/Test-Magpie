@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -26,8 +26,8 @@ subtest 'create a method stub that returns an array' => sub {
     stub($mock)->foo->returns(1, 2, 3);
     is $stubs->{foo}[0]->as_string, 'foo()';
 
-    is_deeply [ $mock->foo ], [ 1, 2, 3 ], 'and stub returns the array';
-    is $mock->foo, 3,                      'or the array size in scalar context';
+    is_deeply [ $mock->foo ], [1, 2, 3], 'and stub returns the array';
+    is $mock->foo, 3,                    'or the array size in scalar context';
 };
 
 subtest 'create a method stub that dies' => sub {
@@ -47,8 +47,24 @@ subtest 'create a method stub that throws exception' => sub {
             line => __LINE__,
         )
     );
-    like exception { $mock->foo }, qr/^my exception/,
-        'and the exception is thrown';
+    like exception { $mock->foo },
+        qr/^my exception/, 'and the exception is thrown';
+};
+
+{
+    package NonThrowable;
+    use overload '""' => \&message;
+    sub new { bless [], $_[0] }
+    sub message {'died'}
+}
+subtest 'create stub dies with a non-exception object' => sub {
+    stub($mock)->foo->dies( NonThrowable->new );
+    like exception { $mock->foo }, qr/^died/, 'and stub does die';
+};
+
+subtest 'create a method stub with no specified response' => sub {
+    stub($mock)->foo;
+    is $mock->foo, undef, 'and stub returns undef';
 };
 
 subtest 'stub applies to the exact name and arguments specified' => sub {
@@ -94,22 +110,6 @@ like exception { stub('string') },
     qr/^stub\(\) must be given a mock object/,
     'stub() with non-mock argument throws exception';
 
-# {
-#     package NonThrowable;
-#     use overload '""' => \&message;
-#     sub new { bless [], $_[0] }
-#     sub message {'died'}
-# }
-#
-# subtest 'dies' => sub {
-#     my $dog = mock;
-#     my $stub = stub($dog)->meow;
-#     is $stub
-#         ->dies( NonThrowable->new )
-#
-#     like exception { $dog->meow }, qr/^died/, 'died (blessed, cannot throw)';
-# };
-#
 # subtest 'argument matching' => sub {
 #     my $list = mock;
 #     stub($list)->get(0)->returns('first');

@@ -205,10 +205,8 @@ sub verify {
         unless keys %options == 1;
 
     if (defined $options{times}) {
-        croak "'times' option must be a number" unless (
-            looks_like_number $options{times} ||
-            ref $options{times} eq 'CODE'
-        );
+        croak "'times' option must be a number"
+            unless looks_like_number $options{times};
     }
     elsif (defined $options{at_least}) {
         croak "'at_least' option must be a number"
@@ -220,10 +218,12 @@ sub verify {
     }
     elsif (defined $options{between}) {
         croak "'between' option must be an arrayref "
-            . "with 2 numbers in ascending order" unless (
-            NumRange->check( $options{between} ) &&
-            $options{between}[0] < $options{between}[1]
-        );
+            . "with 2 numbers in ascending order"
+            unless NumRange->check( $options{between} );
+    }
+    else {
+        my ($option) = keys %options;
+        croak "verify() was given an invalid option: '$option'";
     }
 
     # set test name if given

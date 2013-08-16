@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 29;
 use Test::Fatal;
 use Test::Builder::Tester;
 
@@ -43,10 +43,6 @@ $test_name = 'once() was called once';
 test_out "ok 1 - $test_name";
 verify($mock, $test_name)->once;
 test_test 'simple verify() with a test name';
-
-test_out "ok 1 - $test_name";
-verify($mock, times => 1, $test_name)->once;
-test_test 'verify() with an option AND a name';
 
 # -----------------
 # verify() with 'times' option
@@ -166,6 +162,26 @@ like exception { verify($mock, between => [2, 1])->twice },
     "verify() with invalid 'between' value (pair not ordered)";
 
 # -----------------
+# verify() with an option AND a name
+
+$test_name = 'name for my test';
+test_out "ok 1 - $test_name";
+verify($mock, times => 1, $test_name)->once;
+test_test "verify() with 'times' option and a name";
+
+test_out "ok 1 - $test_name";
+verify($mock, at_least => 1, $test_name)->once;
+test_test "verify() with 'at_least' option and a name";
+
+test_out "ok 1 - $test_name";
+verify($mock, at_most => 2, $test_name)->twice;
+test_test "verify() with 'at_most' option and a name";
+
+test_out "ok 1 - $test_name";
+verify($mock, between => [1, 2], $test_name)->twice;
+test_test "verify() with 'between' option and a name";
+
+# -----------------
 # verify() exceptions
 
 like exception { verify() },
@@ -176,7 +192,11 @@ like exception { verify('string') },
     qr/^verify\(\) must be given a mock object/,
     'verify() called with an invalid argument';
 
-like exception {verify($mock, times => 2, at_least => 2, at_most => 2)->twice},
+like exception { verify($mock, times => 2, at_least => 2)->twice },
     qr/^You can set only one of these options:/,
     'verify() called with multiple options';
+
+like exception { verify($mock, tiny => 1)->once },
+    qr/^verify\(\) was given an invalid option: 'tiny'/,
+    'verify() called with an invalid option';
 

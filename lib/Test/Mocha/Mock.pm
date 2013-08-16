@@ -81,11 +81,7 @@ sub AUTOLOAD {
 # is required.
 
 sub isa {
-    my ($self, $package) = @_;
-    return if (
-        has_caller_package('UNIVERSAL::ref') ||
-        $package =~ /^Class::MOP::*/
-    );
+    return if has_caller_package('UNIVERSAL::ref');
     return 1;
 }
 
