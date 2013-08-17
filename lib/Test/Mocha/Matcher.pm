@@ -6,9 +6,9 @@ use warnings;
 
 use Devel::PartialDump;
 use Exporter qw( import );
-use MooseX::Types::Moose qw( Str CodeRef );
 use Set::Object ();
 use Test::Mocha::Util;
+use Types::Standard qw( Str CodeRef );
 
 use overload '""' => sub { $_[0]->{name} }, fallback => 1;
 

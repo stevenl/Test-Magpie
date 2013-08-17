@@ -6,10 +6,10 @@ use namespace::autoclean;
 
 use aliased 'Test::Mocha::Invocation';
 
-use MooseX::Types::Moose qw( Num Str );
 use Test::Builder;
 use Test::Mocha::Types qw( NumRange );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
+use Types::Standard qw( Num Str );
 
 with 'Test::Mocha::Role::HasMock';
 

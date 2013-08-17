@@ -5,7 +5,7 @@ use warnings;
 use Test::More tests => 6;
 use Test::Fatal;
 
-use MooseX::Types::Moose qw( Int );
+use Types::Standard qw( Int );
 
 use constant Matcher => 'Test::Mocha::Matcher';
 

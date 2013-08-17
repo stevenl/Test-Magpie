@@ -7,8 +7,8 @@ use namespace::autoclean;
 use aliased 'Test::Mocha::Matcher';
 
 use Devel::PartialDump;
-use MooseX::Types::Moose qw( ArrayRef Str );
 use Test::Mocha::Util qw( match );
+use Types::Standard qw( ArrayRef Str );
 
 # cause string overloaded objects (Matchers) to be stringified
 my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);

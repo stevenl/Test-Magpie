@@ -51,8 +51,8 @@ use aliased 'Test::Mocha::Verify';
 
 use Carp qw( croak );
 use Exporter qw( import );
-use Scalar::Util qw( looks_like_number );
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
+use Types::Standard qw( Num );
 
 our @EXPORT = qw(
     mock
@@ -179,10 +179,10 @@ to be called.
 An optional C<$test_name> may be specified to be printed instead of the
 default.
 
-    verify( $warehouse, 'inventory removed')->remove_inventory($item, 50);
+    verify( $warehouse, 'inventory removed' )->remove_inventory($item, 50);
     # prints: ok 1 - inventory removed
 
-    verify( $warehouse, times => 0, 'inventory not removed')
+    verify( $warehouse, times => 0, 'inventory not removed' )
         ->remove_inventory($item, 50);
     # prints: ok 2 - inventory not removed
 
@@ -206,15 +206,15 @@ sub verify {
 
     if (defined $options{times}) {
         croak "'times' option must be a number"
-            unless looks_like_number $options{times};
+            unless Num->check( $options{times} );
     }
     elsif (defined $options{at_least}) {
         croak "'at_least' option must be a number"
-            unless looks_like_number $options{at_least};
+            unless Num->check( $options{at_least} );
     }
     elsif (defined $options{at_most}) {
         croak "'at_most' option must be a number"
-            unless looks_like_number $options{at_most};
+            unless Num->check( $options{at_most} );
     }
     elsif (defined $options{between}) {
         croak "'between' option must be an arrayref "

@@ -15,8 +15,8 @@ use Moose;
 use namespace::autoclean;
 
 use Carp qw( croak );
-use MooseX::Types::Moose qw( ArrayRef );
 use Scalar::Util qw( blessed );
+use Types::Standard qw( ArrayRef );
 
 with 'Test::Mocha::Role::MethodCall';
 

@@ -13,8 +13,7 @@ use Test::Mocha::Util qw(
     has_caller_package
 );
 
-use MooseX::Types::Moose qw( ArrayRef Int Str );
-use MooseX::Types::Structured qw( Map );
+use Types::Standard qw( ArrayRef InstanceOf Int Map Str );
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
@@ -35,7 +34,7 @@ has 'class' => (
 # to be used for verification.
 
 has 'calls' => (
-    isa => ArrayRef[Invocation],
+    isa => ArrayRef[InstanceOf[Invocation]],
     is => 'bare',
     default => sub { [] }
 );
@@ -46,7 +45,7 @@ has 'calls' => (
 # determine which stub to dispatch to.
 
 has 'stubs' => (
-    isa => Map[ Str, ArrayRef[Stub] ],
+    isa => Map[ Str, ArrayRef[InstanceOf[Stub]] ],
     is => 'bare',
     default => sub { {} }
 );
