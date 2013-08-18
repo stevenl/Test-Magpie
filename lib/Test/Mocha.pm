@@ -10,10 +10,13 @@ other objects.
 
     use Test::More tests => 2;
     use Test::Mocha;
+    use Types::Standard qw( Int );
 
-    # set up the mock, and stub method calls
+    # create the mock
     my $warehouse = mock;
-    stub($warehouse)->has_inventory($item1, 50)->returns(1);
+
+    # stub method calls (with type constraint for matching argument)
+    stub($warehouse)->has_inventory($item1, Int)->returns(1);
 
     # execute the code under test
     my $order = Order->new(item => $item1, quantity => 50);
@@ -107,7 +110,8 @@ raise an exception.
     is_deeply( [ $mock->method_that_returns(@args) ], [ 1, 2, 3 ] );
     ok( exception { $mock->method_that_dies(@args) } );
 
-The stub applies to the exact method and arguments specified.
+The stub applies to the exact method and arguments specified. (But see also
+L</"ARGUMENT MATCHING"> for a shortcut around this.)
 
     stub($list)->get(0)->returns('first');
     stub($list)->get(1)->returns('second');
@@ -148,9 +152,11 @@ sub stub {
 
     verify($mock, [%option], [$test_name])->method(@args)
 
-C<verify()> is used to test the interactions with the mock object. C<verify()>
-plays nicely with L<Test::Simple> and Co - it will print the test result along
-with your other tests and calls to C<verify()> are counted in the test plan.
+C<verify()> is used to test the interactions with the mock object. You can use
+it to verify that the correct methods were called, with the correct set of
+arguments, and the correct number of times. C<verify()> plays nicely with
+L<Test::Simple> and Co - it will print the test result along with your other
+tests and calls to C<verify()> are counted in the test plan.
 
     verify($warehouse)->remove($item, 50);
     # prints: ok 1 - remove("coffee", 50) was called 1 time(s)
@@ -246,11 +252,63 @@ sub inspect {
 
 1;
 
-=head1 TO DO
+=head1 ARGUMENT MATCHING
+
+When specifying method calls using C<stub()> or C<verify()>, you may use
+type constraints to match the arguments rather than specifying the exact
+arguments. You may use any L<Type::Tiny> type constraint such as those
+predefined in L<Types::Standard>.
+
+    use Types::Standard qw( Any );
+
+    my $mock = mock;
+    stub($mock)->foo(Any)->returns('ok');
+
+    print $mock->foo(1);        # prints: ok
+    print $mock->foo('string'); # prints: ok
+
+    verify($mock, times => 2)->foo(Any);
+    # prints: ok 1 - foo(Any) was called 2 time(s)
+
+You may use the normal features of type constraints: parameterized and
+structured types, and type unions, intersections and negations (but there's no
+need to use coercions).
+
+    use Types::Standard qw( ArrayRef StrMatch );
+
+    my $list = mock;
+    $list->set(1, [1,2]);
+    $list->set(0, 'foobar');
+
+    # type negation
+    # prints: ok 1 - set(Int, ~Int) was called 2 time(s)
+    verify($list, times => 2)->set(Int, ~Int);
+
+    # type union
+    # prints: ok 2 - set(Int, ArrayRef|Str) was called 2 time(s)
+    verify($list, times => 2)->set(Int, ArrayRef|Str);
+
+    # parameterized type
+    # prints: ok 3 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
+    verify($list)->set(Int, StrMatch[qr/^foo/]);
+
+You may also use your own type constraints, defined using L<Type::Utils>.
+
+    use Type::Utils -all;
+
+    # naming the type means it will be printed nicely in the verify() output
+    my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
+
+    # prints: ok 4 - set(PositiveInt, Any) was called 1 time(s)
+    verify($list)->set($positive_int, Any);
+
+You do not need to use be using an OO framework like Moo(se) to use these.
+Please consult the respective documentation for details about the available
+type constraints or how to define your own.
 
 =for :list
-* Rethink Matchers
 * Ordered verifications
+* Stubs with callbacks
 * Function to clear interaction history
 
 =head1 ACKNOWLEDGEMENTS

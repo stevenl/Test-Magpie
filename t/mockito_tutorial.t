@@ -2,13 +2,12 @@
 use strict;
 use warnings;
 
+use Test::More tests => 5;
 use Test::Fatal;
-use Test::More;
-
+use Type::Utils -all;
 use Types::Standard qw( Int );
 
-use Test::Mocha;
-use Test::Mocha::Matcher qw( type custom_matcher );
+BEGIN { use_ok 'Test::Mocha' }
 
 subtest 'Lets verify some behaviour!' => sub {
     my $mocked_list = mock;
@@ -35,13 +34,15 @@ subtest 'How about some stubbing?' => sub {
 
 subtest 'Argument matchers' => sub {
     my $mocked_list = mock;
-    stub($mocked_list)->get(type(Int))->returns('element');
-    stub($mocked_list)->get(custom_matcher { $_ eq 'hello' })->returns('Hi!');
+    stub($mocked_list)->get(Int)->returns('element');
+
+    my $even_int = declare as Int, where { $_ % 2 == 0 };
+    stub($mocked_list)->get($even_int)->returns('it is even');
 
     is($mocked_list->get(999) => 'element');
-    is($mocked_list->get('hello') => 'Hi!');
+    is($mocked_list->get(100) => 'it is even');
 
-    verify($mocked_list)->get(type(Int));
+    verify($mocked_list, times => 2)->get(Int);
 };
 
 subtest 'Verifying the number of invocations' => sub {
@@ -58,5 +59,3 @@ subtest 'Verifying the number of invocations' => sub {
     verify($list, at_least => 1)->add('three');
     verify($list, at_most => 2)->add('two');
 };
-
-done_testing;

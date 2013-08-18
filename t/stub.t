@@ -9,7 +9,6 @@ BEGIN { use_ok 'Test::Mocha' }
 
 use Exception::Tiny;
 use Test::Mocha::Util qw( get_attribute_value );
-#use Test::Mocha::Matcher qw( anything );
 
 # setup
 my $mock  = mock;

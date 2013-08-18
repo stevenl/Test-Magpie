@@ -4,10 +4,9 @@ use warnings;
 
 use Test::More;
 use Test::Fatal;
+use Types::Standard qw( Any );
 
-BEGIN { use_ok 'Test::Mocha', qw(mock inspect) }
-
-use Test::Mocha::Matcher qw( anything );
+BEGIN { use_ok 'Test::Mocha', qw( mock inspect ) }
 
 my $mock = mock;
 $mock->foo;
@@ -35,7 +34,7 @@ subtest 'get invocation' => sub {
 };
 
 subtest 'get invocation with argument matchers' => sub {
-    my $invocation2 = $inspect->foo(anything);
+    my $invocation2 = $inspect->foo(map {Any} 1..3 );
     isa_ok $invocation2, 'Test::Mocha::Invocation';
     is $invocation2->name, 'foo';
     is_deeply [$invocation2->args], [123, 'bar', 456];

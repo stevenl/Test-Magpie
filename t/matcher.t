@@ -1,72 +1,49 @@
-#!/usr/bin/perl -T
+#!perl -T
 use strict;
 use warnings;
 
-use Test::More tests => 6;
-use Test::Fatal;
+use Test::More;
+use Test::Builder::Tester;
 
-use Types::Standard qw( Int );
+use Type::Utils -all;
+use Types::Standard qw( Any Int Str StrMatch );
 
-use constant Matcher => 'Test::Mocha::Matcher';
+BEGIN { use_ok 'Test::Mocha' }
 
-BEGIN { use_ok Matcher, qw(anything custom_matcher hash set type) }
+my $mock = mock;
 
-subtest 'anything' => sub {
-    my $matcher = anything;
-    isa_ok $matcher, Matcher;
-    is $matcher, 'anything()', 'string overloads';
+$mock->set('foo');
+$mock->set('foobar');
+$mock->set(+1, 'not an int');
+$mock->set(-1, 'negative');
 
-    is_deeply [$matcher->match(qw[arguments are ignored])], [], 'ignore args';
-    is_deeply [$matcher->match()], [], 'no args';
-};
+stub($mock)->set(Any)->returns('any');
+is $mock->set(1), 'any', 'stub() accepts type constraints';
 
-subtest 'custom_matcher' => sub {
-    my $matcher = custom_matcher {ref($_) eq 'ARRAY'};
-    isa_ok $matcher, Matcher;
-    like $matcher, qr/custom_matcher\(CODE\(.+\)\)/, 'string overloads';
+test_out 'ok 1 - set(Int) was called 1 time(s)';
+verify($mock)->set(Int);
+test_test 'verify() accepts type constraints';
 
-    is_deeply [$matcher->match([])], [], 'match';
-    is $matcher->match(123), undef, 'no match';
-    is $matcher->match(),    undef, 'no args';
-};
+test_out 'ok 1 - set(StrMatch[(?^:^foo)]) was called 2 time(s)';
+verify($mock, times => 2)->set( StrMatch[qr/^foo/] );
+test_test 'parameterized type works';
 
-subtest 'hash' => sub {
-    my $matcher = hash(a => 1, b => 2, c => 3);
-    isa_ok $matcher, Matcher;
-    like $matcher, qr/hash\([a1b2c3",\s]+\)/, 'string overloads';
+test_out 'ok 1 - set(Int, ~Int) was called 2 time(s)';
+verify($mock, times => 2)->set(Int, ~Int);
+test_test 'type negation works';
 
-    is_deeply [$matcher->match(a => 1, b => 2, c => 3)], [], 'match exactly';
-    is_deeply [$matcher->match(c => 3, b => 2, a => 1)], [],
-        'match different order';
-    is $matcher->match(a => 1, b => 2),         undef, 'missing key';
-    is $matcher->match(a => 1, b => 2, d => 3), undef, 'different key';
-    is $matcher->match(a => 1, b => 2, c => 4), undef, 'different value';
-    is $matcher->match(),                       undef, 'no args';
-};
+test_out 'ok 1 - set(Int|Str) was called 3 time(s)';
+verify($mock, times => 3)->set( Int | Str );
+test_test 'type union works';
 
-subtest 'set' => sub {
-    my $matcher = set(1, 1, 2, 3, 4, 5);
-    isa_ok $matcher, Matcher;
-    is $matcher, 'set(1, 1, 2, 3, 4, 5)', 'string overloads';
+test_out
+'ok 1 - set(StrMatch[(?^:^foo)]&StrMatch[(?^:bar$)]) was called 1 time(s)';
+verify($mock)->set(StrMatch[qr/^foo/] & StrMatch[qr/bar$/]);
+test_test 'type intersection works';
 
-    is_deeply [$matcher->match(1, 1, 2, 3, 4, 5)], [], 'match exactly';
-    is_deeply [$matcher->match(1, 2, 3, 4, 5)],    [], 'match unique set';
-    is_deeply [$matcher->match(5, 4, 3, 2, 1)],    [], 'match different order';
-    is $matcher->match(1, 2, 3, 4, 5, 6), undef, 'more args';
-    is $matcher->match(1, 2, 3, 4),       undef, 'less args';
-    is $matcher->match(2, 3, 4, 5, 6),    undef, 'different args';
-    is $matcher->match(),                 undef, 'no args';
-};
+my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
+test_out 'ok 1 - set(PositiveInt, Str) was called 1 time(s)';
+verify($mock)->set($positive_int, Str);
+test_test 'self-defined type constraint works';
 
-subtest 'type' => sub {
-    my $matcher = type(Int);
-    isa_ok $matcher, Matcher;
-    is $matcher, 'type(Int)', 'string overloads';
-
-    is_deeply [$matcher->match(234)],   [], 'match Int';
-    is_deeply [$matcher->match('234')], [], 'match Int (Str)';
-    is $matcher->match(234.14),  undef, 'no match - Num';
-    is $matcher->match('hello'), undef, 'no match - Str';
-    is $matcher->match([234]),   undef, 'no match - ArrayRef';
-    is $matcher->match(),        undef, 'no args';
-};
+done_testing;

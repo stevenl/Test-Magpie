@@ -4,9 +4,8 @@ package Test::Mocha::Role::MethodCall;
 use Moose::Role;
 use namespace::autoclean;
 
-use aliased 'Test::Mocha::Matcher';
-
 use Devel::PartialDump;
+use Test::Mocha::Types qw( Matcher );
 use Test::Mocha::Util qw( match );
 use Types::Standard qw( ArrayRef Str );
 
@@ -44,17 +43,17 @@ sub satisfied_by {
     my @expected = $self->args;
     my @input    = $invocation->args;
     # invocation arguments can't be argument matchers
-    ### assert: ! grep { ref($_) eq 'Matcher' } @input
+    ### assert: ! grep { Matcher->check($_) } @input
 
     while (@input && @expected) {
         my $matcher = shift @expected;
+        my $value   = shift @input;
 
-        if (ref($matcher) eq Matcher) {
-            @input = $matcher->match(@input);
+        if (Matcher->check($matcher)) {
+            return unless $matcher->check($value);
         }
         else {
-            my $value = shift @input;
-            return if !match($value, $matcher);
+            return unless match($value, $matcher);
         }
     }
     return @input == 0 && @expected == 0;

@@ -80,7 +80,11 @@ sub AUTOLOAD {
 # is required.
 
 sub isa {
-    return if has_caller_package('UNIVERSAL::ref');
+    my ($self, $package) = @_;
+    return if (
+        has_caller_package('UNIVERSAL::ref') ||
+        $package eq 'Type::Tiny'
+    );
     return 1;
 }
 
