@@ -8,6 +8,7 @@ use Test::Fatal;
 BEGIN { use_ok 'Test::Mocha' }
 
 use Test::Mocha::Util qw( get_attribute_value );
+use Types::Standard qw( Int );
 
 use constant Mock => 'Test::Mocha::Mock';
 
@@ -41,3 +42,4 @@ is ref($mock1), 'Foo',  ' and class is returned with ref function';
 like exception {mock($mock1)},
     qr/^The argument for mock\(\) must be a string/,
     'the argument for mock() must be a string';
+

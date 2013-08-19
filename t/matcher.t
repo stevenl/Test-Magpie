@@ -2,8 +2,9 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 10;
 use Test::Builder::Tester;
+use Test::Fatal;
 
 use Type::Utils -all;
 use Types::Standard qw( Any Int Str StrMatch );
@@ -16,6 +17,11 @@ $mock->set('foo');
 $mock->set('foobar');
 $mock->set(+1, 'not an int');
 $mock->set(-1, 'negative');
+
+my $e = exception { $mock->foo(1, Int) };
+like $e, qr/Int/,
+    'mock does not accept method calls with type constraint arguments';
+like $e, qr/matcher\.t/, ' and message traces back to this script';
 
 stub($mock)->set(Any)->returns('any');
 is $mock->set(1), 'any', 'stub() accepts type constraints';
@@ -46,4 +52,3 @@ test_out 'ok 1 - set(PositiveInt, Str) was called 1 time(s)';
 verify($mock)->set($positive_int, Str);
 test_test 'self-defined type constraint works';
 
-done_testing;

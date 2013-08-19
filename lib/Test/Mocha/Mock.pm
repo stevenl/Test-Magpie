@@ -4,9 +4,12 @@ package Test::Mocha::Mock;
 use Moose;
 use namespace::autoclean;
 
+use Carp qw( croak );
+
 use aliased 'Test::Mocha::Invocation';
 use aliased 'Test::Mocha::Stub';
 
+use Test::Mocha::Types qw( Matcher );
 use Test::Mocha::Util qw(
     extract_method_name
     get_attribute_value
@@ -53,6 +56,11 @@ has 'stubs' => (
 sub AUTOLOAD {
     my $self = shift;
     my $method_name = extract_method_name($AUTOLOAD);
+
+    my @invalid_args = grep { Matcher->check($_) } @_;
+    croak 'Mock methods may not be called with '
+        . 'type constraint arguments: ' . join(', ', @invalid_args)
+        unless @invalid_args == 0;
 
     # record the method call for verification
     my $method_call = Invocation->new(
