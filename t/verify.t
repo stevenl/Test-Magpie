@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 30;
 use Test::Fatal;
 use Test::Builder::Tester;
 
@@ -48,8 +48,16 @@ test_test 'simple verify() with a test name';
 # verify() with 'times' option
 
 test_out 'ok 1 - twice() was called 2 time(s)';
-verify($mock, times => 2)->twice();
+my @calls = verify($mock, times => 2)->twice();
 test_test "verify() with 'times' option that passes";
+
+subtest 'verify returns method calls' => sub {
+    my $call = $calls[0];
+    is scalar(@calls), 2, 'count';
+    isa_ok $call, 'Test::Mocha::Invocation';
+    is $call->name, 'twice',     'name';
+    is_deeply [$call->args], [], 'args';
+};
 
 $test_name = 'twice() was called 1 time(s)';
 $line = __LINE__ + 10;

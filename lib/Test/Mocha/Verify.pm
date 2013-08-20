@@ -50,7 +50,8 @@ sub AUTOLOAD {
     my $mock  = get_attribute_value($self, 'mock');
     my $calls = get_attribute_value($mock, 'calls');
 
-    my $matches = grep { $observe->satisfied_by($_) } @$calls;
+    my @calls = grep { $observe->satisfied_by($_) } @$calls;
+    my $num_calls = scalar @calls;
 
     my $test_name = $self->_test_name;
 
@@ -59,28 +60,28 @@ sub AUTOLOAD {
         $test_name = sprintf '%s was called %u time(s)',
             $observe->as_string, $self->_times
                 unless defined $test_name;
-        $TB->is_num( $matches, $self->_times, $test_name );
+        $TB->is_num( $num_calls, $self->_times, $test_name );
     }
     elsif (defined $self->_at_least) {
         $test_name = sprintf '%s was called at least %u time(s)',
             $observe->as_string, $self->_at_least
                 unless defined $test_name;
-        $TB->cmp_ok( $matches, '>=', $self->_at_least, $test_name );
+        $TB->cmp_ok( $num_calls, '>=', $self->_at_least, $test_name );
     }
     elsif (defined $self->_at_most) {
         $test_name = sprintf '%s was called at most %u time(s)',
             $observe->as_string, $self->_at_most
                 unless defined $test_name;
-        $TB->cmp_ok( $matches, '<=', $self->_at_most, $test_name );
+        $TB->cmp_ok( $num_calls, '<=', $self->_at_most, $test_name );
     }
     elsif (defined $self->_between) {
         my ($lower, $upper) = @{$self->_between};
         $test_name = sprintf '%s was called between %u and %u time(s)',
             $observe->as_string, $lower, $upper
                 unless defined $test_name;
-        $TB->ok( $lower <= $matches && $matches <= $upper, $test_name );
+        $TB->ok( $lower <= $num_calls && $num_calls <= $upper, $test_name );
     }
-    return;
+    return @calls;
 }
 
 __PACKAGE__->meta->make_immutable;

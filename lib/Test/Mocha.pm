@@ -159,7 +159,7 @@ L<Test::Simple> and Co - it will print the test result along with your other
 tests and calls to C<verify()> are counted in the test plan.
 
     verify($warehouse)->remove($item, 50);
-    # prints: ok 1 - remove("coffee", 50) was called 1 time(s)
+    # prints: ok 1 - remove("book", 50) was called 1 time(s)
 
 An option may be specified to constrain the test.
 
@@ -169,16 +169,16 @@ An option may be specified to constrain the test.
     verify( $mock, between => [3, 5] )->method(@args)
 
 =for :list
-= times
+= C<times>
 Specifies the number of times the given method is expected to be called. The
 default is 1 if no other option is specified.
-= at_least
+= C<at_least>
 Specifies the minimum number of times the given method is expected to be
 called.
-= at_most
+= C<at_most>
 Specifies the maximum number of times the given method is expected to be
 called.
-= between
+= C<between>
 Specifies the minimum and maximum number of times the given method is expected
 to be called.
 
@@ -191,6 +191,18 @@ default.
     verify( $warehouse, times => 0, 'inventory not removed' )
         ->remove_inventory($item, 50);
     # prints: ok 2 - inventory not removed
+
+C<verify()> also returns an array of objects representing the method calls
+verified. This may be useful for writing clearer tests than having a complex
+verification call, or for debugging when verification tests fail.
+
+    use Types::Standard qw( Int Str );
+
+    my ($call) = verify($warehouse)->remove( Str, Int );
+
+    is( $call, 'remove("book", 50)', 'string overload' );
+    is( $call->name, 'remove',       'method name' );
+    is_deeply( [$call->args], [],    'method args' );
 
 =cut
 
