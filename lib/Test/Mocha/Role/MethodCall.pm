@@ -4,10 +4,13 @@ package Test::Mocha::Role::MethodCall;
 use Moose::Role;
 use namespace::autoclean;
 
+use Carp qw( croak );
 use Devel::PartialDump;
-use Test::Mocha::Types qw( Matcher );
+use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util qw( match );
-use Types::Standard qw( ArrayRef Str );
+use Types::Standard qw( ArrayRef HashRef Str );
+
+our @CARP_NOT = qw( Test::Mocha::Verify );
 
 # cause string overloaded objects (Matchers) to be stringified
 my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);
@@ -47,13 +50,32 @@ sub satisfied_by {
 
     while (@input && @expected) {
         my $matcher = shift @expected;
-        my $value   = shift @input;
 
-        if (Matcher->check($matcher)) {
+        if (Slurpy->check($matcher)) {
+            croak 'No arguments allowed after a slurpy type constraint'
+                unless @expected == 0;
+
+            $matcher = $matcher->{slurpy};
+            my $value;
+            if ( $matcher->is_a_type_of(ArrayRef) ) {
+                $value = [ @input ];
+            }
+            elsif ( $matcher->is_a_type_of(HashRef) ) {
+                return unless scalar(@input) % 2 == 0;
+                $value = { @input };
+            }
+            else {
+                croak('Slurpy argument must be a type of ArrayRef or HashRef');
+            }
+
             return unless $matcher->check($value);
+            @input = ();
+        }
+        elsif (Matcher->check($matcher)) {
+            return unless $matcher->check(shift @input);
         }
         else {
-            return unless match($value, $matcher);
+            return unless match(shift(@input), $matcher);
         }
     }
     return @input == 0 && @expected == 0;

@@ -4,20 +4,43 @@ package Test::Mocha::Stubber;
 use Moose;
 use namespace::autoclean;
 
+use Carp qw( croak );
+
 use aliased 'Test::Mocha::Stub';
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
+use Test::Mocha::Types qw( Slurpy );
+use Types::Standard qw( ArrayRef HashRef );
 
 with 'Test::Mocha::Role::HasMock';
 
 our $AUTOLOAD;
 
 sub AUTOLOAD {
-    my $self = shift;
+    my ($self, @args) = @_;
     my $method_name = extract_method_name($AUTOLOAD);
+
+    my $i = 0;
+    my $seen_slurpy;
+    foreach (@args) {
+        if (Slurpy->check($_)) {
+            $seen_slurpy = 1;
+            last;
+        }
+        $i++;
+    }
+    croak 'No arguments allowed after a slurpy type constraint'
+        if $i < $#args;
+
+    if ($seen_slurpy) {
+        my $slurpy = $args[$i]->{slurpy};
+        croak 'Slurpy argument must be a type of ArrayRef or HashRef'
+            unless $slurpy->is_a_type_of(ArrayRef)
+                || $slurpy->is_a_type_of(HashRef);
+    }
 
     my $stub = Stub->new(
         name => $method_name,
-        args => \@_,
+        args => \@args,
     );
 
     my $mock  = get_attribute_value($self, 'mock');

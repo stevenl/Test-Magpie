@@ -2,12 +2,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 27;
 use Test::Builder::Tester;
 use Test::Fatal;
 
 use Type::Utils -all;
-use Types::Standard qw( Any Int Str StrMatch Tuple );
+use Types::Standard -all;
 
 BEGIN { use_ok 'Test::Mocha' }
 
@@ -58,3 +58,46 @@ my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
 test_out 'ok 1 - set(PositiveInt, Str) was called 1 time(s)';
 verify($mock)->set($positive_int, Str);
 test_test 'self-defined type constraint works';
+
+# -----------------------
+# slurpy type constraints
+
+test_out 'ok 1 - set({ slurpy: ArrayRef }) was called 6 time(s)';
+verify($mock, times => 6)->set( slurpy ArrayRef );
+test_test 'slurpy ArrayRef works';
+
+test_out 'ok 1 - set({ slurpy: Tuple[Defined,Defined] }) was called 2 time(s)';
+my @calls = verify($mock, times => 2)->set( slurpy Tuple[Defined,Defined] );
+test_test 'slurpy Tuple works';
+
+test_out 'ok 1 - set({ slurpy: HashRef }) was called 2 time(s)';
+@calls = verify($mock, times => 2)->set( slurpy HashRef );
+test_test 'slurpy HashRef works';
+
+test_out 'ok 1 - set({ slurpy: Dict[-1=>Str] }) was called 1 time(s)';
+@calls = verify($mock, times => 1)->set( slurpy Dict[-1 => Str] );
+test_test 'slurpy Dict works';
+
+test_out 'ok 1 - set({ slurpy: Map[PositiveInt,Str] }) was called 1 time(s)';
+@calls = verify($mock, times => 1)->set( slurpy Map[$positive_int, Str] );
+test_test 'slurpy Map works';
+
+$e = exception { stub($mock)->set( slurpy(ArrayRef), 1 ) };
+ok $e, 'Disallow arguments after a slurpy type constraint for stub()';
+like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+$e = exception { stub($mock)->set( slurpy Str) };
+ok $e, 'Invalid Slurpy argument for stub()';
+like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+# satisfy test coverage
+isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::Stub';
+isa_ok stub($mock)->set( slurpy HashRef ),  'Test::Mocha::Stub';
+
+$e = exception { verify($mock)->set( slurpy(ArrayRef), 1 ) };
+ok $e, 'Disallow arguments after a slurpy type constraint for verify()';
+like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+$e = exception { verify($mock)->set( slurpy Str) };
+ok $e, 'Invalid Slurpy argument for verify()';
+like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';

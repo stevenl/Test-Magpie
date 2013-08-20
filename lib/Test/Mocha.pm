@@ -266,28 +266,30 @@ sub inspect {
 
 =head1 ARGUMENT MATCHING
 
+=head2 Predefined types
+
 When specifying method calls using C<stub()> or C<verify()>, you may use
 type constraints to match the arguments rather than specifying the exact
 arguments. You may use any L<Type::Tiny> type constraint such as those
 predefined in L<Types::Standard>. (Moose type constraints such as
 L<MooseX::Types::Moose> and L<MooseX::Types::Structured> will also work.)
 
-    use Types::Standard qw( Any );
+    use Types::Standard qw( Defined );
 
     my $mock = mock;
-    stub($mock)->foo(Any)->returns('ok');
+    stub($mock)->foo(Defined)->returns('ok');
 
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
 
-    verify($mock, times => 2)->foo(Any);
-    # prints: ok 1 - foo(Any) was called 2 time(s)
+    verify($mock, times => 2)->foo(Defined);
+    # prints: ok 1 - foo(Defined) was called 2 time(s)
 
 You may use the normal features of type constraints: parameterized and
 structured types, and type unions, intersections and negations (but there's no
 need to use coercions).
 
-    use Types::Standard qw( ArrayRef StrMatch );
+    use Types::Standard qw( Any ArrayRef Int Str StrMatch );
 
     my $list = mock;
     $list->set(1, [1,2]);
@@ -295,15 +297,15 @@ need to use coercions).
 
     # type negation
     # prints: ok 1 - set(Int, ~Int) was called 2 time(s)
-    verify($list, times => 2)->set(Int, ~Int);
+    verify($list, times => 2)->set( Int, ~Int );
 
     # type union
     # prints: ok 2 - set(Int, ArrayRef|Str) was called 2 time(s)
-    verify($list, times => 2)->set(Int, ArrayRef|Str);
+    verify($list, times => 2)->set( Int, ArrayRef|Str );
 
     # parameterized type
     # prints: ok 3 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
-    verify($list)->set(Int, StrMatch[qr/^foo/]);
+    verify($list)->set( Int, StrMatch[qr/^foo/] );
 
 =head2 Self-defined types
 
@@ -315,11 +317,17 @@ You may also use your own type constraints, defined using L<Type::Utils>.
     my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
 
     # prints: ok 4 - set(PositiveInt, Any) was called 1 time(s)
-    verify($list)->set($positive_int, Any);
+    verify($list)->set( $positive_int, Any );
 
-You do not need to use be using an OO framework like Moo(se) to use these.
-Please consult the respective documentation for details about the available
-type constraints or how to define your own.
+=head2 Argument slurping
+
+You may use the L<C<slurpy()>|Types::Standard/Structured> function if you just
+want to match all arguments generally.
+
+    # prints: ok 5 - set({ slurpy: ArrayRef[Defined] }) was called 2 time(s)
+    verify($list)->set( slurpy ArrayRef[Defined] );
+
+=head1 TO DO
 
 =for :list
 * Ordered verifications
