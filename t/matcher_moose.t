@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 use Test::Builder::Tester;
 use Test::Fatal;
 
@@ -23,6 +23,9 @@ my $e = exception { $mock->foo(1, Int) };
 like $e, qr/Int/,
     'mock does not accept method calls with type constraint arguments';
 like $e, qr/matcher_moose\.t/, ' and message traces back to this script';
+
+is $mock->foo(1, mock), undef,
+    'mock as method argument not isa(Moose::Meta::typeConstraint)';
 
 stub($mock)->set(Any)->returns('any');
 is $mock->set(1), 'any', 'stub() accepts type constraints';

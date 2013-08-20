@@ -90,8 +90,9 @@ sub AUTOLOAD {
 sub isa {
     my ($self, $package) = @_;
     return if (
-        has_caller_package('UNIVERSAL::ref') ||
-        $package eq 'Type::Tiny'
+        $package eq 'Type::Tiny'                  ||
+        $package eq 'Moose::Meta::TypeConstraint' ||
+        has_caller_package('UNIVERSAL::ref')
     );
     return 1;
 }

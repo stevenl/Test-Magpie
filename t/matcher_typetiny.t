@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Test::Builder::Tester;
 use Test::Fatal;
 
@@ -21,8 +21,10 @@ $mock->set( [qw( foo bar )] );
 
 my $e = exception { $mock->foo(1, Int) };
 like $e, qr/Int/,
-    'mock does not accept method calls with type constraint arguments';
+    'mock does not accept method call with type constraint argument';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+is $mock->foo(1, mock), undef, 'mock as method argument not isa(Type::Tiny)';
 
 stub($mock)->set(Any)->returns('any');
 is $mock->set(1), 'any', 'stub() accepts type constraints';
