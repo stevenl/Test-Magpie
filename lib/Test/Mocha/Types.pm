@@ -10,9 +10,12 @@ use Type::Library
     );
 
 use Type::Utils -all;
-use Types::Standard qw( Num Tuple );
+use Types::Standard qw( InstanceOf Num Tuple );
 
-class_type Matcher, { class => 'Type::Tiny' };
+union Matcher, [
+    class_type( { class => 'Type::Tiny' } ),
+    class_type( { class => 'Moose::Meta::TypeConstraint' } ),
+];
 
 class_type Mock, { class => 'Test::Mocha::Mock' };
 

@@ -54,7 +54,7 @@ sub get_attribute_value {
 # Returns whether the given C<$package> is in the current call stack.
 
 sub has_caller_package {
-    my $package= shift;
+    my $package = shift;
 
     my $level = 1;
     while (my ($caller) = caller $level++) {

@@ -257,7 +257,8 @@ sub inspect {
 When specifying method calls using C<stub()> or C<verify()>, you may use
 type constraints to match the arguments rather than specifying the exact
 arguments. You may use any L<Type::Tiny> type constraint such as those
-predefined in L<Types::Standard>.
+predefined in L<Types::Standard>. (Moose type constraints such as
+L<MooseX::Types::Moose> and L<MooseX::Types::Structured> will also work.)
 
     use Types::Standard qw( Any );
 
@@ -291,6 +292,8 @@ need to use coercions).
     # parameterized type
     # prints: ok 3 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
     verify($list)->set(Int, StrMatch[qr/^foo/]);
+
+=head2 Self-defined types
 
 You may also use your own type constraints, defined using L<Type::Utils>.
 
