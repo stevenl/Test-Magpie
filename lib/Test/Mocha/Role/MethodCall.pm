@@ -36,6 +36,27 @@ sub as_string {
     return $self->name . '(' . $Dumper->dump($self->args) . ')';
 }
 
+my $slurp = sub {
+    my ($slurpy_matcher, @to_match) = @_;
+
+    ### assert: Slurpy->check($slurpy_matcher)
+    my $matcher = $slurpy_matcher->{slurpy};
+
+    my $value;
+    if ( $matcher->is_a_type_of(ArrayRef) ) {
+        $value = [ @to_match ];
+    }
+    elsif ( $matcher->is_a_type_of(HashRef) ) {
+        return unless scalar(@to_match) % 2 == 0;
+        $value = { @to_match };
+    }
+    else {
+        croak('Slurpy argument must be a type of ArrayRef or HashRef');
+    }
+
+    return $matcher->check($value);
+};
+
 # Returns true if the given C<$invocation> would satisfy this method call.
 
 sub satisfied_by {
@@ -51,24 +72,12 @@ sub satisfied_by {
     while (@input && @expected) {
         my $matcher = shift @expected;
 
-        if (Slurpy->check($matcher)) {
+        if ( Slurpy->check($matcher) ) {
             croak 'No arguments allowed after a slurpy type constraint'
                 unless @expected == 0;
 
-            $matcher = $matcher->{slurpy};
-            my $value;
-            if ( $matcher->is_a_type_of(ArrayRef) ) {
-                $value = [ @input ];
-            }
-            elsif ( $matcher->is_a_type_of(HashRef) ) {
-                return unless scalar(@input) % 2 == 0;
-                $value = { @input };
-            }
-            else {
-                croak('Slurpy argument must be a type of ArrayRef or HashRef');
-            }
+            return unless $slurp->($matcher, @input);
 
-            return unless $matcher->check($value);
             @input = ();
         }
         elsif (Matcher->check($matcher)) {
@@ -78,6 +87,18 @@ sub satisfied_by {
             return unless match(shift(@input), $matcher);
         }
     }
+
+    # slurpy matcher do handle empty argument lists
+    if (@expected > 0) {
+        if ( Slurpy->check($expected[0]) ) {
+            my $matcher = shift @expected;
+            croak 'No arguments allowed after a slurpy type constraint'
+                unless @expected == 0;
+
+            return unless $slurp->($matcher, @input);
+        }
+    }
+
     return @input == 0 && @expected == 0;
 }
 

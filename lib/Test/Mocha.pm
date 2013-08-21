@@ -345,10 +345,14 @@ You may also use your own type constraints, defined using L<Type::Utils>.
 =head2 Argument slurping
 
 You may use the L<C<slurpy()>|Types::Standard/Structured> function if you just
-want to match all arguments generally.
+want to match all arguments generally. Note that slurpy types will match on
+empty argument lists also.
 
-    # prints: ok 5 - set({ slurpy: ArrayRef[Defined] }) was called 2 time(s)
-    verify($list)->set( slurpy ArrayRef[Defined] );
+    # prints: ok 5 - set({ slurpy: ArrayRef }) was called 2 time(s)
+    verify($list)->set( slurpy ArrayRef );
+
+    # prints: ok 6 - set({ slurpy: HashRef }) was called 2 time(s)
+    verify($list)->set( slurpy HashRef );
 
 =head1 TO DO
 
@@ -361,8 +365,8 @@ want to match all arguments generally.
 This module is a fork from L<Test::Magpie> originally written by Oliver
 Charles (CYCLES).
 
-It is inspired by L<Mockito|http://code.google.com/p/mockito/> for Java and
-Python by Szczepan Faber.
+It is inspired by the popular L<Mockito|http://code.google.com/p/mockito/> for
+Java and Python by Szczepan Faber.
 
 =head1 SEE ALSO
 

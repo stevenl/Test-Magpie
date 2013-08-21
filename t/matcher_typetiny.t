@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More tests => 29;
 use Test::Builder::Tester;
 use Test::Fatal;
 
@@ -67,19 +67,19 @@ verify($mock, times => 6)->set( slurpy ArrayRef );
 test_test 'slurpy ArrayRef works';
 
 test_out 'ok 1 - set({ slurpy: Tuple[Defined,Defined] }) was called 2 time(s)';
-my @calls = verify($mock, times => 2)->set( slurpy Tuple[Defined,Defined] );
+verify($mock, times => 2)->set( slurpy Tuple[Defined,Defined] );
 test_test 'slurpy Tuple works';
 
 test_out 'ok 1 - set({ slurpy: HashRef }) was called 2 time(s)';
-@calls = verify($mock, times => 2)->set( slurpy HashRef );
+verify($mock, times => 2)->set( slurpy HashRef );
 test_test 'slurpy HashRef works';
 
 test_out 'ok 1 - set({ slurpy: Dict[-1=>Str] }) was called 1 time(s)';
-@calls = verify($mock, times => 1)->set( slurpy Dict[-1 => Str] );
+verify($mock, times => 1)->set( slurpy Dict[-1 => Str] );
 test_test 'slurpy Dict works';
 
 test_out 'ok 1 - set({ slurpy: Map[PositiveInt,Str] }) was called 1 time(s)';
-@calls = verify($mock, times => 1)->set( slurpy Map[$positive_int, Str] );
+verify($mock, times => 1)->set( slurpy Map[$positive_int, Str] );
 test_test 'slurpy Map works';
 
 $e = exception { stub($mock)->set( slurpy(ArrayRef), 1 ) };
@@ -89,6 +89,16 @@ like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 $e = exception { stub($mock)->set( slurpy Str) };
 ok $e, 'Invalid Slurpy argument for stub()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+# slurpy matches with empty argument list
+$mock->foo();
+test_out 'ok 1 - foo({ slurpy: ArrayRef }) was called 2 time(s)';
+verify($mock, times => 2)->foo( slurpy ArrayRef );
+test_test 'slurpy ArrayRef matches no arguments';
+
+test_out 'ok 1 - foo({ slurpy: HashRef }) was called 2 time(s)';
+verify($mock, times => 2)->foo( slurpy HashRef );
+test_test 'slurpy HashRef matches no arguments';
 
 # satisfy test coverage
 isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::Stub';
@@ -101,3 +111,28 @@ like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 $e = exception { verify($mock)->set( slurpy Str) };
 ok $e, 'Invalid Slurpy argument for verify()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+# -----------------------
+# undef edge cases
+#
+# These tests are invalid because they are inconsistent with Type::Params and
+# they are counter-intuitive.
+#
+# clear($mock);
+# $mock->set();
+#
+# test_out 'ok 1 - set(Defined) was called 0 time(s)';
+# verify($mock, times => 0)->set(Defined);
+# test_test 'Defined does not match undef';
+#
+# test_out 'ok 1 - set(Any) was called 1 time(s)';
+# verify($mock)->set(Any);
+# test_test 'Any matches undef';
+#
+# test_out 'ok 1 - set(~Int) was called 1 time(s)';
+# verify($mock)->set(~Int);
+# test_test 'negated type matches undef';
+#
+# test_out 'ok 1 - set({ slurpy: ArrayRef }) was called 1 time(s)';
+# verify($mock)->set( slurpy ArrayRef );
+# test_test 'slurpy ArrayRef[Any] matches undef';
