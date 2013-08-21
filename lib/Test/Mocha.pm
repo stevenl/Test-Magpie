@@ -55,12 +55,14 @@ use aliased 'Test::Mocha::Verify';
 use Carp qw( croak );
 use Exporter qw( import );
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
+use Test::Mocha::Util qw( get_attribute_value );
 use Types::Standard qw( Num );
 
 our @EXPORT = qw(
     mock
     stub
     verify
+    clear
 );
 our @EXPORT_OK = qw(
     inspect
@@ -250,6 +252,27 @@ sub verify {
     return Verify->new(mock => $mock, %options);
 }
 
+=func clear
+
+    clear($mock)
+
+Clears the method call history. Note that this does not affect the stubbed
+methods.
+
+=cut
+
+sub clear {
+    my ($mock) = @_;
+
+    croak 'clear() must be given a mock object'
+        unless defined $mock && MockType->check($mock);
+
+    my $calls = get_attribute_value($mock, 'calls');
+    @$calls = ();
+
+    return;
+}
+
 =for Pod::Coverage inspect
 =cut
 
@@ -332,7 +355,6 @@ want to match all arguments generally.
 =for :list
 * Ordered verifications
 * Stubs with callbacks
-* Function to clear interaction history
 
 =head1 ACKNOWLEDGEMENTS
 
