@@ -50,8 +50,7 @@ sub AUTOLOAD {
     my $mock  = get_attribute_value($self, 'mock');
     my $calls = get_attribute_value($mock, 'calls');
 
-    my @calls = grep { $observe->satisfied_by($_) } @$calls;
-    my $num_calls = scalar @calls;
+    my $num_calls = grep { $observe->satisfied_by($_) } @$calls;
 
     my $test_name = $self->_test_name;
 
@@ -81,7 +80,7 @@ sub AUTOLOAD {
                 unless defined $test_name;
         $TB->ok( $lower <= $num_calls && $num_calls <= $upper, $test_name );
     }
-    return @calls;
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;

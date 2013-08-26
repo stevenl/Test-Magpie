@@ -194,18 +194,6 @@ default.
         ->remove_inventory($item, 50);
     # prints: ok 2 - inventory not removed
 
-C<verify()> also returns an array of objects representing the method calls
-verified. This may be useful for writing clearer tests than having a complex
-verification call, or for debugging when verification tests fail.
-
-    use Types::Standard qw( Int Str );
-
-    my ($call) = verify($warehouse)->remove( Str, Int );
-
-    is( $call, 'remove("book", 50)', 'string overload' );
-    is( $call->name, 'remove',       'method name' );
-    is_deeply( [$call->args], [],    'method args' );
-
 =cut
 
 sub verify {
