@@ -6,7 +6,7 @@ use namespace::autoclean;
 
 use Carp qw( croak );
 
-use Test::Mocha::Invocation;
+use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Matcher );
 use Test::Mocha::Util qw(
     extract_method_name
@@ -35,7 +35,7 @@ has 'class' => (
 # to be used for verification.
 
 has 'calls' => (
-    isa => ArrayRef[InstanceOf['Test::Mocha::Invocation']],
+    isa => ArrayRef[InstanceOf['Test::Mocha::MethodCall']],
     is => 'bare',
     default => sub { [] }
 );
@@ -61,7 +61,7 @@ sub AUTOLOAD {
         unless @invalid_args == 0;
 
     # record the method call for verification
-    my $method_call = Test::Mocha::Invocation->new(
+    my $method_call = Test::Mocha::MethodCall->new(
         name => $method_name,
         args => \@_,
     );

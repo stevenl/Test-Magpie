@@ -28,14 +28,14 @@ subtest 'inspect()' => sub {
 
 subtest 'get invocation' => sub {
     my $invocation1 = $inspect->foo;
-    isa_ok $invocation1, 'Test::Mocha::Invocation';
+    isa_ok $invocation1, 'Test::Mocha::MethodCall';
     is $invocation1->name, 'foo';
     is_deeply [$invocation1->args], [];
 };
 
 subtest 'get invocation with argument matchers' => sub {
     my $invocation2 = $inspect->foo(map {Any} 1..3 );
-    isa_ok $invocation2, 'Test::Mocha::Invocation';
+    isa_ok $invocation2, 'Test::Mocha::MethodCall';
     is $invocation2->name, 'foo';
     is_deeply [$invocation2->args], [123, 'bar', 456];
 };

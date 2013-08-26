@@ -6,7 +6,7 @@ use warnings;
 use feature 'state';
 
 use Test::Builder;
-use Test::Mocha::Invocation;
+use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 use Type::Params qw( compile );
@@ -35,7 +35,7 @@ sub new {
 sub AUTOLOAD {
     my $self = shift;
 
-    my $observe = Test::Mocha::Invocation->new(
+    my $observe = Test::Mocha::MethodCall->new(
         name => extract_method_name($AUTOLOAD),
         args => \@_,
     );

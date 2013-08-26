@@ -6,7 +6,7 @@ use warnings;
 use feature 'state';
 
 use Carp qw( croak );
-use Test::Mocha::Stub;
+use Test::Mocha::StubbedCall;
 use Test::Mocha::Types qw( MockWrapper Slurpy );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 use Type::Params qw( compile );
@@ -44,7 +44,7 @@ sub AUTOLOAD {
                 || $slurpy->is_a_type_of(HashRef);
     }
 
-    my $stub = Test::Mocha::Stub->new(
+    my $stub = Test::Mocha::StubbedCall->new(
         name => $method_name,
         args => \@args,
     );

@@ -6,7 +6,7 @@ use warnings;
 use feature 'state';
 
 use List::Util qw( first );
-use Test::Mocha::Invocation;
+use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( MockWrapper );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 use Type::Params qw( compile );
@@ -24,7 +24,7 @@ sub new {
 sub AUTOLOAD {
     my $self = shift;
 
-    my $inspect = Test::Mocha::Invocation->new(
+    my $inspect = Test::Mocha::MethodCall->new(
         name => extract_method_name($AUTOLOAD),
         args => \@_,
     );

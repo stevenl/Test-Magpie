@@ -1,7 +1,7 @@
-package Test::Mocha::Role::MethodCall;
+package Test::Mocha::MethodCall;
 # ABSTRACT: A role that represents a method call
 
-use Moose::Role;
+use Moose;
 use namespace::autoclean;
 
 use Carp qw( croak );
@@ -106,4 +106,5 @@ sub satisfied_by {
     return @input == 0 && @expected == 0;
 }
 
+__PACKAGE__->meta->make_immutable;
 1;

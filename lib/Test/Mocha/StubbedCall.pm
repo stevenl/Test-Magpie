@@ -1,4 +1,4 @@
-package Test::Mocha::Stub;
+package Test::Mocha::StubbedCall;
 # ABSTRACT: The declaration of a stubbed method
 
 # Represents a stub method - a method that may have some sort of action when
@@ -18,7 +18,7 @@ use Carp qw( croak );
 use Scalar::Util qw( blessed );
 use Types::Standard qw( ArrayRef );
 
-with 'Test::Mocha::Role::MethodCall';
+extends 'Test::Mocha::MethodCall';
 
 # croak() messages should not trace back to Mocha modules
 # to facilitate debugging of user test scripts

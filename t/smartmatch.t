@@ -11,13 +11,13 @@ use 5.010001;
 use Test::More tests => 10;
 use Test::Mocha qw( mock inspect );
 
-use constant Invocation => 'Test::Mocha::Invocation';
+use constant MethodCall => 'Test::Mocha::MethodCall';
 
 subtest 'X ~~ Array' => sub {
     my $mock = mock;
 
     $mock->array( [1, 2, 3] );
-    isa_ok inspect($mock)->array( [1, 2, 3] ), Invocation, 'Array ~~ Array';
+    isa_ok inspect($mock)->array( [1, 2, 3] ), MethodCall, 'Array ~~ Array';
     is inspect($mock)->array( [1, 2] ), undef, 'Array.size != Array.size';
 
     $mock->hash( {a => 1} );
@@ -37,11 +37,11 @@ subtest 'X ~~ Array (nested)' => sub {
     my $mock = mock;
 
     $mock->nested_array( [1, 2, [3, 4]] );
-    isa_ok inspect($mock)->nested_array( [1, 2, [3, 4]] ), Invocation,
+    isa_ok inspect($mock)->nested_array( [1, 2, [3, 4]] ), MethodCall,
         'Array[Array] ~~ Array[Array]';
 
     $mock->nested_hash( [1, 2, {3 => 4}] );
-    isa_ok inspect($mock)->nested_hash( [1, 2, {3 => 4}] ), Invocation,
+    isa_ok inspect($mock)->nested_hash( [1, 2, {3 => 4}] ), MethodCall,
         'Array[Hash] ~~ Array[Hash]';
 
     $mock->array( [1, 2, 3] );
@@ -57,7 +57,7 @@ subtest 'X ~~ Hash' => sub {
     my $mock = mock;
 
     $mock->hash( {a => 1, b => 2, c => 3} );
-    isa_ok inspect($mock)->hash( {c => 3, b => 2, a => 1} ), Invocation,
+    isa_ok inspect($mock)->hash( {c => 3, b => 2, a => 1} ), MethodCall,
         'Hash ~~ Hash';
 
     is inspect($mock)->hash( {a => 3, b => 2, d => 1} ), undef,
@@ -103,7 +103,7 @@ subtest 'X ~~ Code' => sub {
     $mock = mock;
     my $sub = sub {0};
     $mock->code($sub);
-    isa_ok inspect($mock)->code($sub), Invocation,  'Code == Code';
+    isa_ok inspect($mock)->code($sub), MethodCall,  'Code == Code';
 };
 
 subtest 'X ~~ Regexp' => sub {
@@ -123,7 +123,7 @@ subtest 'X ~~ Undef' => sub {
     my $mock = mock;
 
     $mock->undef(undef);
-    isa_ok inspect($mock)->undef(undef), Invocation, 'Undef ~~ Undef';
+    isa_ok inspect($mock)->undef(undef), MethodCall, 'Undef ~~ Undef';
 
     $mock->any(1);
     is inspect($mock)->any(undef), undef, 'Any ~~ Undef';
@@ -159,7 +159,7 @@ subtest 'X ~~ Object (overloaded)' => sub {
     is inspect($mock)->any($overloaded), undef, 'Any ~~ Object';
 
     $mock->object($overloaded);
-    isa_ok inspect($mock)->object($overloaded), Invocation, 'Object == Object';
+    isa_ok inspect($mock)->object($overloaded), MethodCall, 'Object == Object';
 };
 
 subtest 'X ~~ Object (non-overloaded)' => sub {
@@ -167,10 +167,10 @@ subtest 'X ~~ Object (non-overloaded)' => sub {
     my $obj = My::Object->new(value => 5);
 
     $mock->object($obj);
-    isa_ok inspect($mock)->object($obj), Invocation, 'Object == Object';
+    isa_ok inspect($mock)->object($obj), MethodCall, 'Object == Object';
 
     $mock->mock($mock);
-    isa_ok inspect($mock)->mock($mock), Invocation, 'Mock == Mock';
+    isa_ok inspect($mock)->mock($mock), MethodCall, 'Mock == Mock';
 
     # This scenario won't invoke the overload method because smartmatching
     # rules take precedence over overloading. The comparison is meant to be
@@ -184,8 +184,8 @@ subtest 'X ~~ Num' => sub {
     my $mock = mock;
 
     $mock->int(5);
-    isa_ok inspect($mock)->int(5), Invocation, 'Int == Int';
-    isa_ok inspect($mock)->int(5.0), Invocation, 'Int == Num';
+    isa_ok inspect($mock)->int(5), MethodCall, 'Int == Int';
+    isa_ok inspect($mock)->int(5.0), MethodCall, 'Int == Num';
 
     $mock->str('42x');
     is inspect($mock)->str(42), undef, 'Str ~~ Num (42x == 42)';
@@ -195,12 +195,12 @@ subtest 'X ~~ Str' => sub {
     my $mock = mock;
 
     $mock->str('foo');
-    isa_ok inspect($mock)->str('foo'), Invocation, 'Str eq Str';
+    isa_ok inspect($mock)->str('foo'), MethodCall, 'Str eq Str';
     is inspect($mock)->str('Foo'), undef, 'Str ne Str';
     is inspect($mock)->str('bar'), undef, 'Str ne Str';
 
     $mock->int(5);
-    isa_ok inspect($mock)->int("5.0"), Invocation, 'Int ~~ Num-like';
+    isa_ok inspect($mock)->int("5.0"), MethodCall, 'Int ~~ Num-like';
     is inspect($mock)->int("5x"), undef, 'Int !~ Num-like (5 eq 5x)';
 
     TODO: {

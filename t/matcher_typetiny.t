@@ -91,8 +91,8 @@ ok $e, 'Invalid Slurpy argument for verify()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
 # satisfy test coverage
-isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::Stub';
-isa_ok stub($mock)->set( slurpy HashRef ),  'Test::Mocha::Stub';
+isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::StubbedCall';
+isa_ok stub($mock)->set( slurpy HashRef ),  'Test::Mocha::StubbedCall';
 
 $e = exception { stub($mock)->set( slurpy(ArrayRef), 1 ) };
 ok $e, 'Disallow arguments after a slurpy type constraint for stub()';
