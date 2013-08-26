@@ -11,24 +11,29 @@ package Test::Mocha::StubbedCall;
 # and called. As stubs are matched via arguments, you may have multiple stubs
 # for the same method name.
 
-use Moose;
-use namespace::autoclean;
+use 5.010001;
+use strict;
+use warnings;
 
 use Carp qw( croak );
 use Scalar::Util qw( blessed );
 use Types::Standard qw( ArrayRef );
 
-extends 'Test::Mocha::MethodCall';
+our @ISA = qw( Test::Mocha::MethodCall );
 
 # croak() messages should not trace back to Mocha modules
 # to facilitate debugging of user test scripts
 our @CARP_NOT = qw( Test::Mocha::Mock );
 
-has '_executions' => (
-    isa     => ArrayRef,
-    is      => 'ro',
-    default => sub { [] },
-);
+sub new {
+    # uncoverable pod
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
+
+    $self->{executions} = [];
+
+    return $self;
+}
 
 # returns(@return_values)
 #
@@ -39,7 +44,7 @@ sub returns {
     # uncoverable pod
     my ($self, @return_values) = @_;
 
-    push @{$self->_executions}, sub {
+    push @{ $self->{executions} }, sub {
         return wantarray || @return_values > 1
             ? @return_values
             : $return_values[0];
@@ -56,7 +61,7 @@ sub dies {
     # uncoverable pod
     my ($self, $exception) = @_;
 
-    push @{$self->_executions}, sub {
+    push @{ $self->{executions} }, sub {
         $exception->throw
             if blessed($exception) && $exception->can('throw');
 
@@ -70,7 +75,7 @@ sub dies {
 sub execute {
     # uncoverable pod
     my ($self) = @_;
-    my $executions = $self->_executions;
+    my $executions = $self->{executions};
 
     # return undef by default
     return if @$executions == 0;
@@ -84,5 +89,4 @@ sub execute {
     return $execution->();
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

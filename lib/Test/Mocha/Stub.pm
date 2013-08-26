@@ -1,9 +1,9 @@
 package Test::Mocha::Stub;
 # ABSTRACT: Create methods stubs for mock objects
 
+use 5.010001;
 use strict;
 use warnings;
-use feature 'state';
 
 use Carp qw( croak );
 use Test::Mocha::StubbedCall;
@@ -15,6 +15,7 @@ use Types::Standard qw( ArrayRef ClassName HashRef slurpy );
 our $AUTOLOAD;
 
 sub new {
+    # uncoverable pod
     state $check = compile( ClassName, slurpy MockWrapper );
     my ($class, $self) = $check->(@_);
 

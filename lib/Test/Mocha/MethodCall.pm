@@ -1,8 +1,8 @@
 package Test::Mocha::MethodCall;
 # ABSTRACT: A role that represents a method call
 
-use Moose;
-use namespace::autoclean;
+use strict;
+use warnings;
 
 use Carp qw( croak );
 use Devel::PartialDump;
@@ -15,18 +15,26 @@ our @CARP_NOT = qw( Test::Mocha::Verify );
 # cause string overloaded objects (Matchers) to be stringified
 my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);
 
-has 'name' => (
-    isa => Str,
-    is  => 'ro',
-    required => 1
-);
+sub new {
+    # uncoverable pod
+    my ($class, %args) = @_;
+    my $self = \%args;
 
-has 'args' => (
-    isa     => ArrayRef,
-    traits  => ['Array'],
-    handles => { args => 'elements' },
-    default => sub { [] },
-);
+    ### assert: Str->check( $self->{name} )
+    ### assert: ArrayRef->check( $self->{args} )
+
+    return bless $self, $class;
+}
+
+sub name {
+    # uncoverable pod
+    return $_[0]->{name};
+}
+
+sub args {
+    # uncoverable pod
+    return @{$_[0]->{args}};
+}
 
 # Stringifies this method call to something that roughly resembles what you'd
 # type in Perl.
@@ -106,5 +114,4 @@ sub satisfied_by {
     return @input == 0 && @expected == 0;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

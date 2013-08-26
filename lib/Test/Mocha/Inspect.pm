@@ -1,9 +1,9 @@
 package Test::Mocha::Inspect;
 # ABSTRACT: Inspect method calls on mock objects
 
+use 5.010001;
 use strict;
 use warnings;
-use feature 'state';
 
 use List::Util qw( first );
 use Test::Mocha::MethodCall;
@@ -15,6 +15,7 @@ use Types::Standard qw( ClassName slurpy );
 our $AUTOLOAD;
 
 sub new {
+    # uncoverable pod
     state $check = compile( ClassName, slurpy MockWrapper );
     my ($class, $self) = $check->(@_);
 

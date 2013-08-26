@@ -44,6 +44,7 @@ sub get_attribute_value {
     # uncoverable pod
     my ($object, $attribute) = @_;
 
+    # uncoverable branch true
     confess "Attribute '$attribute' does not exist for object '$object'"
         if not defined $object->{$attribute};
 

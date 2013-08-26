@@ -1,9 +1,9 @@
 package Test::Mocha::Verify;
 # ABSTRACT: Verify interactions with a mock object
 
+use 5.010001;
 use strict;
 use warnings;
-use feature 'state';
 
 use Test::Builder;
 use Test::Mocha::MethodCall;
@@ -17,6 +17,7 @@ our $AUTOLOAD;
 my $TB = Test::Builder->new;
 
 sub new {
+    # uncoverable pod
     state $check = compile( ClassName, slurpy(
         Dict[
             mock      => Mock,

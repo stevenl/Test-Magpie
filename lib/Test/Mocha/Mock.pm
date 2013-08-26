@@ -1,55 +1,49 @@
 package Test::Mocha::Mock;
 # ABSTRACT: Mock objects
 
-use Moose;
-use namespace::autoclean;
+use 5.010001;
+use strict;
+use warnings;
 
 use Carp qw( croak );
-
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Matcher );
 use Test::Mocha::Util qw(
-    extract_method_name
-    get_attribute_value
-    has_caller_package
+    extract_method_name get_attribute_value has_caller_package
 );
-
-use Types::Standard qw( ArrayRef InstanceOf Int Map Str );
+use Type::Params qw( compile );
+use Types::Standard qw(
+    ArrayRef ClassName Dict InstanceOf Int Map Optional Str slurpy
+);
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
 
+# Attributes:
+#
 # class
 # The name of the class that the object is pretending to be blessed into.
-# Calling C<ref()> on the mock object (either as a method or as a function)
-# will return this class name.
-
-has 'class' => (
-    isa => Str,
-    reader => 'ref',
-    default => __PACKAGE__,
-);
 
 # calls
 # An array reference containing a record of all methods called on this mock
 # to be used for verification.
-
-has 'calls' => (
-    isa => ArrayRef[InstanceOf['Test::Mocha::MethodCall']],
-    is => 'bare',
-    default => sub { [] }
-);
 
 # stubs
 # Contains all of the methods stubbed for this mock. It maps the method name
 # to an array of stubs. Stubs are matched against invocation arguments to
 # determine which stub to dispatch to.
 
-has 'stubs' => (
-    isa => Map[ Str, ArrayRef[InstanceOf['Test::Mocha::Stub']] ],
-    is => 'bare',
-    default => sub { {} }
-);
+sub new {
+    # uncoverable pod
+    state $check = compile( ClassName, slurpy Dict[class => Optional[Str]] );
+    my ($class, $self) = $check->(@_);
+
+    $self->{class} = __PACKAGE__ unless defined $self->{class};
+    $self->{calls} = [];
+    $self->{stubs} = {};
+
+    return bless $self, $class;
+}
 
 sub AUTOLOAD {
     my $self = shift;
@@ -63,7 +57,7 @@ sub AUTOLOAD {
     # record the method call for verification
     my $method_call = Test::Mocha::MethodCall->new(
         name => $method_name,
-        args => \@_,
+        args => [@_],
     );
 
     my $calls = get_attribute_value($self, 'calls');
@@ -101,8 +95,17 @@ sub isa {
 # is required.
 
 sub does {
-    return if has_caller_package('UNIVERSAL::ref');
+    # uncoverable pod
     return 1;
+}
+
+# ref()
+# Returns the name of the class that this object is pretending to be.
+# C<ref()> can be called either as a method or as a function.
+
+sub ref {
+    # uncoverable pod
+    return $_[0]->{class};
 }
 
 # can()
@@ -118,5 +121,4 @@ sub can {
     };
 }
 
-__PACKAGE__->meta->make_immutable;
 1;
