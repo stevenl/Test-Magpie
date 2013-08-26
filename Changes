@@ -1,5 +1,8 @@
 Revision history for Test-Mocha
 
+0.13    2013-08-26
+        Distribution fix
+
 0.12    2013-08-26
         Added support for using Type::Tiny type constraints as matchers.
 
