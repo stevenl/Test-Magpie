@@ -1,5 +1,8 @@
 Revision history for Test-Mocha
 
+0.12    2013-08-26
+        Added support for using Type::Tiny type constraints as matchers.
+
 0.11    2013-08-16
         Forked from Test-Magpie.
         Removed deprecated functions.
