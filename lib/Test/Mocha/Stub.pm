@@ -1,4 +1,4 @@
-package Test::Mocha::Stubber;
+package Test::Mocha::Stub;
 # ABSTRACT: Create methods stubs for mock objects
 
 use strict;

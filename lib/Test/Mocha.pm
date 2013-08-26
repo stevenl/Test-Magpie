@@ -51,7 +51,7 @@ use Carp qw( croak );
 use Exporter qw( import );
 use Test::Mocha::Inspect;
 use Test::Mocha::Mock;
-use Test::Mocha::Stubber;
+use Test::Mocha::Stub;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 use Test::Mocha::Util qw( get_attribute_value );
 use Test::Mocha::Verify;
@@ -146,7 +146,7 @@ sub stub {
     croak 'stub() must be given a mock object'
         unless defined $mock && MockType->check($mock);
 
-    return Test::Mocha::Stubber->new(mock => $mock);
+    return Test::Mocha::Stub->new(mock => $mock);
 }
 
 =func verify
