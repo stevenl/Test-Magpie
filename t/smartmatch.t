@@ -8,16 +8,17 @@ use 5.010001;
 # These tests are to make sure that no unexpected argument matches occur
 # because we are using smartmatching
 
-use Test::More;
+use Test::More tests => 10;
 use Test::Mocha qw( mock inspect );
 
 use constant Invocation => 'Test::Mocha::Invocation';
 
-subtest 'Array' => sub {
+subtest 'X ~~ Array' => sub {
     my $mock = mock;
 
     $mock->array( [1, 2, 3] );
     isa_ok inspect($mock)->array( [1, 2, 3] ), Invocation, 'Array ~~ Array';
+    is inspect($mock)->array( [1, 2] ), undef, 'Array.size != Array.size';
 
     $mock->hash( {a => 1} );
     is inspect($mock)->hash( [qw/a b c/] ), undef, 'Hash ~~ Array';
@@ -32,7 +33,7 @@ subtest 'Array' => sub {
     is inspect($mock)->any( [1,2,3] ), undef, 'Any ~~ Array';
 };
 
-subtest 'Array (nested)' => sub {
+subtest 'X ~~ Array (nested)' => sub {
     my $mock = mock;
 
     $mock->nested_array( [1, 2, [3, 4]] );
@@ -52,12 +53,15 @@ subtest 'Array (nested)' => sub {
 
 };
 
-subtest 'Hash' => sub {
+subtest 'X ~~ Hash' => sub {
     my $mock = mock;
 
     $mock->hash( {a => 1, b => 2, c => 3} );
     isa_ok inspect($mock)->hash( {c => 3, b => 2, a => 1} ), Invocation,
         'Hash ~~ Hash';
+
+    is inspect($mock)->hash( {a => 3, b => 2, d => 1} ), undef,
+        'Hash ~~ Hash - different keys';
 
     is inspect($mock)->hash( {a => 3, b => 2, c => 1} ), undef,
         'Hash ~~ Hash - same keys, different values';
@@ -72,7 +76,7 @@ subtest 'Hash' => sub {
     is inspect($mock)->any( {a => 1, b => 2} ), undef, 'Any ~~ Hash';
 };
 
-subtest 'Code' => sub {
+subtest 'X ~~ Code' => sub {
     my $mock = mock;
 
     $mock->array( [1, 2, 3] );
@@ -102,7 +106,7 @@ subtest 'Code' => sub {
     isa_ok inspect($mock)->code($sub), Invocation,  'Code == Code';
 };
 
-subtest 'Regexp' => sub {
+subtest 'X ~~ Regexp' => sub {
     my $mock = mock;
 
     $mock->array( [qw/hello bye/] );
@@ -115,7 +119,7 @@ subtest 'Regexp' => sub {
     is inspect($mock)->any( qr/^hell/ ), undef, 'Any ~~ Regexp';
 };
 
-subtest 'Undef' => sub {
+subtest 'X ~~ Undef' => sub {
     my $mock = mock;
 
     $mock->undef(undef);
@@ -143,7 +147,7 @@ subtest 'Undef' => sub {
     }
 }
 
-subtest 'Object (overloaded)' => sub {
+subtest 'X ~~ Object (overloaded)' => sub {
     my $mock = mock;
     my $overloaded = My::Overloaded->new(value => 5);
 
@@ -154,7 +158,7 @@ subtest 'Object (overloaded)' => sub {
     isa_ok inspect($mock)->object($overloaded), Invocation, 'Object == Object';
 };
 
-subtest 'Object (non-overloaded)' => sub {
+subtest 'X ~~ Object (non-overloaded)' => sub {
     my $mock = mock;
     my $obj = My::Object->new(value => 5);
 
@@ -172,7 +176,7 @@ subtest 'Object (non-overloaded)' => sub {
 
 };
 
-subtest 'Num' => sub {
+subtest 'X ~~ Num' => sub {
     my $mock = mock;
 
     $mock->int(5);
@@ -183,7 +187,7 @@ subtest 'Num' => sub {
     is inspect($mock)->str(42), undef, 'Str ~~ Num (42x == 42)';
 };
 
-subtest 'Str' => sub {
+subtest 'X ~~ Str' => sub {
     my $mock = mock;
 
     $mock->str('foo');
@@ -200,5 +204,3 @@ subtest 'Str' => sub {
         is inspect($mock)->int("5\n"), undef, 'Int !~ Num-like (5 eq 5\\n)';
     }
 };
-
-done_testing(10);

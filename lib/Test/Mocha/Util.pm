@@ -99,11 +99,11 @@ sub match {
         return 1;
     }
 
-    # smartmatch only matches hash keys
-    # but we want to match the values too
     if (ref($x) eq 'HASH') {
+        # smartmatch only matches the hash keys
         return unless $x ~~ $y;
 
+        # ... but we want to match the hash values too
         foreach (keys %$x) {
             return if !match( $x->{$_}, $y->{$_} );
         }

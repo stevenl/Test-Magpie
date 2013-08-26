@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 33;
 use Test::Builder::Tester;
 use Test::Fatal;
 
@@ -82,6 +82,18 @@ test_out 'ok 1 - set({ slurpy: Map[PositiveInt,Str] }) was called 1 time(s)';
 verify($mock, times => 1)->set( slurpy Map[$positive_int, Str] );
 test_test 'slurpy Map works';
 
+$e = exception { verify($mock)->set( slurpy(ArrayRef), 1 ) };
+ok $e, 'Disallow arguments after a slurpy type constraint for verify()';
+like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+$e = exception { verify($mock)->set( slurpy Str) };
+ok $e, 'Invalid Slurpy argument for verify()';
+like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
+
+# satisfy test coverage
+isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::Stub';
+isa_ok stub($mock)->set( slurpy HashRef ),  'Test::Mocha::Stub';
+
 $e = exception { stub($mock)->set( slurpy(ArrayRef), 1 ) };
 ok $e, 'Disallow arguments after a slurpy type constraint for stub()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
@@ -91,24 +103,20 @@ ok $e, 'Invalid Slurpy argument for stub()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
 # slurpy matches with empty argument list
-$mock->foo();
-test_out 'ok 1 - foo({ slurpy: ArrayRef }) was called 2 time(s)';
-verify($mock, times => 2)->foo( slurpy ArrayRef );
+$mock->bar();
+test_out 'ok 1 - bar({ slurpy: ArrayRef }) was called 1 time(s)';
+verify($mock)->bar( slurpy ArrayRef );
 test_test 'slurpy ArrayRef matches no arguments';
 
-test_out 'ok 1 - foo({ slurpy: HashRef }) was called 2 time(s)';
-verify($mock, times => 2)->foo( slurpy HashRef );
+test_out 'ok 1 - bar({ slurpy: HashRef }) was called 1 time(s)';
+verify($mock)->bar( slurpy HashRef );
 test_test 'slurpy HashRef matches no arguments';
 
-# satisfy test coverage
-isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::Stub';
-isa_ok stub($mock)->set( slurpy HashRef ),  'Test::Mocha::Stub';
-
-$e = exception { verify($mock)->set( slurpy(ArrayRef), 1 ) };
+$e = exception { verify($mock)->bar( slurpy(ArrayRef), 1 ) };
 ok $e, 'Disallow arguments after a slurpy type constraint for verify()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
-$e = exception { verify($mock)->set( slurpy Str) };
+$e = exception { verify($mock)->bar( slurpy Str) };
 ok $e, 'Invalid Slurpy argument for verify()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
