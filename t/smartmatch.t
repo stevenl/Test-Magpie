@@ -133,17 +133,21 @@ subtest 'X ~~ Undef' => sub {
 
 {
     package My::Object;
-    use Moose;
-    has 'value' => (is => 'ro', required => 1);
+    sub new {
+        my ($class, %args) = @_;
+        return bless \%args, $class;
+    }
 
     package My::Overloaded;
-    use Moose;
     use overload '~~' => 'match', 'bool' => sub {1};
-    has 'value' => (is => 'ro', required => 1);
+    sub new {
+        my ($class, %args) = @_;
+        return bless \%args, $class;
+    }
     sub match {
         no warnings; # suppress smartmatch warnings
         my ($self, $other) = @_;
-        return $self->value ~~ $other;
+        return $self->{value} ~~ $other;
     }
 }
 

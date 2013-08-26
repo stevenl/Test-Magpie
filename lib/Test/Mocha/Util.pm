@@ -8,9 +8,9 @@ use warnings;
 use 5.010001;
 use experimental qw( smartmatch );
 
+use Carp qw( confess );
 use Exporter qw( import );
 use Scalar::Util qw( blessed looks_like_number refaddr );
-use Moose::Util qw( find_meta );
 
 our @EXPORT_OK = qw(
     extract_method_name
@@ -44,9 +44,10 @@ sub get_attribute_value {
     # uncoverable pod
     my ($object, $attribute) = @_;
 
-    return find_meta($object)
-        ->find_attribute_by_name($attribute)
-        ->get_value($object);
+    confess "Attribute '$attribute' does not exist for object '$object'"
+        if not defined $object->{$attribute};
+
+    return $object->{$attribute};
 }
 
 # has_caller_package

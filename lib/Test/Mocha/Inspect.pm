@@ -1,16 +1,25 @@
 package Test::Mocha::Inspect;
 # ABSTRACT: Inspect method calls on mock objects
 
-use Moose;
-use namespace::autoclean;
+use strict;
+use warnings;
+use feature 'state';
 
 use List::Util qw( first );
 use Test::Mocha::Invocation;
+use Test::Mocha::Types qw( MockWrapper );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
-
-with 'Test::Mocha::Role::HasMock';
+use Type::Params qw( compile );
+use Types::Standard qw( ClassName slurpy );
 
 our $AUTOLOAD;
+
+sub new {
+    state $check = compile( ClassName, slurpy MockWrapper );
+    my ($class, $self) = $check->(@_);
+
+    return bless $self, $class;
+}
 
 sub AUTOLOAD {
     my $self = shift;
@@ -26,5 +35,4 @@ sub AUTOLOAD {
     return first { $inspect->satisfied_by($_) } @$calls;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

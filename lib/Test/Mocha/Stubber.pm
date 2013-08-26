@@ -1,19 +1,25 @@
 package Test::Mocha::Stubber;
 # ABSTRACT: Create methods stubs for mock objects
 
-use Moose;
-use namespace::autoclean;
+use strict;
+use warnings;
+use feature 'state';
 
 use Carp qw( croak );
-
 use Test::Mocha::Stub;
-use Test::Mocha::Types qw( Slurpy );
+use Test::Mocha::Types qw( MockWrapper Slurpy );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
-use Types::Standard qw( ArrayRef HashRef );
-
-with 'Test::Mocha::Role::HasMock';
+use Type::Params qw( compile );
+use Types::Standard qw( ArrayRef ClassName HashRef slurpy );
 
 our $AUTOLOAD;
+
+sub new {
+    state $check = compile( ClassName, slurpy MockWrapper );
+    my ($class, $self) = $check->(@_);
+
+    return bless $self, $class;
+}
 
 sub AUTOLOAD {
     my ($self, @args) = @_;
@@ -53,5 +59,4 @@ sub AUTOLOAD {
     return $stub;
 }
 
-__PACKAGE__->meta->make_immutable;
 1;

@@ -6,6 +6,7 @@ use Type::Library
     -declare => qw(
         Matcher
         Mock
+        MockWrapper
         NumRange
         Slurpy
     );
@@ -19,6 +20,8 @@ union Matcher, [
 ];
 
 class_type Mock, { class => 'Test::Mocha::Mock' };
+
+declare MockWrapper, as Dict[ mock => InstanceOf['Test::Mocha::Mock'] ];
 
 declare NumRange, as Tuple[Num, Num], where { $_->[0] < $_->[1] };
 
