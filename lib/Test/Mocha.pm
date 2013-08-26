@@ -47,15 +47,14 @@ rather than on internal state.
 
 =cut
 
-use aliased 'Test::Mocha::Inspect';
-use aliased 'Test::Mocha::Mock';
-use aliased 'Test::Mocha::Stubber';
-use aliased 'Test::Mocha::Verify';
-
 use Carp qw( croak );
 use Exporter qw( import );
+use Test::Mocha::Inspect;
+use Test::Mocha::Mock;
+use Test::Mocha::Stubber;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 use Test::Mocha::Util qw( get_attribute_value );
+use Test::Mocha::Verify;
 use Types::Standard qw( Num );
 
 our @EXPORT = qw(
@@ -90,14 +89,14 @@ return C<undef> (in scalar context) or an empty list (in list context).
 =cut
 
 sub mock {
-    return Mock->new if @_ == 0;
+    return Test::Mocha::Mock->new if @_ == 0;
 
     my ($class) = @_;
 
     croak 'The argument for mock() must be a string'
         unless !ref $class;
 
-    return Mock->new(class => $class);
+    return Test::Mocha::Mock->new(class => $class);
 }
 
 =func stub
@@ -147,7 +146,7 @@ sub stub {
     croak 'stub() must be given a mock object'
         unless defined $mock && MockType->check($mock);
 
-    return Stubber->new(mock => $mock);
+    return Test::Mocha::Stubber->new(mock => $mock);
 }
 
 =func verify
@@ -237,7 +236,7 @@ sub verify {
     # set test name if given
     $options{test_name} = $test_name if defined $test_name;
 
-    return Verify->new(mock => $mock, %options);
+    return Test::Mocha::Verify->new(mock => $mock, %options);
 }
 
 =func clear
@@ -271,7 +270,7 @@ sub inspect {
     croak 'inspect() must be given a mock object'
         unless defined $mock && MockType->check($mock);
 
-    return Inspect->new(mock => $mock);
+    return Test::Mocha::Inspect->new(mock => $mock);
 }
 
 1;

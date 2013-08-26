@@ -6,9 +6,7 @@ use namespace::autoclean;
 
 use Carp qw( croak );
 
-use aliased 'Test::Mocha::Invocation';
-use aliased 'Test::Mocha::Stub';
-
+use Test::Mocha::Invocation;
 use Test::Mocha::Types qw( Matcher );
 use Test::Mocha::Util qw(
     extract_method_name
@@ -37,7 +35,7 @@ has 'class' => (
 # to be used for verification.
 
 has 'calls' => (
-    isa => ArrayRef[InstanceOf[Invocation]],
+    isa => ArrayRef[InstanceOf['Test::Mocha::Invocation']],
     is => 'bare',
     default => sub { [] }
 );
@@ -48,7 +46,7 @@ has 'calls' => (
 # determine which stub to dispatch to.
 
 has 'stubs' => (
-    isa => Map[ Str, ArrayRef[InstanceOf[Stub]] ],
+    isa => Map[ Str, ArrayRef[InstanceOf['Test::Mocha::Stub']] ],
     is => 'bare',
     default => sub { {} }
 );
@@ -63,7 +61,7 @@ sub AUTOLOAD {
         unless @invalid_args == 0;
 
     # record the method call for verification
-    my $method_call = Invocation->new(
+    my $method_call = Test::Mocha::Invocation->new(
         name => $method_name,
         args => \@_,
     );

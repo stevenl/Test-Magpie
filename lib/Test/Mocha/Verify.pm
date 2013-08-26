@@ -1,12 +1,11 @@
 package Test::Mocha::Verify;
-# ABSTRACT: Verify interactions with a mock object by looking into its invocation history
+# ABSTRACT: Verify interactions with a mock object
 
 use Moose;
 use namespace::autoclean;
 
-use aliased 'Test::Mocha::Invocation';
-
 use Test::Builder;
+use Test::Mocha::Invocation;
 use Test::Mocha::Types qw( NumRange );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 use Types::Standard qw( Num Str );
@@ -42,7 +41,7 @@ has 'between' => (
 sub AUTOLOAD {
     my $self = shift;
 
-    my $observe = Invocation->new(
+    my $observe = Test::Mocha::Invocation->new(
         name => extract_method_name($AUTOLOAD),
         args => \@_,
     );

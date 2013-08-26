@@ -6,9 +6,9 @@ use namespace::autoclean;
 
 use Carp qw( croak );
 
-use aliased 'Test::Mocha::Stub';
-use Test::Mocha::Util qw( extract_method_name get_attribute_value );
+use Test::Mocha::Stub;
 use Test::Mocha::Types qw( Slurpy );
+use Test::Mocha::Util qw( extract_method_name get_attribute_value );
 use Types::Standard qw( ArrayRef HashRef );
 
 with 'Test::Mocha::Role::HasMock';
@@ -38,7 +38,7 @@ sub AUTOLOAD {
                 || $slurpy->is_a_type_of(HashRef);
     }
 
-    my $stub = Stub->new(
+    my $stub = Test::Mocha::Stub->new(
         name => $method_name,
         args => \@args,
     );
