@@ -286,10 +286,10 @@ arguments. You may use any L<Type::Tiny> type constraint such as those
 predefined in L<Types::Standard>. (Moose type constraints such as
 L<MooseX::Types::Moose> and L<MooseX::Types::Structured> will also work.)
 
-    use Types::Standard qw( Defined );
+    use Types::Standard qw( Any );
 
     my $mock = mock;
-    stub($mock)->foo(Defined)->returns('ok');
+    stub($mock)->foo(Any)->returns('ok');
 
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
