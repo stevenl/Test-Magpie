@@ -32,6 +32,7 @@ has 'args' => (
 # type in Perl.
 
 sub as_string {
+    # uncoverable pod
     my ($self) = @_;
     return $self->name . '(' . $Dumper->dump($self->args) . ')';
 }
@@ -60,6 +61,7 @@ my $slurp = sub {
 # Returns true if the given C<$invocation> would satisfy this method call.
 
 sub satisfied_by {
+    # uncoverable pod
     my ($self, $invocation) = @_;
 
     return unless $invocation->name eq $self->name;

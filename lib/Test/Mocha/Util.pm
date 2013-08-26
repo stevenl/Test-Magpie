@@ -27,6 +27,7 @@ our @EXPORT_OK = qw(
 # just the method name (in this example, baz).
 
 sub extract_method_name {
+    # uncoverable pod
     my ($method_name) = @_;
     $method_name =~ s/.*:://;
     return $method_name;
@@ -40,6 +41,7 @@ sub extract_method_name {
 # underlying meta-object of the class.
 
 sub get_attribute_value {
+    # uncoverable pod
     my ($object, $attribute) = @_;
 
     return find_meta($object)
@@ -54,6 +56,7 @@ sub get_attribute_value {
 # Returns whether the given C<$package> is in the current call stack.
 
 sub has_caller_package {
+    # uncoverable pod
     my $package = shift;
 
     my $level = 1;
@@ -70,6 +73,7 @@ sub has_caller_package {
 # Match 2 values for equality.
 
 sub match {
+    # uncoverable pod
     my ($x, $y) = @_;
 
     # This function uses smart matching, but we need to limit the scenarios

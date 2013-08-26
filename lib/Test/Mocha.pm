@@ -265,6 +265,7 @@ sub clear {
 =cut
 
 sub inspect {
+    # uncoverable pod
     my ($mock) = @_;
 
     croak 'inspect() must be given a mock object'

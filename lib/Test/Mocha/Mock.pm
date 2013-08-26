@@ -88,6 +88,7 @@ sub AUTOLOAD {
 # is required.
 
 sub isa {
+    # uncoverable pod
     my ($self, $package) = @_;
     return if (
         $package eq 'Type::Tiny'                  ||
@@ -111,6 +112,7 @@ sub does {
 # object to C<can()> do any method that is required.
 
 sub can {
+    # uncoverable pod
     my ($self, $method_name) = @_;
     return sub {
         $AUTOLOAD = $method_name;

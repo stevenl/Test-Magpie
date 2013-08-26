@@ -36,6 +36,7 @@ has '_executions' => (
 # execution queue.
 
 sub returns {
+    # uncoverable pod
     my ($self, @return_values) = @_;
 
     push @{$self->_executions}, sub {
@@ -52,6 +53,7 @@ sub returns {
 # the execution queue.
 
 sub dies {
+    # uncoverable pod
     my ($self, $exception) = @_;
 
     push @{$self->_executions}, sub {
@@ -66,6 +68,7 @@ sub dies {
 # Executes the next execution
 
 sub execute {
+    # uncoverable pod
     my ($self) = @_;
     my $executions = $self->_executions;
 
