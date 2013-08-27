@@ -32,8 +32,8 @@ verify($mock, times => 2)->set( Int | Str );
 test_test 'type union works';
 
 test_out
-'ok 1 - set(StrMatch[(?^:^foo)]&StrMatch[(?^:bar$)]) was called 1 time(s)';
-verify($mock)->set(StrMatch[qr/^foo/] & StrMatch[qr/bar$/]);
+qr/ok 1 - set\(StrMatch\[\(\?.*\:\^foo\)\]\&StrMatch\[\(\?.*\:bar\$\)\]\) was called 1 time\(s\)\s/;
+verify($mock)->set( StrMatch[qr/^foo/] & StrMatch[qr/bar$/] );
 test_test 'type intersection works';
 
 test_out 'ok 1 - set(Tuple[Str,Str]) was called 1 time(s)';
