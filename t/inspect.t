@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 16;
+use Test::More tests => 15;
 use Test::Fatal;
 use Types::Standard qw( ArrayRef Int slurpy );
 
@@ -10,7 +10,8 @@ BEGIN { use_ok 'Test::Mocha' }
 
 my $mock = mock;
 $mock->once;
-$mock->twice($_) for 1..2;
+$mock->twice(1)   for 1..2;
+$mock->thrice($_) for 1..3;
 
 # inspect() argument checks
 like exception { inspect() },
@@ -24,18 +25,20 @@ my ($once) = inspect($mock)->once;
 is $once, 'once()', 'inspect() returns method call';
 
 my @twice = inspect($mock)->twice(1);
-is @twice, 1, 'inspect() with argument returns method call';
+is @twice, 2, 'inspect() with argument returns method call';
 is $twice[0], 'twice(1)', ' and method call stringifies';
 
-@twice = inspect($mock)->twice(Int);
-is @twice, 2, 'inspect() works with argument matcher';
-is $twice[0], 'twice(1)', ' and returns calls in the right order';
-is $twice[1], 'twice(2)';
+my @thrice = inspect($mock)->thrice(Int);
+is @thrice, 3, 'inspect() works with argument matcher';
+is $thrice[0], 'thrice(1)', ' and returns calls in the right order';
+is $thrice[1], 'thrice(2)';
+is $thrice[2], 'thrice(3)';
 
-@twice = inspect($mock)->twice(slurpy ArrayRef);
-is @twice, 2, 'inspect() works with slurpy argument matcher';
-is $twice[0], 'twice(1)', ' and returns calls in the right order';
-is $twice[1], 'twice(2)';
+# ----------------------
+# inspect() with type constraint arguments
+
+@thrice = inspect($mock)->thrice(slurpy ArrayRef);
+is @thrice, 3, 'inspect() works with slurpy argument matcher';
 
 my $e = exception { inspect($mock)->twice(slurpy ArrayRef, 1) };
 like $e, qr/^No arguments allowed after a slurpy type constraint/,

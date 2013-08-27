@@ -101,16 +101,14 @@ sub satisfied_by {
     }
 
     # slurpy matcher should handle empty argument lists
-    if (@expected > 0) {
-        if ( Slurpy->check($expected[0]) ) {
-            my $matcher = shift @expected;
+    if ( @expected > 0 && Slurpy->check($expected[0]) ) {
+        my $matcher = shift @expected;
 
-            croak 'No arguments allowed after a slurpy type constraint'
-                unless @expected == 0;
+        croak 'No arguments allowed after a slurpy type constraint'
+            unless @expected == 0;
 
-            # uncoverable branch true
-            return if ! $slurp->($matcher, @input);
-        }
+        # uncoverable branch true
+        return if ! $slurp->($matcher, @input);
     }
 
     return @input == 0 && @expected == 0;

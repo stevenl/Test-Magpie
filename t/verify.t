@@ -2,9 +2,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 36;
 use Test::Fatal;
 use Test::Builder::Tester;
+use Types::Standard qw( Any ArrayRef slurpy );
 
 BEGIN { use_ok 'Test::Mocha' }
 
@@ -16,6 +17,26 @@ my $err;
 my $mock = mock;
 $mock->once;
 $mock->twice() for 1..2;
+$mock->thrice($_) for 1..3;
+
+# -----------------
+# verify() exceptions
+
+like exception { verify() },
+    qr/^verify\(\) must be given a mock object/,
+    'verify() called without an argument';
+
+like exception { verify('string') },
+    qr/^verify\(\) must be given a mock object/,
+    'verify() called with an invalid argument';
+
+like exception { verify($mock, times => 2, at_least => 2)->twice },
+    qr/^You can set only one of these options:/,
+    'verify() called with multiple options';
+
+like exception { verify($mock, tiny => 1)->once },
+    qr/^verify\(\) was given an invalid option: 'tiny'/,
+    'verify() called with an invalid option';
 
 # -----------------
 # simple verify() (with no options)
@@ -182,21 +203,24 @@ verify($mock, between => [1, 2], $test_name)->twice;
 test_test "verify() with 'between' option and a name";
 
 # -----------------
-# verify() exceptions
+# verify() with type constraint arguments
 
-like exception { verify() },
-    qr/^verify\(\) must be given a mock object/,
-    'verify() called without an argument';
+test_out 'ok 1 - thrice(Any) was called 3 time(s)';
+verify($mock, times => 3)->thrice(Any);
+test_test 'verify() accepts type constraints';
 
-like exception { verify('string') },
-    qr/^verify\(\) must be given a mock object/,
-    'verify() called with an invalid argument';
+my $e = exception { verify($mock)->thrice( slurpy(ArrayRef), 1 ) };
+like $e, qr/^No arguments allowed after a slurpy type constraint/,
+    'Disallow arguments after a slurpy type constraint';
+like $e, qr/verify\.t/, ' and message traces back to this script';
 
-like exception { verify($mock, times => 2, at_least => 2)->twice },
-    qr/^You can set only one of these options:/,
-    'verify() called with multiple options';
+# to complete test coverage - once() has no arguments
+$e = exception { verify($mock)->once( slurpy(ArrayRef), 1 ) };
+like $e, qr/^No arguments allowed after a slurpy type constraint/,
+    'Disallow arguments after a slurpy type constraint';
+like $e, qr/verify\.t/, ' and message traces back to this script';
 
-like exception { verify($mock, tiny => 1)->once },
-    qr/^verify\(\) was given an invalid option: 'tiny'/,
-    'verify() called with an invalid option';
-
+$e = exception { verify($mock)->thrice( slurpy Any) };
+like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    'Invalid Slurpy argument for verify()';
+like $e, qr/verify\.t/, ' and message traces back to this script';
