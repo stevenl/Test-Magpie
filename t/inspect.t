@@ -2,42 +2,47 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 16;
 use Test::Fatal;
-use Types::Standard qw( Any );
+use Types::Standard qw( ArrayRef Int slurpy );
 
-BEGIN { use_ok 'Test::Mocha', qw( mock inspect ) }
+BEGIN { use_ok 'Test::Mocha' }
 
 my $mock = mock;
-$mock->foo;
-$mock->foo(123, bar => 456);
+$mock->once;
+$mock->twice($_) for 1..2;
 
-my $inspect;
+# inspect() argument checks
+like exception { inspect() },
+    qr/^inspect\(\) must be given a mock object/,
+    'no argument exception';
+like exception { inspect('string') },
+    qr/^inspect\(\) must be given a mock object/,
+    'invalid argument exception';
 
-subtest 'inspect()' => sub {
-    $inspect = inspect($mock);
-    isa_ok $inspect, 'Test::Mocha::Inspect';
+my ($once) = inspect($mock)->once;
+is $once, 'once()', 'inspect() returns method call';
 
-    like exception { inspect },
-        qr/^inspect\(\) must be given a mock object/,
-        'no arg';
-    like exception { inspect('string') },
-        qr/^inspect\(\) must be given a mock object/,
-        'invalid arg';
-};
+my @twice = inspect($mock)->twice(1);
+is @twice, 1, 'inspect() with argument returns method call';
+is $twice[0], 'twice(1)', ' and method call stringifies';
 
-subtest 'get invocation' => sub {
-    my $invocation1 = $inspect->foo;
-    isa_ok $invocation1, 'Test::Mocha::MethodCall';
-    is $invocation1->name, 'foo';
-    is_deeply [$invocation1->args], [];
-};
+@twice = inspect($mock)->twice(Int);
+is @twice, 2, 'inspect() works with argument matcher';
+is $twice[0], 'twice(1)', ' and returns calls in the right order';
+is $twice[1], 'twice(2)';
 
-subtest 'get invocation with argument matchers' => sub {
-    my $invocation2 = $inspect->foo(map {Any} 1..3 );
-    isa_ok $invocation2, 'Test::Mocha::MethodCall';
-    is $invocation2->name, 'foo';
-    is_deeply [$invocation2->args], [123, 'bar', 456];
-};
+@twice = inspect($mock)->twice(slurpy ArrayRef);
+is @twice, 2, 'inspect() works with slurpy argument matcher';
+is $twice[0], 'twice(1)', ' and returns calls in the right order';
+is $twice[1], 'twice(2)';
 
-done_testing(4);
+my $e = exception { inspect($mock)->twice(slurpy ArrayRef, 1) };
+like $e, qr/^No arguments allowed after a slurpy type constraint/,
+    'Disallow arguments after a slurpy type constraint';
+like $e, qr/inspect\.t/, ' and message traces back to this script';
+
+$e = exception { inspect($mock)->twice(slurpy Int) };
+like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    'Invalid Slurpy argument';
+like $e, qr/inspect\.t/, ' and message traces back to this script';

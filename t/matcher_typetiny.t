@@ -95,11 +95,13 @@ isa_ok stub($mock)->set( slurpy ArrayRef ), 'Test::Mocha::StubbedCall';
 isa_ok stub($mock)->set( slurpy HashRef ),  'Test::Mocha::StubbedCall';
 
 $e = exception { stub($mock)->set( slurpy(ArrayRef), 1 ) };
-ok $e, 'Disallow arguments after a slurpy type constraint for stub()';
+like $e, qr/^No arguments allowed after a slurpy type constraint/,
+    'Disallow arguments after a slurpy type constraint for stub()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
 $e = exception { stub($mock)->set( slurpy Str) };
-ok $e, 'Invalid Slurpy argument for stub()';
+like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    'Invalid Slurpy argument for stub()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
 # slurpy matches with empty argument list
@@ -113,11 +115,13 @@ verify($mock)->bar( slurpy HashRef );
 test_test 'slurpy HashRef matches no arguments';
 
 $e = exception { verify($mock)->bar( slurpy(ArrayRef), 1 ) };
-ok $e, 'Disallow arguments after a slurpy type constraint for verify()';
+like $e, qr/^No arguments allowed after a slurpy type constraint/,
+    'Disallow arguments after a slurpy type constraint for verify()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
 $e = exception { verify($mock)->bar( slurpy Str) };
-ok $e, 'Invalid Slurpy argument for verify()';
+like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    'Invalid Slurpy argument for verify()';
 like $e, qr/matcher_typetiny\.t/, ' and message traces back to this script';
 
 # -----------------------

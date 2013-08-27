@@ -8,8 +8,9 @@ use 5.010001;
 # These tests are to make sure that no unexpected argument matches occur
 # because we are using smartmatching
 
-use Test::More tests => 10;
-use Test::Mocha qw( mock inspect );
+use Test::More tests => 11;
+
+BEGIN { use_ok 'Test::Mocha' }
 
 use constant MethodCall => 'Test::Mocha::MethodCall';
 
@@ -17,118 +18,116 @@ subtest 'X ~~ Array' => sub {
     my $mock = mock;
 
     $mock->array( [1, 2, 3] );
-    isa_ok inspect($mock)->array( [1, 2, 3] ), MethodCall, 'Array ~~ Array';
-    is inspect($mock)->array( [1, 2] ), undef, 'Array.size != Array.size';
+    verify($mock, 'Array ~~ Array')->array( [1, 2, 3] );
+    verify($mock, times => 0, 'Array.size != Array.size')->array( [1, 2] );
 
     $mock->hash( {a => 1} );
-    is inspect($mock)->hash( [qw/a b c/] ), undef, 'Hash ~~ Array';
+    verify($mock, times => 0, 'Hash ~~ Array')->hash( [qw/a b c/] );
 
     $mock->regexp( qr/^hell/ );
-    is inspect($mock)->regexp( [qw/hello/] ), undef, 'Regexp ~~ Array';
+    verify($mock, times => 0, 'Regexp ~~ Array')->regexp( [qw/hello/] );
 
     $mock->undef(undef);
-    is inspect($mock)->undef( [undef, 'anything'] ), undef, 'Undef ~~ Array';
+    verify($mock, times => 0, 'Undef ~~ Array')->undef( [undef, 'anything'] );
 
     $mock->any(1);
-    is inspect($mock)->any( [1,2,3] ), undef, 'Any ~~ Array';
+    verify($mock, times => 0, 'Any ~~ Array')->any( [1,2,3] );
 };
 
 subtest 'X ~~ Array (nested)' => sub {
     my $mock = mock;
 
     $mock->nested_array( [1, 2, [3, 4]] );
-    isa_ok inspect($mock)->nested_array( [1, 2, [3, 4]] ), MethodCall,
-        'Array[Array] ~~ Array[Array]';
+    verify($mock, 'Array[Array] ~~ Array[Array]')
+        ->nested_array( [1, 2, [3, 4]] );
 
     $mock->nested_hash( [1, 2, {3 => 4}] );
-    isa_ok inspect($mock)->nested_hash( [1, 2, {3 => 4}] ), MethodCall,
-        'Array[Hash] ~~ Array[Hash]';
+    verify($mock, 'Array[Hash] ~~ Array[Hash]')
+        ->nested_hash( [1, 2, {3 => 4}] );
 
     $mock->array( [1, 2, 3] );
-    is inspect($mock)->array( [1, 2, [3, 4]] ), undef,
-        'Array ~~ Array[Array]';
+    verify($mock, times => 0, 'Array ~~ Array[Array]')
+        ->array( [1, 2, [3, 4]] );
 
-    is inspect($mock)->array( [1, 2, {3 => 4}] ), undef,
-        'Array ~~ Array[Hash]';
-
+    verify($mock, times => 0, 'Array ~~ Array[Hash]')
+        ->array( [1, 2, {3 => 4}] );
 };
 
 subtest 'X ~~ Hash' => sub {
     my $mock = mock;
 
     $mock->hash( {a => 1, b => 2, c => 3} );
-    isa_ok inspect($mock)->hash( {c => 3, b => 2, a => 1} ), MethodCall,
-        'Hash ~~ Hash';
+    verify($mock, 'Hash ~~ Hash')->hash( {c => 3, b => 2, a => 1} );
 
-    is inspect($mock)->hash( {a => 3, b => 2, d => 1} ), undef,
-        'Hash ~~ Hash - different keys';
+    verify($mock, times => 0, 'Hash ~~ Hash - different keys')
+        ->hash( {a => 3, b => 2, d => 1} );
 
-    is inspect($mock)->hash( {a => 3, b => 2, c => 1} ), undef,
-        'Hash ~~ Hash - same keys, different values';
+    verify($mock, times => 0, 'Hash ~~ Hash - same keys, different values')
+        ->hash( {a => 3, b => 2, c => 1} );
 
     $mock->array( [qw/a b c/] );
-    is inspect($mock)->array( {a => 1} ), undef, 'Array ~~ Hash';
+    verify($mock, times => 0, 'Array ~~ Hash')->array( {a => 1} );
 
     $mock->regexp(qr/^hell/);
-    is inspect($mock)->regexp( {hello => 1} ), undef, 'Regexp ~~ Hash';
+    verify($mock, times => 0, 'Regexp ~~ Hash')->regexp( {hello => 1} );
 
     $mock->any('a');
-    is inspect($mock)->any( {a => 1, b => 2} ), undef, 'Any ~~ Hash';
+    verify($mock, times => 0, 'Any ~~ Hash')->any( {a => 1, b => 2} );
 };
 
 subtest 'X ~~ Code' => sub {
     my $mock = mock;
 
     $mock->array( [1, 2, 3] );
-    is inspect($mock)->array( sub {1} ), undef, 'Array ~~ Code';
+    verify($mock, times => 0, 'Array ~~ Code')->array( sub {1} );
 
     # empty arrays always match
     $mock->array( [] );
-    is inspect($mock)->array( sub {0} ), undef, 'Array(empty) ~~ Code';
+    verify($mock, times => 0, 'Array(empty) ~~ Code')->array( sub {0} );
 
     $mock->hash( {a => 1, b => 2} );
-    is inspect($mock)->hash( sub {1} ), undef, 'Hash ~~ Code';
+    verify($mock, times => 0, 'Hash ~~ Code')->hash( sub {1} );
 
     # empty hashes always match
     $mock->hash( {} );
-    is inspect($mock)->hash( sub {0} ), undef, 'Hash(empty) ~~ Code';
+    verify($mock, times => 0, 'Hash(empty) ~~ Code')->hash( sub {0} );
 
     $mock->code('anything');
-    is inspect($mock)->code( sub {1} ), undef, 'Any ~~ Code';
+    verify($mock, times => 0, 'Any ~~ Code')->code( sub {1} );
 
     $mock->code( sub {0} );
-    is inspect($mock)->code( sub {1} ), undef, 'Code ~~ Code';
+    verify($mock, times => 0, 'Code ~~ Code')->code( sub {1} );
 
     # same coderef should match
     $mock = mock;
     my $sub = sub {0};
     $mock->code($sub);
-    isa_ok inspect($mock)->code($sub), MethodCall,  'Code == Code';
+    verify($mock, 'Code == Code')->code($sub);
 };
 
 subtest 'X ~~ Regexp' => sub {
     my $mock = mock;
 
     $mock->array( [qw/hello bye/] );
-    is inspect($mock)->array( qr/^hell/ ), undef, 'Array ~~ Regexp';
+    verify($mock, times => 0, 'Array ~~ Regexp')->array( qr/^hell/ );
 
     $mock->hash( {hello => 1} );
-    is inspect($mock)->hash( qr/^hell/ ), undef, 'Array ~~ Regexp';
+    verify($mock, times => 0, 'Array ~~ Regexp')->hash( qr/^hell/ );
 
     $mock->any('hello');
-    is inspect($mock)->any( qr/^hell/ ), undef, 'Any ~~ Regexp';
+    verify($mock, times => 0, 'Any ~~ Regexp')->any( qr/^hell/ );
 };
 
 subtest 'X ~~ Undef' => sub {
     my $mock = mock;
 
     $mock->undef(undef);
-    isa_ok inspect($mock)->undef(undef), MethodCall, 'Undef ~~ Undef';
+    verify($mock, 'Undef ~~ Undef')->undef(undef);
 
     $mock->any(1);
-    is inspect($mock)->any(undef), undef, 'Any ~~ Undef';
+    verify($mock, times => 0, 'Any ~~ Undef')->any(undef);
 
-    is inspect($mock)->undef(1), undef, 'Undef ~~ Any'
+    verify($mock, times => 0, 'Undef ~~ Any')->undef(1);
 };
 
 {
@@ -156,10 +155,10 @@ subtest 'X ~~ Object (overloaded)' => sub {
     my $overloaded = My::Overloaded->new(value => 5);
 
     $mock->any( [1,3,5] );
-    is inspect($mock)->any($overloaded), undef, 'Any ~~ Object';
+    verify($mock, times => 0, 'Any ~~ Object')->any($overloaded);
 
     $mock->object($overloaded);
-    isa_ok inspect($mock)->object($overloaded), MethodCall, 'Object == Object';
+    verify($mock, 'Object == Object')->object($overloaded);
 };
 
 subtest 'X ~~ Object (non-overloaded)' => sub {
@@ -167,16 +166,16 @@ subtest 'X ~~ Object (non-overloaded)' => sub {
     my $obj = My::Object->new(value => 5);
 
     $mock->object($obj);
-    isa_ok inspect($mock)->object($obj), MethodCall, 'Object == Object';
+    verify($mock, 'Object == Object')->object($obj);
 
     $mock->mock($mock);
-    isa_ok inspect($mock)->mock($mock), MethodCall, 'Mock == Mock';
+    verify($mock, 'Mock == Mock')->mock($mock);
 
     # This scenario won't invoke the overload method because smartmatching
     # rules take precedence over overloading. The comparison is meant to be
     # `$obj eq 'My::Object` but this doesn't seem to be happening
     $mock->object($obj);
-    is inspect($mock)->object('My::Object'), undef, 'Object ~~ Any';
+    verify($mock, times => 0, 'Object ~~ Any')->object('My::Object');
 
 };
 
@@ -184,27 +183,27 @@ subtest 'X ~~ Num' => sub {
     my $mock = mock;
 
     $mock->int(5);
-    isa_ok inspect($mock)->int(5), MethodCall, 'Int == Int';
-    isa_ok inspect($mock)->int(5.0), MethodCall, 'Int == Num';
+    verify($mock, 'Int == Int')->int(5);
+    verify($mock, 'Int == Num')->int(5.0);
 
     $mock->str('42x');
-    is inspect($mock)->str(42), undef, 'Str ~~ Num (42x == 42)';
+    verify($mock, times => 0, 'Str ~~ Num (42x == 42)')->str(42);
 };
 
 subtest 'X ~~ Str' => sub {
     my $mock = mock;
 
     $mock->str('foo');
-    isa_ok inspect($mock)->str('foo'), MethodCall, 'Str eq Str';
-    is inspect($mock)->str('Foo'), undef, 'Str ne Str';
-    is inspect($mock)->str('bar'), undef, 'Str ne Str';
+    verify($mock, 'Str eq Str')->str('foo');
+    verify($mock, times => 0, 'Str ne Str')->str('Foo');
+    verify($mock, times => 0, 'Str ne Str')->str('bar');
 
     $mock->int(5);
-    isa_ok inspect($mock)->int("5.0"), MethodCall, 'Int ~~ Num-like';
-    is inspect($mock)->int("5x"), undef, 'Int !~ Num-like (5 eq 5x)';
+    verify($mock, 'Int ~~ Num-like')->int("5.0");
+    verify($mock, times => 0, 'Int !~ Num-like (5 eq 5x)')->int("5x");
 
     TODO: {
         local $TODO = "string still looks_like_number in spite of whitespace";
-        is inspect($mock)->int("5\n"), undef, 'Int !~ Num-like (5 eq 5\\n)';
+        verify($mock, times => 0, 'Int !~ Num-like (5 eq 5\\n)')->int("5\n");
     }
 };

@@ -10,7 +10,12 @@ use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util qw( match );
 use Types::Standard qw( ArrayRef HashRef Str );
 
-our @CARP_NOT = qw( Test::Mocha::Verify );
+use overload '""' => \&as_string, fallback => 1;
+
+our @CARP_NOT = qw(
+    Test::Mocha::Inspect
+    Test::Mocha::Verify
+);
 
 # cause string overloaded objects (Matchers) to be stringified
 my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);
