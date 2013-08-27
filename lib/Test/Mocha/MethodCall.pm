@@ -18,12 +18,9 @@ my $Dumper = Devel::PartialDump->new(objects => 0, stringify => 1);
 sub new {
     # uncoverable pod
     my ($class, %args) = @_;
-    my $self = \%args;
-
-    ### assert: Str->check( $self->{name} )
-    ### assert: ArrayRef->check( $self->{args} )
-
-    return bless $self, $class;
+    ### assert: Str->check( $args{name} )
+    ### assert: ArrayRef->check( $args{args} )
+    return bless \%args, $class;
 }
 
 sub name {

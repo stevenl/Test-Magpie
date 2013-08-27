@@ -1,7 +1,6 @@
 package Test::Mocha::Verify;
 # ABSTRACT: Verify interactions with a mock object
 
-use 5.010001;
 use strict;
 use warnings;
 
@@ -9,8 +8,7 @@ use Test::Builder;
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
-use Type::Params qw( compile );
-use Types::Standard qw( ClassName Dict Num Optional Str slurpy );
+use Types::Standard qw( Num Str );
 
 our $AUTOLOAD;
 
@@ -18,19 +16,17 @@ my $TB = Test::Builder->new;
 
 sub new {
     # uncoverable pod
-    state $check = compile( ClassName, slurpy(
-        Dict[
-            mock      => Mock,
-            test_name => Optional[Str],
-            times     => Optional[Num],
-            at_least  => Optional[Num],
-            at_most   => Optional[Num],
-            between   => Optional[NumRange],
-        ]
-    ) );
-    my ($class, $self) = $check->(@_);
+    my ($class, %args) = @_;
 
-    return bless $self, $class;
+    ### assert: defined $args{mock} && Mock->check( $args{mock} )
+    ### assert: !defined $args{ name     } || Str->check( $args{ name     } )
+    ### assert: !defined $args{ times    } || Num->check( $args{ times    } )
+    ### assert: !defined $args{ at_least } || Num->check( $args{ at_least } )
+    ### assert: !defined $args{ at_most  } || Num->check( $args{ at_most  } )
+    ### assert: !defined $args{ between  } || NumRange->check( $args{between} )
+    ### assert: 1 == grep { defined } @args{ times at_least at_most between }
+
+    return bless \%args, $class;
 }
 
 sub AUTOLOAD {

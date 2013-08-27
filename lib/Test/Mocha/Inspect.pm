@@ -1,25 +1,21 @@
 package Test::Mocha::Inspect;
 # ABSTRACT: Inspect method calls on mock objects
 
-use 5.010001;
 use strict;
 use warnings;
 
 use List::Util qw( first );
 use Test::Mocha::MethodCall;
-use Test::Mocha::Types qw( MockWrapper );
+use Test::Mocha::Types qw( Mock );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
-use Type::Params qw( compile );
-use Types::Standard qw( ClassName slurpy );
 
 our $AUTOLOAD;
 
 sub new {
     # uncoverable pod
-    state $check = compile( ClassName, slurpy MockWrapper );
-    my ($class, $self) = $check->(@_);
-
-    return bless $self, $class;
+    my ($class, %args) = @_;
+    ### assert: defined $args{mock} && Mock->check( $args{mock} )
+    return bless \%args, $class;
 }
 
 sub AUTOLOAD {

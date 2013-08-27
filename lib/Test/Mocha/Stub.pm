@@ -1,25 +1,22 @@
 package Test::Mocha::Stub;
 # ABSTRACT: Create methods stubs for mock objects
 
-use 5.010001;
 use strict;
 use warnings;
 
 use Carp qw( croak );
 use Test::Mocha::StubbedCall;
-use Test::Mocha::Types qw( MockWrapper Slurpy );
+use Test::Mocha::Types qw( Mock Slurpy );
 use Test::Mocha::Util qw( extract_method_name get_attribute_value );
-use Type::Params qw( compile );
-use Types::Standard qw( ArrayRef ClassName HashRef slurpy );
+use Types::Standard qw( ArrayRef HashRef );
 
 our $AUTOLOAD;
 
 sub new {
     # uncoverable pod
-    state $check = compile( ClassName, slurpy MockWrapper );
-    my ($class, $self) = $check->(@_);
-
-    return bless $self, $class;
+    my ($class, %args) = @_;
+    ### assert: defined $args{mock} && Mock->check( $args{mock} )
+    return bless \%args, $class;
 }
 
 sub AUTOLOAD {

@@ -11,13 +11,11 @@ package Test::Mocha::StubbedCall;
 # and called. As stubs are matched via arguments, you may have multiple stubs
 # for the same method name.
 
-use 5.010001;
 use strict;
 use warnings;
 
 use Carp qw( croak );
 use Scalar::Util qw( blessed );
-use Types::Standard qw( ArrayRef );
 
 our @ISA = qw( Test::Mocha::MethodCall );
 

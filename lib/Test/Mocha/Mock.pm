@@ -1,20 +1,15 @@
 package Test::Mocha::Mock;
 # ABSTRACT: Mock objects
 
-use 5.010001;
 use strict;
 use warnings;
 
 use Carp qw( croak );
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Matcher );
-use Test::Mocha::Util qw(
-    extract_method_name get_attribute_value has_caller_package
-);
-use Type::Params qw( compile );
-use Types::Standard qw(
-    ArrayRef ClassName Dict InstanceOf Int Map Optional Str slurpy
-);
+use Test::Mocha::Util qw( extract_method_name get_attribute_value
+                          has_caller_package );
+use Types::Standard qw( Str );
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
@@ -35,9 +30,10 @@ our $AUTOLOAD;
 
 sub new {
     # uncoverable pod
-    state $check = compile( ClassName, slurpy Dict[class => Optional[Str]] );
-    my ($class, $self) = $check->(@_);
+    my ($class, %args) = @_;
+    ### assert: !defined $args{class} || Str->check( $args{class} )
 
+    my $self = \%args;
     $self->{class} = __PACKAGE__ unless defined $self->{class};
     $self->{calls} = [];
     $self->{stubs} = {};
