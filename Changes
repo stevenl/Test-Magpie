@@ -1,5 +1,9 @@
 Revision history for Test-Mocha
 
+0.14    2013-08-30
+        Made inspect() public.
+        Removed Moose and other dependencies.
+
 0.13    2013-08-26
         Distribution fix
 
