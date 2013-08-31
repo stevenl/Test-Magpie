@@ -1,5 +1,5 @@
 package Test::Mocha::Types;
-# ABSTRACT: Type constraints used internally by Mocha
+# ABSTRACT: Internal type constraints
 
 use Type::Library
     -base,

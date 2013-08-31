@@ -1,5 +1,5 @@
 package Test::Mocha::Util;
-# ABSTRACT: Internal utility functions for Test::Mocha
+# ABSTRACT: Internal utility functions
 
 use strict;
 use warnings;
@@ -8,8 +8,8 @@ use warnings;
 use 5.010001;
 use experimental qw( smartmatch );
 
-use Carp qw( confess );
-use Exporter qw( import );
+use Carp         qw( confess );
+use Exporter     qw( import );
 use Scalar::Util qw( blessed looks_like_number refaddr );
 
 our @EXPORT_OK = qw(
@@ -19,28 +19,14 @@ our @EXPORT_OK = qw(
     match
 );
 
-# extract_method_name
-#
-#    $method_name = extract_method_name($full_method_name)
-#
-# From a fully qualified method name such as Foo::Bar::baz, will return
-# just the method name (in this example, baz).
-
 sub extract_method_name {
+    # """Extracts the method name from its fully qualified name."""
     # uncoverable pod
-    my ($method_name) = @_;
-    $method_name =~ s/.*:://;
-    return $method_name;
+    return $_[0] =~ s/.*:://r;
 }
 
-# get_attribute_value
-#
-#    $value = get_attribute_value($object, $attr_name)
-#
-# Gets value of Moose attributes that have no accessors by accessing the
-# underlying meta-object of the class.
-
 sub get_attribute_value {
+    # """Safely get the attribute value of an object."""
     # uncoverable pod
     my ($object, $attribute) = @_;
 
@@ -51,15 +37,12 @@ sub get_attribute_value {
     return $object->{$attribute};
 }
 
-# has_caller_package
-#
-#    $bool = has_caller_package($package_name)
-#
-# Returns whether the given C<$package> is in the current call stack.
-
 sub has_caller_package {
+    # """
+    # Returns whether the given C<$package> is in the current call stack.
+    # """
     # uncoverable pod
-    my $package = shift;
+    my ($package) = @_;
 
     my $level = 1;
     while (my ($caller) = caller $level++) {
@@ -68,13 +51,9 @@ sub has_caller_package {
     return;
 }
 
-# match
-#
-#    $bool = match($x, $y)
-#
-# Match 2 values for equality.
 
 sub match {
+    # """Match 2 values for equality."""
     # uncoverable pod
     my ($x, $y) = @_;
 

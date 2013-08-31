@@ -1,14 +1,14 @@
 package Test::Mocha::Stub;
-# ABSTRACT: Create methods stubs for mock objects
+# ABSTRACT: Mock wrapper to create method stubs
 
 use strict;
 use warnings;
 
 use Carp qw( croak );
 use Test::Mocha::StubbedCall;
-use Test::Mocha::Types qw( Mock Slurpy );
-use Test::Mocha::Util qw( extract_method_name get_attribute_value );
-use Types::Standard qw( ArrayRef HashRef );
+use Test::Mocha::Types  qw( Mock Slurpy );
+use Test::Mocha::Util   qw( extract_method_name get_attribute_value );
+use Types::Standard     qw( ArrayRef HashRef );
 
 our $AUTOLOAD;
 

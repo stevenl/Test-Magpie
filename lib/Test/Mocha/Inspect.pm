@@ -1,12 +1,12 @@
 package Test::Mocha::Inspect;
-# ABSTRACT: Inspect method calls on mock objects
+# ABSTRACT: Mock wrapper to inspect method calls
 
 use strict;
 use warnings;
 
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock );
-use Test::Mocha::Util qw( extract_method_name get_attribute_value );
+use Test::Mocha::Util  qw( extract_method_name get_attribute_value );
 
 our $AUTOLOAD;
 

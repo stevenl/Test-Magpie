@@ -24,8 +24,7 @@ other objects.
 
     # verify interactions with the dependent object
     ok( $order->is_filled, 'Order is filled' );
-    verify( $warehouse, '... and inventory is removed' )
-        ->remove_inventory($item1, 50);
+    verify( $warehouse, '... and inventory is removed' )->remove_inventory($item1, 50);
 
 =head1 DESCRIPTION
 
@@ -47,7 +46,7 @@ rather than on internal state.
 
 =cut
 
-use Carp qw( croak );
+use Carp     qw( croak );
 use Exporter qw( import );
 use Test::Mocha::Inspect;
 use Test::Mocha::Mock;

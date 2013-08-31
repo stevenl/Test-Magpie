@@ -1,5 +1,5 @@
 package Test::Mocha::Verify;
-# ABSTRACT: Verify interactions with a mock object
+# ABSTRACT: Mock wrapper to verify method calls
 
 use strict;
 use warnings;
