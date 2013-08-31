@@ -135,6 +135,21 @@ You may chain responses together to provide a series of responses.
     ok( $iterator->next == 3 );
     ok( exception { $iterator->next } );
 
+Responses may also be specified as callbacks.
+
+    my @returns = qw( first second );
+
+    stub($list)->get(Int)->executes(sub {
+        my ($i) = @_;
+        die "index out of bounds" if $i < 0;
+        return $returns[$i];
+    });
+
+    is( $list->get(0), 'first'  );
+    is( $list->get(1), 'second' );
+    is( $list->get(2), undef    );
+    like( exception { $list->get(-1) }, qr/^index out of bounds/ ),
+
 =cut
 
 sub stub {
@@ -352,8 +367,7 @@ recognised by slurpy types.
 =head1 TO DO
 
 =for :list
-* Ordered verifications
-* Stubs with callbacks
+* Enhanced verifications
 
 =head1 ACKNOWLEDGEMENTS
 

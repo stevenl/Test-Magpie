@@ -2,14 +2,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 20;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
 use Exception::Tiny;
 use Test::Mocha::Util qw( get_attribute_value );
-use Types::Standard qw( Any ArrayRef HashRef slurpy );
+use Types::Standard qw( Any ArrayRef HashRef Int slurpy );
 
 # setup
 my $mock  = mock;
@@ -108,6 +108,30 @@ subtest 'stub can chain responses' => sub {
     ok $iterator->next == 2;
     ok $iterator->next == 3;
     ok exception { $iterator->next };
+};
+
+subtest 'stub with callback' => sub {
+    my $list = mock;
+
+    my @returns = qw( first second );
+
+    stub($list)->get(Int)->executes(sub {
+        my ($i) = @_;
+        die "index out of bounds" if $i < 0;
+        return $returns[$i];
+    });
+
+    is $list->get(0), 'first', 'returns value';
+    is $list->get(1), 'second';
+    is $list->get(2),  undef, 'no return value specified';
+
+    like exception { $list->get(-1) }, qr/^index out of bounds/,
+        'exception is thrown';
+
+    my $e = exception { stub($list)->get(Int)->executes('not a coderef') };
+    like $e, qr/^executes\(\) must be given a coderef/,
+        'executes() with a non-coderef argument';
+    like $e, qr/stub\.t/, ' and message traces back to this script';
 };
 
 stub($mock)->set(Any)->returns('any');

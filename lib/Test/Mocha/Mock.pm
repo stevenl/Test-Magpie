@@ -28,10 +28,10 @@ sub new {
 }
 
 sub AUTOLOAD {
-    my $self = shift;
+    my ($self, @args) = @_;
     my $method_name = extract_method_name($AUTOLOAD);
 
-    my @invalid_args = grep { Matcher->check($_) } @_;
+    my @invalid_args = grep { Matcher->check($_) } @args;
     croak 'Mock methods may not be called with '
         . 'type constraint arguments: ' . join(', ', @invalid_args)
         unless @invalid_args == 0;
@@ -39,7 +39,7 @@ sub AUTOLOAD {
     # record the method call for verification
     my $method_call = Test::Mocha::MethodCall->new(
         name => $method_name,
-        args => [@_],
+        args => \@args,
     );
 
     my $calls = get_attribute_value($self, 'calls');
@@ -50,7 +50,7 @@ sub AUTOLOAD {
     # find a stub to return a response
     if (defined $stubs->{$method_name}) {
         foreach my $stub ( @{$stubs->{$method_name}} ) {
-            return $stub->execute
+            return $stub->do_next_execution(@args)
                 if $stub->satisfied_by($method_call);
         }
     }

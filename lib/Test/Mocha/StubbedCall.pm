@@ -41,19 +41,31 @@ sub dies {
     # uncoverable pod
     my ($self, $exception) = @_;
 
-    push @{ $self->{executions} }, sub {
-        $exception->throw
-            if blessed($exception) && $exception->can('throw');
+    push @{ $self->{executions} },
+        blessed($exception) && $exception->can('throw')
+          ? sub { $exception->throw }
+          : sub { croak $exception  };
 
-        croak $exception;
-    };
     return $self;
 }
 
-sub execute {
+sub executes {
+    # """Adds a callback response to the end of the executions queue."""
+    # uncoverable pod
+    my ($self, $callback) = @_;
+
+    croak 'executes() must be given a coderef'
+        unless ref($callback) eq 'CODE';
+
+    push @{ $self->{executions} }, $callback;
+
+    return $self;
+}
+
+sub do_next_execution {
     # """Executes the next response."""
     # uncoverable pod
-    my ($self) = @_;
+    my ($self, @args) = @_;
     my $executions = $self->{executions};
 
     # return undef by default
@@ -65,7 +77,7 @@ sub execute {
         ? shift(@$executions)
         : $executions->[0];
 
-    return $execution->();
+    return $execution->(@args);
 }
 
 1;
