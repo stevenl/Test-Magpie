@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 use Test::Fatal;
 use Types::Standard qw( ArrayRef Int slurpy );
 
@@ -49,3 +49,5 @@ $e = exception { inspect($mock)->twice(slurpy Int) };
 like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument';
 like $e, qr/inspect\.t/, ' and message traces back to this script';
+
+is inspect($mock)->DESTROY, undef, 'DESTROY() is not AUTOLOADed';

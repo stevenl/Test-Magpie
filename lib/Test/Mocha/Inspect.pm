@@ -31,4 +31,7 @@ sub AUTOLOAD {
     return grep { $inspect->satisfied_by($_) } @$calls;
 }
 
+# Don't let AUTOLOAD() handle DESTROY()
+sub DESTROY { }
+
 1;

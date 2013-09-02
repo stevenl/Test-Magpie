@@ -57,4 +57,7 @@ sub AUTOLOAD {
     return $stub;
 }
 
+# Don't let AUTOLOAD() handle DESTROY()
+sub DESTROY { }
+
 1;

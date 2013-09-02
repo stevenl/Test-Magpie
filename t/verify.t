@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 36;
+use Test::More tests => 37;
 use Test::Fatal;
 use Test::Builder::Tester;
 use Types::Standard qw( Any ArrayRef slurpy );
@@ -224,3 +224,7 @@ $e = exception { verify($mock)->thrice( slurpy Any) };
 like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument for verify()';
 like $e, qr/verify\.t/, ' and message traces back to this script';
+
+test_out;
+verify($mock)->DESTROY;
+test_test 'DESTROY() is not AUTOLOADed';

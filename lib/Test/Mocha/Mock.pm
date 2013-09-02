@@ -57,6 +57,9 @@ sub AUTOLOAD {
     return;
 }
 
+# Don't let AUTOLOAD() handle DESTROY()
+sub DESTROY { }
+
 sub isa {
     # """
     # Always returns true. It allows the mock object to C<isa()> any class

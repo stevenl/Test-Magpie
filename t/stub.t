@@ -2,18 +2,17 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
 use Exception::Tiny;
 use Test::Mocha::Util qw( get_attribute_value );
-use Types::Standard qw( Any ArrayRef HashRef Int slurpy );
+use Types::Standard   qw( Any ArrayRef HashRef Int slurpy );
 
 # setup
 my $mock  = mock;
-my $calls = get_attribute_value($mock, 'calls');
 my $stubs = get_attribute_value($mock, 'stubs');
 
 # stub() argument checks
@@ -172,3 +171,6 @@ like $e, qr/stub\.t/, ' and message traces back to this script';
 #     like exception { $list->get(-1) }, qr/index out of bounds/,
 #         'argument matcher';
 # };
+
+stub($mock)->DESTROY;
+ok !defined $stubs->{DESTROY}, 'DESTROY() is not AUTOLOADed';
