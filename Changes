@@ -1,5 +1,8 @@
 Revision history for Test-Mocha
 
+0.16    2013-09-04
+        Fix for Perl versions older than 5.014 (s/// operator with /r switch).
+
 0.15    2013-09-02
         Don't let AUTOLOAD() handle DESTROY().
         Added stubbing with callbacks.
@@ -9,7 +12,7 @@ Revision history for Test-Mocha
         Removed Moose and other dependencies.
 
 0.13    2013-08-26
-        Distribution fix
+        Distribution fix (no modules provided)
 
 0.12    2013-08-26
         Added support for using Type::Tiny type constraints as matchers.
