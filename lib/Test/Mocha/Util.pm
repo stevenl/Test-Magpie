@@ -22,7 +22,9 @@ our @EXPORT_OK = qw(
 sub extract_method_name {
     # """Extracts the method name from its fully qualified name."""
     # uncoverable pod
-    return $_[0] =~ s/.*:://r;
+    my ($method_name) = @_;
+    $method_name =~ s/.*:://;
+    return $method_name;
 }
 
 sub get_attribute_value {
