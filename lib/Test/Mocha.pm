@@ -33,19 +33,24 @@ other objects.
 
 We find all sorts of excuses to avoid writing tests for our code. Often it
 seems too hard to isolate the code we want to test from the objects it is
-dependent on. Mocking frameworks are available to help us with this. But it
-still takes too long to set up the mock objects before you can get on with
-testing the actual code in question.
+dependent on. I'm too lazy and impatient to code my own mocks. Mocking
+frameworks can help with this but they still take too long to set up the mock
+objects. Enough setting up! I just want to get on with the actual testing.
 
 Test::Mocha offers a simpler and more intuitive approach. Rather than setting
 up the expected interactions beforehand, you ask questions about interactions
-after the execution. The mocks can be created in almost no time. Yet they are
+after the execution. The mocks can be created in almost no time. Yet they're
 ready to be used out-of-the-box by pretending to be any type you want them to
-be and accepting any method call on them. Explicit stubbing is only required
-when the dependent object is expected to return a response. After executing
-the code under test, you can selectively verify the interactions that you are
-interested in. As you verify behaviour, you focus on external interfaces
-rather than on internal state.
+be and accepting any method call on them.
+
+Explicit stubbing is only required when the dependent object is expected to
+return a specific response. And you can even use argument matchers to skip
+having to enter the exact method arguments for the stub.
+
+After executing the code under test, you can test that your code is interacting
+correctly with its dependent objects. Selectively verify the method calls that
+you are interested in only. As you verify behaviour, you focus on external
+interfaces rather than on internal state.
 
 =cut
 
@@ -67,20 +72,22 @@ our @EXPORT = qw(
     clear
 );
 
-=func mock()
-
-C<mock()> creates a new mock object.
+=func mock
 
     my $mock = mock;
 
-By default, the mock object pretends to be anything you want it to be. Calling
-C<isa()> or C<does()> on the object will always return true.
+C<mock()> creates a new mock object. It's that quick and simple!
+
+The mock object is ready, as-is, to pretend to be anything you want it to be.
+Calling C<isa()> or C<does()> on the object will always return true. This
+is particularly handy when dependent objects are required to satisfy type
+constraint checks with OO frameworks such as L<Moose>.
 
     ok( $mock->isa('AnyClass') );
     ok( $mock->does('AnyRole') );
     ok( $mock->DOES('AnyRole') );
 
-It will also accept any method call on it. By default, any method call will
+It will also accept any method call on it. By default, method calls will
 return C<undef> (in scalar context) or an empty list (in list context).
 
     ok( $mock->can('any_method') );
@@ -99,10 +106,13 @@ sub mock {
     return Test::Mocha::Mock->new(class => $class);
 }
 
-=func stub($mock) -> method(@args) -> returns|dies|executes($response)
+=func stub
 
-C<stub()> is used when you need a method to respond with something other than
-returning C<undef>. You can specify 3 types of responses:
+    stub($mock)->method(@args)->returns|dies|executes($response)
+
+By default, the mock object already acts as a stub that accepts any method
+call and returns C<undef>. However, you can use C<stub()> to tell a method to
+give an alternative response. You can specify 3 types of responses:
 
 =begin :list
 
@@ -150,7 +160,7 @@ L</"ARGUMENT MATCHING"> for a shortcut around this.)
     is( $list->get(1), 'second' );
     is( $list->get(2), undef );
 
-You may chain responses together to provide a series of responses.
+Chain responses together to provide a consecutive series.
 
     stub($iterator)->next
         ->returns(1)->returns(2)->returns(3)->dies('exhuasted');
@@ -179,7 +189,9 @@ sub stub {
     return Test::Mocha::Stub->new(mock => $mock);
 }
 
-=func verify($mock, [%option], [$test_name]) -> method(@args)
+=func verify
+
+    verify($mock, [%option], [$test_name])->method(@args)
 
 C<verify()> is used to test the interactions with the mock object. You can use
 it to verify that the correct methods were called, with the correct set of
@@ -283,17 +295,18 @@ sub verify {
     return Test::Mocha::Verify->new(mock => $mock, %options);
 }
 
-=func inspect($mock) -> method(@args)
+=func inspect
+
+    @method_calls = inspect($mock)->method(@args)
 
 C<inspect()> returns a list of method calls matching the given method call
-specification. It can be useful for debugging failed C<verify()> calls. It may
-also be used in place of a complex C<verify()> call to break it down into
-smaller tests.
-
-    my @method_calls = inspect($warehouse)->remove_inventory(Str, Int);
+specification. It can be useful for debugging failed C<verify()> calls. Or use
+it in place of a complex C<verify()> call to break it down into smaller tests.
 
 Each method call object has a C<name> and an C<args> property, and it
 is C<string> overloaded.
+
+    my ($method_calls) = inspect($warehouse)->remove_inventory(Str, Int);
 
     is( $method_call->name, 'remove_inventory',       'method name' );
     is_deeply( [$method_call->args], ['book', 50],    'method args array' );
@@ -310,7 +323,9 @@ sub inspect {
     return Test::Mocha::Inspect->new(mock => $mock);
 }
 
-=func clear($mock)
+=func clear
+
+    clear($mock)
 
 Clears the method call history of the mock for it to be reused in another test.
 Note that this does not affect the stubbed methods.
@@ -333,16 +348,15 @@ sub clear {
 
 =head1 ARGUMENT MATCHING
 
-Argument matchers may be used with C<stub()>, C<verify()> or C<inspect>.
-They are type constraints that are used to match method arguments. They save
-you from having to specify the exact arguments. This is a powerful feature
-that will save you time when writing your stubs and verifications.
+Argument matchers may be used in place of specifying exact method arguments
+with C<stub()>, C<verify()> or C<inspect>. They will add flexibility and save
+much time in verifications and stubbing.
 
-=head2 Predefined types
+=head2 Pre-defined types
 
-You may use any L<Type::Tiny> type constraint such as those predefined in
-L<Types::Standard>. (Moose type constraints such as L<MooseX::Types::Moose>
-and L<MooseX::Types::Structured> will also work.)
+You may use any of the ready-made types in L<Types::Standard>. (Alternatively,
+Moose types like those in L<MooseX::Types::Moose> and
+L<MooseX::Types::Structured> will also work.)
 
     use Types::Standard qw( Any );
 
@@ -355,9 +369,9 @@ and L<MooseX::Types::Structured> will also work.)
     verify($mock, times => 2)->foo(Defined);
     # prints: ok 1 - foo(Defined) was called 2 time(s)
 
-You may use the normal features of type constraints: parameterized and
-structured types, and type unions, intersections and negations (but there's no
-need to use coercions).
+You may use the normal features of the types: parameterized and structured
+types, and type unions, intersections and negations (but there's no need to
+use coercions).
 
     use Types::Standard qw( Any ArrayRef HashRef Int StrMatch );
 
@@ -371,7 +385,7 @@ need to use coercions).
 
 =head2 Self-defined types
 
-You may also use your own type constraints, defined using L<Type::Utils>.
+You may also use your own types, defined using L<Type::Utils>.
 
     use Type::Utils -all;
 
@@ -384,7 +398,7 @@ You may also use your own type constraints, defined using L<Type::Utils>.
 =head2 Argument slurping
 
 You may use the L<C<slurpy()>|Types::Standard/Structured> function if you
-don't care what are arguments are used. They will just slurp up the remaining
+don't care what arguments are used. They will just slurp up the remaining
 arguments as though they match. Note that empty argument lists are also
 recognised by slurpy types.
 
