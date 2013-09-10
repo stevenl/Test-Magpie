@@ -1,5 +1,8 @@
 Revision history for Test-Mocha
 
+0.17    2013-09-10
+        Fix version dependency for Types::Standard.
+
 0.16    2013-09-04
         Fix for Perl versions older than 5.014 (s/// operator with /r switch).
 
