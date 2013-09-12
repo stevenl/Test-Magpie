@@ -10,7 +10,6 @@ use Scalar::Util qw( blessed );
 our @ISA = qw( Test::Mocha::MethodCall );
 
 # croak() messages should not trace back to Mocha modules
-# to facilitate debugging of user test scripts
 our @CARP_NOT = qw( Test::Mocha::Mock );
 
 sub new {
@@ -39,12 +38,13 @@ sub returns {
 sub dies {
     # """Adds a die response to the end of the executions queue."""
     # uncoverable pod
-    my ($self, $exception) = @_;
+    my ($self, @exception) = @_;
 
     push @{ $self->{executions} },
-        blessed($exception) && $exception->can('throw')
-          ? sub { $exception->throw }
-          : sub { croak $exception  };
+        # check if first arg is a throwable exception
+        blessed($exception[0]) && $exception[0]->can('throw')
+          ? sub { $exception[0]->throw }
+          : sub { croak @exception     };
 
     return $self;
 }

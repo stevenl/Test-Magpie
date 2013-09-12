@@ -41,13 +41,13 @@ subtest 'create a method stub that returns an array' => sub {
 };
 
 subtest 'create a method stub that dies' => sub {
-    stub($mock)->foo->dies('died');
+    stub($mock)->foo->dies( 'error, ', 'stopped' );
 
-    is $stubs->{foo}[0]->as_string, 'foo()',
+    is $stubs->{foo}[0]->as_string, 'foo()';
 
     my $exception = exception { $mock->foo };
-    like $exception, qr/^died at /, 'and stub does die';
-    like $exception, qr/stub\.t/,   'and error traces back to this script';
+    like $exception, qr/^error, stopped at /, 'and stub does die';
+    like $exception, qr/stub\.t/, 'and error traces back to this script';
 };
 
 subtest 'create a method stub that throws exception' => sub {
@@ -56,7 +56,8 @@ subtest 'create a method stub that throws exception' => sub {
             message => 'my exception',
             file => __FILE__,
             line => __LINE__,
-        )
+        ),
+        qw( remaining args are ignored ),
     );
     like exception { $mock->foo },
         qr/^my exception/, 'and the exception is thrown';
