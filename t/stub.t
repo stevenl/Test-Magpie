@@ -115,7 +115,7 @@ subtest 'stub with callback' => sub {
     my @returns = qw( first second );
 
     stub($list)->get(Int)->executes(sub {
-        my ($i) = @_;
+        my ($list, $i) = @_;
         die "index out of bounds" if $i < 0;
         return $returns[$i];
     });

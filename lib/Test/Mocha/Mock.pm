@@ -50,7 +50,7 @@ sub AUTOLOAD {
     # find a stub to return a response
     if (defined $stubs->{$method_name}) {
         foreach my $stub ( @{$stubs->{$method_name}} ) {
-            return $stub->do_next_execution(@args)
+            return $stub->do_next_execution($self, @args)
                 if $stub->satisfied_by($method_call);
         }
     }

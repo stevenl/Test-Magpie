@@ -130,7 +130,7 @@ Specifies that a stub should raise an exception.
     stub($mock)->method(@args)->dies('exception');
     ok( exception { $mock->method(@args) } );
 
-= C<executes(sub{...})>
+= C<executes($coderef)>
 
 Specifies that a stub should execute the given callback. The arguments used in
 the method call are passed on to the callback.
@@ -138,7 +138,7 @@ the method call are passed on to the callback.
     my @returns = qw( first second third );
 
     stub($list)->get(Int)->executes(sub {
-        my ($i) = @_;
+        my ($self, $i) = @_;
         die "index out of bounds" if $i < 0;
         return $returns[$i];
     });
