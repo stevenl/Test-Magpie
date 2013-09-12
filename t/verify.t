@@ -5,7 +5,7 @@ use warnings;
 use Test::More tests => 37;
 use Test::Fatal;
 use Test::Builder::Tester;
-use Types::Standard qw( Any ArrayRef slurpy );
+use Types::Standard qw( Any slurpy );
 
 BEGIN { use_ok 'Test::Mocha' }
 
@@ -209,18 +209,18 @@ test_out 'ok 1 - thrice(Any) was called 3 time(s)';
 verify($mock, times => 3)->thrice(Any);
 test_test 'verify() accepts type constraints';
 
-my $e = exception { verify($mock)->thrice( slurpy(ArrayRef), 1 ) };
+my $e = exception { verify($mock)->thrice(SlurpyArray, 1) };
 like $e, qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint';
 like $e, qr/verify\.t/, ' and message traces back to this script';
 
 # to complete test coverage - once() has no arguments
-$e = exception { verify($mock)->once( slurpy(ArrayRef), 1 ) };
+$e = exception { verify($mock)->once(SlurpyArray, 1) };
 like $e, qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint';
 like $e, qr/verify\.t/, ' and message traces back to this script';
 
-$e = exception { verify($mock)->thrice( slurpy Any) };
+$e = exception { verify($mock)->thrice(slurpy Any) };
 like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument for verify()';
 like $e, qr/verify\.t/, ' and message traces back to this script';

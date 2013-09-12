@@ -4,7 +4,7 @@ use warnings;
 
 use Test::More tests => 16;
 use Test::Fatal;
-use Types::Standard qw( ArrayRef Int slurpy );
+use Types::Standard qw( Int slurpy );
 
 BEGIN { use_ok 'Test::Mocha' }
 
@@ -37,10 +37,10 @@ is $thrice[2], 'thrice(3)';
 # ----------------------
 # inspect() with type constraint arguments
 
-@thrice = inspect($mock)->thrice(slurpy ArrayRef);
+@thrice = inspect($mock)->thrice(SlurpyArray);
 is @thrice, 3, 'inspect() works with slurpy argument matcher';
 
-my $e = exception { inspect($mock)->twice(slurpy ArrayRef, 1) };
+my $e = exception { inspect($mock)->twice(SlurpyArray, 1) };
 like $e, qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint';
 like $e, qr/inspect\.t/, ' and message traces back to this script';

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 18;
 use Test::Builder::Tester;
 use Test::Fatal;
 
@@ -79,27 +79,19 @@ test_out 'ok 1 - bar({ slurpy: HashRef }) was called 1 time(s)';
 verify($mock)->bar( slurpy HashRef );
 test_test 'slurpy HashRef matches no arguments';
 
-# -----------------------
-# undef edge cases
-#
-# These tests are invalid because they are inconsistent with Type::Params and
-# they are counter-intuitive.
-#
-# clear($mock);
-# $mock->set();
-#
-# test_out 'ok 1 - set(Defined) was called 0 time(s)';
-# verify($mock, times => 0)->set(Defined);
-# test_test 'Defined does not match undef';
-#
-# test_out 'ok 1 - set(Any) was called 1 time(s)';
-# verify($mock)->set(Any);
-# test_test 'Any matches undef';
-#
-# test_out 'ok 1 - set(~Int) was called 1 time(s)';
-# verify($mock)->set(~Int);
-# test_test 'negated type matches undef';
-#
-# test_out 'ok 1 - set({ slurpy: ArrayRef }) was called 1 time(s)';
-# verify($mock)->set( slurpy ArrayRef );
-# test_test 'slurpy ArrayRef[Any] matches undef';
+# custom slurpy types
+test_out 'ok 1 - set({ slurpy: ArrayRef }) was called 5 time(s)';
+verify($mock, times => 5)->set( SlurpyArray );
+test_test 'SlurpyArray works';
+
+test_out 'ok 1 - set({ slurpy: HashRef }) was called 2 time(s)';
+verify($mock, times => 2)->set( SlurpyHash );
+test_test 'SlurpyHash works';
+
+test_out 'ok 1 - bar({ slurpy: ArrayRef }) was called 1 time(s)';
+verify($mock)->bar( SlurpyArray );
+test_test 'SlurpyArray matches no arguments';
+
+test_out 'ok 1 - bar({ slurpy: HashRef }) was called 1 time(s)';
+verify($mock)->bar( SlurpyHash );
+test_test 'SlurpyHash matches no arguments';

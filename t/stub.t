@@ -9,7 +9,7 @@ BEGIN { use_ok 'Test::Mocha' }
 
 use Exception::Tiny;
 use Test::Mocha::Util qw( get_attribute_value );
-use Types::Standard   qw( Any ArrayRef HashRef Int slurpy );
+use Types::Standard   qw( Any Int slurpy );
 
 # setup
 my $mock  = mock;
@@ -143,12 +143,12 @@ is $mock->set(1), 'any', 'stub() accepts type constraints';
 # ----------------------
 # stub() with slurpy type constraint
 
-my $stub = stub($mock)->set( slurpy ArrayRef );
+my $stub = stub($mock)->set(SlurpyArray);
 is $stub, 'set({ slurpy: ArrayRef })', 'stub() accepts slurpy ArrayRef';
-$stub = stub($mock)->set( slurpy HashRef );
+$stub = stub($mock)->set(SlurpyHash);
 is $stub, 'set({ slurpy: HashRef })', 'stub() accepts slurpy HashRef';
 
-my $e = exception { stub($mock)->set( slurpy(ArrayRef), 1 ) };
+my $e = exception { stub($mock)->set(SlurpyArray, 1) };
 like $e, qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint for stub()';
 like $e, qr/stub\.t/, ' and message traces back to this script';
@@ -157,24 +157,6 @@ $e = exception { stub($mock)->set(slurpy Any) };
 like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument for stub()';
 like $e, qr/stub\.t/, ' and message traces back to this script';
-
-# subtest 'argument matching' => sub {
-#     my $list = mock;
-#     stub($list)->get(0)->returns('first');
-#     stub($list)->get(1)->returns('second');
-#     stub($list)->get()->dies('no index given');
-#
-#     ok ! $list->set(0, '1st'), 'no such method';
-#     ok ! $list->get(0, 1),     'extra args';
-#
-#     is $list->get(0), 'first', 'exact match';
-#     is $list->get(1), 'second';
-#     like exception { $list->get() }, qr/^no index given/, 'no args';
-#
-#     stub($list)->get(anything)->dies('index out of bounds');
-#     like exception { $list->get(-1) }, qr/index out of bounds/,
-#         'argument matcher';
-# };
 
 stub($mock)->DESTROY;
 ok !defined $stubs->{DESTROY}, 'DESTROY() is not AUTOLOADed';
