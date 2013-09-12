@@ -5,6 +5,11 @@ use warnings;
 use Test::More tests => 10;
 use Test::Builder::Tester;
 use Test::Fatal;
+use Test::Requires qw(
+    Moose::Util::TypeConstraints
+    MooseX::Types::Moose
+    MooseX::Types::Structured
+);
 
 use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw( Any ArrayRef Int Str );
@@ -34,6 +39,12 @@ test_out 'ok 1 - set(Int) was called 1 time(s)';
 verify($mock)->set(Int);
 test_test 'verify() accepts type constraints';
 
+my $positive_int = subtype 'PositiveInt', as Int, where { $_ > 0 };
+test_out 'ok 1 - set(PositiveInt, Str) was called 1 time(s)';
+verify($mock)->set($positive_int, Str);
+test_test 'self-defined type constraint works';
+
+
 test_out 'ok 1 - set(ArrayRef[Str]) was called 2 time(s)';
 verify($mock, times => 2)->set( ArrayRef[Str] );
 test_test 'parameterized type works';
@@ -43,11 +54,7 @@ verify($mock, times => 3)->set( ArrayRef | Int );
 test_test 'type union works';
 
 
-test_out 'ok 1 - set(MooseX::Types::Structured::Tuple[Str,Str]) was called 1 time(s)';
+test_out
+'ok 1 - set(MooseX::Types::Structured::Tuple[Str,Str]) was called 1 time(s)';
 verify($mock)->set( Tuple[Str,Str] );
 test_test 'structured type works';
-
-my $positive_int = subtype 'PositiveInt', as Int, where { $_ > 0 };
-test_out 'ok 1 - set(PositiveInt, Str) was called 1 time(s)';
-verify($mock)->set($positive_int, Str);
-test_test 'self-defined type constraint works';
