@@ -28,11 +28,11 @@ sub returns {
     # uncoverable pod
     my ($self, @return_values) = @_;
 
-    push @{ $self->{executions} }, sub {
-        return wantarray || @return_values > 1
-            ? @return_values
-            : $return_values[0];
-    };
+    push @{ $self->{executions} },
+        @return_values == 1
+          ? sub { $return_values[0] }
+          : sub { @return_values    };
+
     return $self;
 }
 

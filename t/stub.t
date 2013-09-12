@@ -25,21 +25,24 @@ like exception { stub('string') },
     'stub() with non-mock argument throws exception';
 
 subtest 'create a method stub that returns a scalar' => sub {
-    stub($mock)->foo->returns(1);
+    stub($mock)->foo->returns(4);
+
     is $stubs->{foo}[0]->as_string, 'foo()';
-    is $mock->foo, 1, 'and stub returns the scalar';
+    is $mock->foo, 4,               'and stub returns the scalar';
+    is_deeply [ $mock->foo ], [4],  'or the single-element in a list';
 };
 
 subtest 'create a method stub that returns an array' => sub {
     stub($mock)->foo->returns(1, 2, 3);
-    is $stubs->{foo}[0]->as_string, 'foo()';
 
+    is $stubs->{foo}[0]->as_string,      'foo()';
     is_deeply [ $mock->foo ], [1, 2, 3], 'and stub returns the array';
     is $mock->foo, 3,                    'or the array size in scalar context';
 };
 
 subtest 'create a method stub that dies' => sub {
     stub($mock)->foo->dies('died');
+
     is $stubs->{foo}[0]->as_string, 'foo()',
 
     my $exception = exception { $mock->foo };
