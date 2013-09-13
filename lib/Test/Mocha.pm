@@ -142,8 +142,8 @@ Specifies that a stub should raise an exception.
 
 = C<executes($coderef)>
 
-Specifies that a stub should execute the given callback. The arguments used in
-the method call are passed on to the callback.
+Specifies that a stub should execute the given callback. The arguments used
+in the method call are passed on to the callback.
 
     my @returns = qw( first second third );
 
@@ -218,8 +218,8 @@ An option may be specified to constrain the test.
 
 = C<times>
 
-Specifies the number of times the given method is expected to be called. The
-default is 1 if no other option is specified.
+Specifies the number of times the given method is expected to be called.
+The default is 1 if no other option is specified.
 
     verify( $mock, times => 3 )->method(@args)
     # print: ok 1 - method(@args) was called 3 time(s)
@@ -242,8 +242,8 @@ called.
 
 = C<between>
 
-Specifies the minimum and maximum number of times the given method is expected
-to be called.
+Specifies the minimum and maximum number of times the given method is
+expected to be called.
 
     verify( $mock, between => [3, 5] )->method(@args)
     # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
@@ -430,8 +430,8 @@ they will match empty argument lists.
 This module is a fork from L<Test::Magpie> originally written by Oliver
 Charles (CYCLES).
 
-It is inspired by the popular L<Mockito|http://code.google.com/p/mockito/> for
-Java and Python by Szczepan Faber.
+It is inspired by the popular L<Mockito|http://code.google.com/p/mockito/>
+for Java and Python by Szczepan Faber.
 
 =head1 SEE ALSO
 
