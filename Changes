@@ -1,7 +1,14 @@
 Revision history for Test-Mocha
 
+0.18    2013-09-13
+        Fix tests for Perl versions older than 5.014 (operator precedence for
+        bitwise '&').
+        Make matcher_moose.t optional using Test::Requires.
+        Stub executes() should be given mock $self as its first argument.
+
 0.17    2013-09-10
-        Fix version dependency for Types::Standard.
+        Set version dependency for Types::Standard to 0.008 when InstanceOf
+        was introduced.
 
 0.16    2013-09-04
         Fix for Perl versions older than 5.014 (s/// operator with /r switch).
