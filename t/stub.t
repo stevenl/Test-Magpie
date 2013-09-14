@@ -7,7 +7,6 @@ use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Exception::Tiny;
 use Test::Mocha::Util qw( get_attribute_value );
 use Types::Standard   qw( Any Int slurpy );
 
@@ -50,13 +49,17 @@ subtest 'create a method stub that dies' => sub {
     like $exception, qr/stub\.t/, 'and error traces back to this script';
 };
 
+{
+    package My::Throwable;
+    sub new {
+        my ($class, $message) = @_;
+        return bless { message => $message }, $class;
+    }
+    sub throw { die $_[0]->{message} }
+}
 subtest 'create a method stub that throws exception' => sub {
     stub($mock)->foo->dies(
-        Exception::Tiny->new(
-            message => 'my exception',
-            file => __FILE__,
-            line => __LINE__,
-        ),
+        My::Throwable->new('my exception'),
         qw( remaining args are ignored ),
     );
     like exception { $mock->foo },
@@ -64,13 +67,13 @@ subtest 'create a method stub that throws exception' => sub {
 };
 
 {
-    package NonThrowable;
+    package My::NonThrowable;
     use overload '""' => \&message;
     sub new { bless [], $_[0] }
     sub message {'died'}
 }
 subtest 'create stub dies with a non-exception object' => sub {
-    stub($mock)->foo->dies( NonThrowable->new );
+    stub($mock)->foo->dies( My::NonThrowable->new );
     like exception { $mock->foo }, qr/^died/, 'and stub does die';
 };
 
