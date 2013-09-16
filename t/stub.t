@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 21;
+use Test::More tests => 22;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -24,27 +24,35 @@ like exception { stub('string') },
     'stub() with non-mock argument throws exception';
 
 subtest 'create a method stub that returns a scalar' => sub {
-    stub($mock)->foo->returns(4);
+    stub($mock)->foo(1)->returns(4);
 
-    is $stubs->{foo}[0]->as_string, 'foo()';
-    is $mock->foo, 4,               'and stub returns the scalar';
-    is_deeply [ $mock->foo ], [4],  'or the single-element in a list';
+    is $stubs->{foo}[0]->as_string,   'foo(1)';
+    is $mock->foo(1), 4,              'and stub returns the scalar';
+    is_deeply [ $mock->foo(1) ], [4], 'or the single-element in a list';
 };
 
 subtest 'create a method stub that returns an array' => sub {
-    stub($mock)->foo->returns(1, 2, 3);
+    stub($mock)->foo(2)->returns(1, 2, 3);
 
-    is $stubs->{foo}[0]->as_string,      'foo()';
-    is_deeply [ $mock->foo ], [1, 2, 3], 'and stub returns the array';
-    is $mock->foo, 3,                    'or the array size in scalar context';
+    is $stubs->{foo}[0]->as_string,         'foo(2)';
+    is_deeply [ $mock->foo(2) ], [1, 2, 3], 'and stub returns the array';
+    is $mock->foo(2), 3,                'or the array size in scalar context';
+};
+
+subtest 'create a method stub that returns nothing' => sub {
+    stub($mock)->foo(3)->returns;
+
+    is $stubs->{foo}[0]->as_string,     'foo(3)';
+    is $mock->foo(3), undef,            'and stub returns undef';
+    is_deeply [ $mock->foo(3) ], [ ],   'or an empty list';
 };
 
 subtest 'create a method stub that dies' => sub {
-    stub($mock)->foo->dies( 'error, ', 'stopped' );
+    stub($mock)->foo(4)->dies( 'error, ', 'stopped' );
 
-    is $stubs->{foo}[0]->as_string, 'foo()';
+    is $stubs->{foo}[0]->as_string, 'foo(4)';
 
-    my $exception = exception { $mock->foo };
+    my $exception = exception { $mock->foo(4) };
     like $exception, qr/^error, stopped at /, 'and stub does die';
     like $exception, qr/stub\.t/, 'and error traces back to this script';
 };
@@ -58,11 +66,11 @@ subtest 'create a method stub that dies' => sub {
     sub throw { die $_[0]->{message} }
 }
 subtest 'create a method stub that throws exception' => sub {
-    stub($mock)->foo->dies(
+    stub($mock)->foo(5)->dies(
         My::Throwable->new('my exception'),
         qw( remaining args are ignored ),
     );
-    like exception { $mock->foo },
+    like exception { $mock->foo(5) },
         qr/^my exception/, 'and the exception is thrown';
 };
 
@@ -73,13 +81,15 @@ subtest 'create a method stub that throws exception' => sub {
     sub message {'died'}
 }
 subtest 'create stub dies with a non-exception object' => sub {
-    stub($mock)->foo->dies( My::NonThrowable->new );
-    like exception { $mock->foo }, qr/^died/, 'and stub does die';
+    stub($mock)->foo(6)->dies( My::NonThrowable->new );
+    like exception { $mock->foo(6) }, qr/^died/, 'and stub does die';
 };
 
 subtest 'create a method stub with no specified response' => sub {
-    stub($mock)->foo;
-    is $mock->foo, undef, 'and stub returns undef';
+    stub($mock)->foo(7);
+    is $stubs->{foo}[0]->as_string,   'foo(7)';
+    is $mock->foo(7), undef,          'and stub returns undef';
+    is_deeply [ $mock->foo(7) ], [ ], 'or an empty list';
 };
 
 subtest 'stub applies to the exact name and arguments specified' => sub {
