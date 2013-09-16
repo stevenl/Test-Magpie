@@ -69,6 +69,7 @@ our @EXPORT = qw(
     stub
     verify
     inspect
+    inspect_all
     clear
     SlurpyArray
     SlurpyHash
@@ -331,6 +332,24 @@ sub inspect {
         unless defined $mock && MockType->check($mock);
 
     return Test::Mocha::Inspect->new(mock => $mock);
+}
+
+=func inspect_all
+
+    @all_method_calls = inspect_all($mock)
+
+C<inspect_all()> returns a list containing all methods called on the mock
+object. This is mainly used for debugging.
+
+=cut
+
+sub inspect_all {
+    my ($mock) = @_;
+
+    croak 'inspect_all() must be given a mock object'
+        unless defined $mock && MockType->check($mock);
+
+    return @{ $mock->{calls} };
 }
 
 =func clear

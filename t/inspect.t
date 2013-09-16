@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 16;
+use Test::More tests => 14;
 use Test::Fatal;
 use Types::Standard qw( Int slurpy );
 
@@ -30,9 +30,8 @@ is $twice[0], 'twice(1)', ' and method call stringifies';
 
 my @thrice = inspect($mock)->thrice(Int);
 is @thrice, 3, 'inspect() works with argument matcher';
-is $thrice[0], 'thrice(1)', ' and returns calls in the right order';
-is $thrice[1], 'thrice(2)';
-is $thrice[2], 'thrice(3)';
+is_deeply \@thrice, [qw( thrice(1) thrice(2) thrice(3) )],
+    ' and returns calls in the right order';
 
 # ----------------------
 # inspect() with type constraint arguments

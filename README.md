@@ -219,6 +219,13 @@ is `string` overloaded.
     is_deeply( [$method_call->args], ['book', 50],    'method args array' );
     is( $method_call, 'remove_inventory("book", 50)', 'method as string' );
 
+## inspect\_all
+
+    @all_method_calls = inspect_all($mock)
+
+`inspect_all()` returns a list containing all methods called on the mock
+object. This is mainly used for debugging.
+
 ## clear
 
     clear($mock)
