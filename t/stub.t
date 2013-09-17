@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 23;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -54,6 +54,16 @@ subtest 'create a method stub that dies' => sub {
 
     my $exception = exception { $mock->foo(4) };
     like $exception, qr/^error, stopped at /, 'and stub does die';
+    like $exception, qr/stub\.t/, 'and error traces back to this script';
+};
+
+subtest 'create a method stub that dies with no arguments' => sub {
+    stub($mock)->foo('4a')->dies();
+
+    is $stubs->{foo}[0]->as_string, 'foo("4a")';
+
+    my $exception = exception { $mock->foo('4a') };
+    like $exception, qr/^ at /,   'and stub does die';
     like $exception, qr/stub\.t/, 'and error traces back to this script';
 };
 
