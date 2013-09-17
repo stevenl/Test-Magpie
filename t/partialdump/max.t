@@ -14,11 +14,8 @@ BEGIN { use_ok CLASS }
 
 my @list = 1 .. 10;
 
-my $d = CLASS->new;
-$d->{pairs} = 0;
-$d->{max_elements} = undef;
+my $d = CLASS->new( pairs => 0, max_elements => undef, max_length => undef );
 
-$d->{max_length} = undef;
 is( $d->dump(@list), '1, 2, 3, 4, 5, 6, 7, 8, 9, 10', 'max_length undefined');
 
 $d->{max_length} = 100;
@@ -74,9 +71,8 @@ $d->{pairs} = 1;
 # -----------------
 # max_depth
 
-$d = CLASS->new;
+$d = CLASS->new( max_depth => 10 );
 
-$d->{max_depth} = 10;
 is( $d->dump( [ { foo => ["bar"] } ] ),
     '[ { foo: [ "bar" ] } ]', 'max_depth high' );
 

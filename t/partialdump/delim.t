@@ -3,20 +3,16 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 3;
 
 use constant CLASS => 'Test::Mocha::PartialDump';
 
 BEGIN { use_ok CLASS }
 
-my $d = new_ok CLASS;
-
-$d->{pairs} = 0;
-$d->{list_delim} = ",";
+my $d = CLASS->new( pairs => 0, list_delim => ',' );
 
 is( $d->dump("foo", "bar"), '"foo","bar"', "list_delim" );
 
-$d->{pairs} = 1;
-$d->{pair_delim} = "=>";
+$d = CLASS->new( pairs => 1, pair_delim => '=>' );
 
 is( $d->dump("foo" => "bar"), 'foo=>"bar"', "pair_delim" );

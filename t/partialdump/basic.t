@@ -1,19 +1,24 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 11;
 
-use ok 'Test::Mocha::PartialDump';
+BEGIN { use_ok 'Test::Mocha::PartialDump' }
 
-my $d = Test::Mocha::PartialDump->new;
+my $d = new_ok 'Test::Mocha::PartialDump';
 
 is( $d->dump("foo"), '"foo"', "simple value" );
 
+is( $d->dump(undef), "undef", "undef" );
+
 is( $d->dump("foo" => "bar"), 'foo: "bar"', "named params" );
 
-is( $d->dump( foo => "bar", gorch => [ 1, "bah" ] ), 'foo: "bar", gorch: [ 1, "bah" ]', "recursion" );
+is( $d->dump( \"foo" => "bar" ), '\\"foo", "bar"', "not named pairs" );
+
+is( $d->dump( foo => "bar", gorch => [ 1, "bah" ] ),
+    'foo: "bar", gorch: [ 1, "bah" ]', "recursion" );
 
 is( $d->dump("foo\nbar"), '"foo\nbar"', "newline" );
 
