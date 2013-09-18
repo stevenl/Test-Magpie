@@ -1,5 +1,10 @@
 Revision history for Test-Mocha
 
+0.19    2013-09-18
+        Add inspect_all() function.
+        Remove Exception::Tiny test dependency.
+        Fix returns() and dies() when no arguments.
+
 0.18    2013-09-13
         Fix tests for Perl versions older than 5.014 (operator precedence for
         bitwise '&').
