@@ -6,39 +6,6 @@ use warnings;
 use Carp ();
 use Scalar::Util qw(looks_like_number reftype blessed);
 
-use Sub::Exporter -setup => {
-    collectors => {
-        override_carp => sub {
-            no warnings 'redefine';
-            require Carp::Heavy;
-            *Carp::caller_info = \&replacement_caller_info;
-        },
-    },
-};
-
-# a replacement for Carp::caller_info
-sub replacement_caller_info {
-    my $i = shift(@_) + 1;
-
-    package DB;
-    my %call_info;
-    @call_info{
-    qw(pack file line sub has_args wantarray evaltext is_require)
-    } = caller($i);
-
-    return unless (defined $call_info{pack});
-
-    my $sub_name = Carp::get_subname(\%call_info);
-
-    if ($call_info{has_args}) {
-        $sub_name .= '(' . Test::Mocha::PartialDump::dump(@DB::args) . ')';
-    }
-
-    $call_info{sub_name} = $sub_name;
-
-    return wantarray() ? %call_info : \%call_info;
-}
-
 sub new {
     my ( $class, %args ) = @_;
 
@@ -53,62 +20,6 @@ sub new {
     $args{ pair_delim   } = ': ' unless defined $args{ pair_delim   };
 
     return bless \%args, $class;
-}
-
-sub warn_str {
-    my ( $self, @args ) = @_;
-
-    return $self->_join(
-        map {
-            !ref($_) && defined($_)
-            ? $_
-            : $self->dump($_)
-        } @args
-    );
-}
-
-sub warn {
-    Carp::carp(warn_str(@_));
-}
-
-foreach my $f ( qw(carp croak confess cluck) ) {
-    no warnings 'redefine';
-    eval "sub $f {
-        local \$Carp::CarpLevel = \$Carp::CarpLevel + 1;
-        Carp::$f(warn_str(\@_));
-    }";
-}
-
-sub show {
-    my ( $self, @args ) = @_;
-
-    $self->warn(@args);
-
-    return ( @args == 1 ? $args[0] : @args );
-}
-
-sub show_scalar ($) { goto \&show }
-
-sub _join {
-    my ( $self, @strings ) = @_;
-
-    my $ret = "";
-
-    if ( @strings ) {
-        my $sep = $, || $" || " ";
-        my $re = qr/(?: \s| \Q$sep\E )$/x;
-
-        my $last = pop @strings;
-
-        foreach my $string ( @strings ) {
-            $ret .= $string;
-            $ret .= $sep unless $string =~ $re;
-        }
-
-        $ret .= $last;
-    }
-
-    return $ret;
 }
 
 sub dump {
@@ -270,6 +181,12 @@ sub format_object {
     }
 }
 
+sub format_number {
+    # uncoverable pod
+    my ( $self, $depth, $value ) = @_;
+    return "$value";
+}
+
 sub format_string {
     my ( $self, $depth, $str ) =@_;
     # FIXME use String::Escape ?
@@ -281,20 +198,9 @@ sub format_string {
     # reformat nonprintables
     $str =~ s/(\P{IsPrint})/"\\x{" . sprintf("%x", ord($1)) . "}"/ge;
 
-    $self->quote($str);
-}
-
-sub quote {
-    my ( $self, $str ) = @_;
-
     qq{"$str"};
 }
 
 sub format_undef { "undef" }
-
-sub format_number {
-    my ( $self, $depth, $value ) = @_;
-    return "$value";
-}
 
 1;
