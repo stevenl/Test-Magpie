@@ -20,7 +20,7 @@ $mock->set(-1, 'negative');
 $mock->set( [qw( foo bar )] );
 
 test_out
-qr/ok 1 - set\(StrMatch\[\(\?.*\:\^foo\)\]\) was called 2 time\(s\)\s/;
+qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\) was called 2 time\(s\)\s?/;
 verify($mock, times => 2)->set( StrMatch[qr/^foo/] );
 test_test 'parameterized type works';
 
@@ -33,7 +33,7 @@ verify($mock, times => 2)->set( Int | Str );
 test_test 'type union works';
 
 test_out
-qr/ok 1 - set\(StrMatch\[\(\?.*\:\^foo\)\]\&StrMatch\[\(\?.*\:bar\$\)\]\) was called 1 time\(s\)\s/;
+qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\&StrMatch\[\(\?.*:bar\$\)\]\) was called 1 time\(s\)\s?/;
 verify($mock)->set( (StrMatch[qr/^foo/]) & (StrMatch[qr/bar$/]) );
 test_test 'type intersection works';
 
