@@ -46,13 +46,21 @@ verify($mock)->once;
 test_test 'simple verify() that passes';
 
 $test_name = 'one() was called 1 time(s)';
-$line = __LINE__ + 10;
+$line = __LINE__ + 18;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
-#          got: 0
-#     expected: 1
+# Error: unexpected number of calls to 'one()'
+#          got: 0 time(s)
+#     expected: 1 time(s)
+# Complete method call history (most recent call last):
+#     once()
+#     twice()
+#     twice()
+#     thrice(1)
+#     thrice(2)
+#     thrice(3)
 ERR
 test_err $err;
 {
@@ -73,13 +81,21 @@ verify($mock, times => 2)->twice();
 test_test "verify() with 'times' option that passes";
 
 $test_name = 'twice() was called 1 time(s)';
-$line = __LINE__ + 10;
+$line = __LINE__ + 18;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
-#          got: 2
-#     expected: 1
+# Error: unexpected number of calls to 'twice()'
+#          got: 2 time(s)
+#     expected: 1 time(s)
+# Complete method call history (most recent call last):
+#     once()
+#     twice()
+#     twice()
+#     thrice(1)
+#     thrice(2)
+#     thrice(3)
 ERR
 test_err $err;
 {
@@ -99,14 +115,21 @@ verify($mock, at_least => 1)->once;
 test_test "verify() with 'at_least' option that passes";
 
 $test_name = 'once() was called at least 2 time(s)';
-$line = __LINE__ + 11;
+$line = __LINE__ + 18;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
-#     '1'
-#         >=
-#     '2'
+# Error: unexpected number of calls to 'once()'
+#          got: 1 time(s)
+#     expected: at least 2 time(s)
+# Complete method call history (most recent call last):
+#     once()
+#     twice()
+#     twice()
+#     thrice(1)
+#     thrice(2)
+#     thrice(3)
 ERR
 test_err $err;
 {
@@ -126,14 +149,21 @@ verify($mock, at_most => 2)->twice;
 test_test "verify() with 'at_most' option that passes";
 
 $test_name = 'twice() was called at most 1 time(s)';
-$line = __LINE__ + 11;
+$line = __LINE__ + 18;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
-#     '2'
-#         <=
-#     '1'
+# Error: unexpected number of calls to 'twice()'
+#          got: 2 time(s)
+#     expected: at most 1 time(s)
+# Complete method call history (most recent call last):
+#     once()
+#     twice()
+#     twice()
+#     thrice(1)
+#     thrice(2)
+#     thrice(3)
 ERR
 test_err $err;
 {
@@ -156,14 +186,50 @@ test_out 'ok 1 - twice() was called between 2 and 3 time(s)';
 verify($mock, between => [2, 3])->twice;
 test_test "verify() with 'between' option that passes (upper boundary)";
 
-test_out 'not ok 1 - twice() was called between 0 and 1 time(s)';
-test_fail +1;
-verify($mock, between => [0, 1])->twice;
+$test_name = 'twice() was called between 0 and 1 time(s)';
+$line = __LINE__ + 18;
+test_out "not ok 1 - $test_name";
+chomp($err = <<ERR);
+#   Failed test '$test_name'
+#   at $file line $line.
+# Error: unexpected number of calls to 'twice()'
+#          got: 2 time(s)
+#     expected: between 0 and 1 time(s)
+# Complete method call history (most recent call last):
+#     once()
+#     twice()
+#     twice()
+#     thrice(1)
+#     thrice(2)
+#     thrice(3)
+ERR
+test_err $err;
+{
+    verify($mock, between => [0, 1])->twice;
+}
 test_test "verify() with 'between' option that fails (lower boundary)";
 
-test_out 'not ok 1 - twice() was called between 3 and 4 time(s)';
-test_fail +1;
-verify($mock, between => [3, 4])->twice;
+$test_name = 'twice() was called between 3 and 4 time(s)';
+$line = __LINE__ + 18;
+test_out "not ok 1 - $test_name";
+chomp($err = <<ERR);
+#   Failed test '$test_name'
+#   at $file line $line.
+# Error: unexpected number of calls to 'twice()'
+#          got: 2 time(s)
+#     expected: between 3 and 4 time(s)
+# Complete method call history (most recent call last):
+#     once()
+#     twice()
+#     twice()
+#     thrice(1)
+#     thrice(2)
+#     thrice(3)
+ERR
+test_err $err;
+{
+    verify($mock, between => [3, 4])->twice;
+}
 test_test "verify() with 'between' option that fails (upper boundary)";
 
 like exception { verify($mock, between => 1)->twice },
