@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 37;
+use Test::More tests => 40;
 use Test::Fatal;
 use Test::Builder::Tester;
 use Types::Standard qw( Any slurpy );
@@ -290,6 +290,38 @@ $e = exception { verify($mock)->thrice(slurpy Any) };
 like $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument for verify()';
 like $e, qr/verify\.t/, ' and message traces back to this script';
+
+# -----------------
+# conditional verifications - verify that failure diagnostics are not output
+
+$test_name = 'method_not_called() was called 1 time(s)';
+$line = __LINE__ + 9;
+chomp(my $out = <<OUT);
+not ok 1 - $test_name # TODO should fail
+#   Failed (TODO) test '$test_name'
+#   at $file line $line.
+OUT
+test_out $out;
+TODO: {
+    local $TODO = "should fail";
+    verify($mock)->method_not_called;
+}
+test_test 'verify() in a TODO block';
+
+$test_name = "a verification in skip block";
+test_out "ok 1 # skip $test_name";
+SKIP: {
+    skip $test_name, 1;
+    verify($mock)->method_not_called;
+}
+test_test 'verify() in a SKIP block';
+
+test_out "not ok 1 # TODO & SKIP $test_name";
+TODO: {
+    todo_skip $test_name, 1;
+    verify($mock)->method_not_called;
+}
+test_test 'verify() in a TODO_SKIP block';
 
 test_out;
 verify($mock)->DESTROY;

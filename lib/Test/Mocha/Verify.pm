@@ -48,6 +48,8 @@ my $ok = sub {
 my $diag = sub {
     my ($method_call, $got, $exp, $all_calls) = @_;
 
+    return if $TB->in_todo;
+
     my $out
       = "Error: unexpected number of calls to '$method_call'\n"
       . "         got: $got time(s)\n"
