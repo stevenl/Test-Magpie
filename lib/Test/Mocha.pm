@@ -60,7 +60,7 @@ use Test::Mocha::Inspect;
 use Test::Mocha::Mock;
 use Test::Mocha::Stub;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( get_attribute_value );
+use Test::Mocha::Util qw( getattr );
 use Test::Mocha::Verify;
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
@@ -374,7 +374,7 @@ sub clear {
     croak 'clear() must be given a mock object'
         unless defined $mock && MockType->check($mock);
 
-    my $calls = get_attribute_value($mock, 'calls');
+    my $calls = getattr($mock, 'calls');
     @$calls = ();
 
     return;

@@ -7,7 +7,7 @@ use warnings;
 use Carp qw( croak );
 use Test::Mocha::StubbedCall;
 use Test::Mocha::Types  qw( Mock Slurpy );
-use Test::Mocha::Util   qw( extract_method_name get_attribute_value );
+use Test::Mocha::Util   qw( extract_method_name getattr );
 use Types::Standard     qw( ArrayRef HashRef );
 
 our $AUTOLOAD;
@@ -47,8 +47,8 @@ sub AUTOLOAD {
         args => \@args,
     );
 
-    my $mock  = get_attribute_value($self, 'mock');
-    my $stubs = get_attribute_value($mock, 'stubs');
+    my $mock  = getattr($self, 'mock');
+    my $stubs = getattr($mock, 'stubs');
 
     # add new stub to front of queue so that it takes precedence
     # over existing stubs that would satisfy the same invocations

@@ -14,7 +14,7 @@ use Scalar::Util qw( blessed looks_like_number refaddr );
 
 our @EXPORT_OK = qw(
     extract_method_name
-    get_attribute_value
+    getattr
     has_caller_package
     match
 );
@@ -27,7 +27,7 @@ sub extract_method_name {
     return $method_name;
 }
 
-sub get_attribute_value {
+sub getattr {
     # """Safely get the attribute value of an object."""
     # uncoverable pod
     my ($object, $attribute) = @_;

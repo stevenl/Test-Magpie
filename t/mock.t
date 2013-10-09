@@ -8,7 +8,7 @@ use Test::Fatal;
 BEGIN { use_ok 'Test::Mocha' }
 
 use Scalar::Util      qw( blessed );
-use Test::Mocha::Util qw( get_attribute_value );
+use Test::Mocha::Util qw( getattr );
 use Types::Standard   qw( Int );
 
 # ----------------------
@@ -24,7 +24,7 @@ ok $mock->DOES('Baz'), 'mock can DOES(anything)';
 
 # ----------------------
 # mocks accept any methods call on them
-my $calls   = get_attribute_value($mock, 'calls');
+my $calls   = getattr($mock, 'calls');
 my $coderef = $mock->can('foo');
 ok $coderef,                    'mock can(anything)';
 is ref($coderef), 'CODE',       ' and can() returns a coderef';

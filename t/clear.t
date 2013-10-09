@@ -7,10 +7,10 @@ use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Util qw( get_attribute_value );
+use Test::Mocha::Util qw( getattr );
 
 my $mock  = mock;
-my $calls = get_attribute_value($mock, 'calls');
+my $calls = getattr($mock, 'calls');
 
 clear($mock);
 is scalar(@$calls), 0, 'clear() with no calls';

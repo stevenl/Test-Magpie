@@ -7,12 +7,12 @@ use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Util qw( get_attribute_value );
+use Test::Mocha::Util qw( getattr );
 use Types::Standard   qw( Any Int slurpy );
 
 # setup
 my $mock  = mock;
-my $stubs = get_attribute_value($mock, 'stubs');
+my $stubs = getattr($mock, 'stubs');
 
 # stub() argument checks
 like exception { stub() },

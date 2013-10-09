@@ -7,7 +7,7 @@ use warnings;
 use Test::Builder;
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
-use Test::Mocha::Util  qw( extract_method_name get_attribute_value );
+use Test::Mocha::Util  qw( extract_method_name getattr );
 use Types::Standard    qw( Num Str );
 
 our $AUTOLOAD;
@@ -75,8 +75,8 @@ sub AUTOLOAD {
         args => \@_,
     );
 
-    my $mock  = get_attribute_value($self, 'mock');
-    my $calls = get_attribute_value($mock, 'calls');
+    my $mock  = getattr($self, 'mock');
+    my $calls = getattr($mock, 'calls');
 
     my $got = grep { $call_to_verify->satisfied_by($_) } @$calls;
     my $exp;
