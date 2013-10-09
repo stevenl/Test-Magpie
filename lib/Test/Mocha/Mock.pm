@@ -17,10 +17,8 @@ our $AUTOLOAD;
 sub new {
     # uncoverable pod
     my ($class, %args) = @_;
-    ### assert: !defined $args{class} || Str->check( $args{class} )
 
     my $self = \%args;
-    $self->{class} = __PACKAGE__ unless defined $self->{class};
     $self->{calls} = [];  # ArrayRef[ MethodCall ]
     $self->{stubs} = {};  # $method_name => ArrayRef[ StubbedCall ]
 
@@ -82,15 +80,6 @@ sub does {
     # """
     # uncoverable pod
     return 1;
-}
-
-sub ref {
-    # """
-    # Returns the name of the class that this object is pretending to be.
-    # C<ref()> can be called either as a method or as a function.
-    # """
-    # uncoverable pod
-    return $_[0]->{class};
 }
 
 sub can {

@@ -104,6 +104,13 @@ return C<undef> (in scalar context) or an empty list (in list context).
     ok( $mock->can('any_method') );
     is( $mock->any_method(@args), undef );
 
+You can stub C<ref()> to specify the value it should return (see below for
+more info about stubbing).
+
+    stub($mock)->ref->returns('AnyClass');
+    is( $mock->ref, 'AnyClass' );
+    is( ref($mock), 'AnyClass' );
+
 =cut
 
 sub mock {

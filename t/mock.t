@@ -2,11 +2,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 18;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
+use Scalar::Util      qw( blessed );
 use Test::Mocha::Util qw( get_attribute_value );
 use Types::Standard   qw( Int );
 
@@ -44,15 +45,16 @@ like $e, qr/mock\.t/, ' and message traces back to this script';
 is $mock->foo(1, mock), undef, 'mock as method argument not isa(Type::Tiny)';
 
 # ----------------------
-# calling mock with a class
-my $mock1 = mock('Foo');
-ok $mock1,              'mock($class) creates a mock with a class';
-is $mock1->ref, 'Foo',  ' and class is returned with ref method';
-is ref($mock1), 'Foo',  ' and class is returned with ref function';
+# calling mock with a ref
+stub($mock)->ref->returns('Foo');
+is $mock->ref, 'Foo', 'mock has a ref';
+is ref($mock), 'Foo', ' and ref() returns the class';
 
-like exception { mock($mock1) },
-    qr/^The argument for mock\(\) must be a string/,
-    'the argument for mock() must be a string';
+TODO: {
+    local $TODO = 'unimplemented';
+    stub($mock)->blessed->returns('Foo');
+    is blessed($mock), 'Foo', ' and blessed() returns the class';
+}
 
 $mock->DESTROY;
 isnt $calls->[-1]->as_string, 'DESTROY()', 'DESTROY() is not AUTOLOADed';
