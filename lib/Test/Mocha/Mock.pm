@@ -15,9 +15,9 @@ our $AUTOLOAD;
 
 sub new {
     # uncoverable pod
-    my ($class, %args) = @_;
+    my $class = shift;
+    my $self  = {@_};
 
-    my $self = \%args;
     $self->{calls} = [];  # ArrayRef[ MethodCall ]
     $self->{stubs} = {};  # $method_name => ArrayRef[ StubbedCall ]
 

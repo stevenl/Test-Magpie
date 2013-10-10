@@ -114,14 +114,7 @@ more info about stubbing).
 =cut
 
 sub mock {
-    return Test::Mocha::Mock->new if @_ == 0;
-
-    my ($class) = @_;
-
-    croak 'The argument for mock() must be a string'
-        unless !ref $class;
-
-    return Test::Mocha::Mock->new(class => $class);
+    return Test::Mocha::Mock->new(@_);
 }
 
 =func stub
