@@ -14,6 +14,7 @@ use Scalar::Util qw( blessed looks_like_number refaddr );
 
 our @EXPORT_OK = qw(
     extract_method_name
+    find_caller
     getattr
     has_caller_package
     match
@@ -37,6 +38,18 @@ sub getattr {
         if not defined $object->{$attribute};
 
     return $object->{$attribute};
+}
+
+sub find_caller {
+    # """Search the call stack to find an external caller"""
+    # uncoverable pod
+    my ($package, $file, $line);
+
+    for ( my $i = 1; 1; $i++ ) {
+        ($package, $file, $line) = caller($i);
+        last if $package ne 'UNIVERSAL::ref';
+    }
+    return ($file, $line);
 }
 
 sub has_caller_package {

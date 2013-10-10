@@ -1,16 +1,14 @@
-package Test::Mocha::StubbedCall;
-# ABSTRACT: Objects to represent stubbed method calls
+package Test::Mocha::MethodStub;
+# ABSTRACT: Objects to represent stubbed methods with arguments and responses
 
 use strict;
 use warnings;
 
 use Carp qw( croak );
 use Scalar::Util qw( blessed );
+use Test::Mocha::Method;
 
-our @ISA = qw( Test::Mocha::MethodCall );
-
-# croak() messages should not trace back to Mocha modules
-our @CARP_NOT = qw( Test::Mocha::Mock );
+our @ISA = qw( Test::Mocha::Method );
 
 sub new {
     # uncoverable pod

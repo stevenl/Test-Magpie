@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp qw( croak );
-use Test::Mocha::StubbedCall;
+use Test::Mocha::MethodStub;
 use Test::Mocha::Types  qw( Mock Slurpy );
 use Test::Mocha::Util   qw( extract_method_name getattr );
 use Types::Standard     qw( ArrayRef HashRef );
@@ -42,7 +42,7 @@ sub AUTOLOAD {
                 || $slurpy->is_a_type_of(HashRef);
     }
 
-    my $stub = Test::Mocha::StubbedCall->new(
+    my $stub = Test::Mocha::MethodStub->new(
         name => $method_name,
         args => \@args,
     );

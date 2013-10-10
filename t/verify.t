@@ -19,6 +19,17 @@ $mock->once;
 $mock->twice() for 1..2;
 $mock->thrice($_) for 1..3;
 
+my $diag_call_history = <<END;
+# Complete method call history (most recent call last):
+#     once() called at $file line 18
+#     twice() called at $file line 19
+#     twice() called at $file line 19
+#     thrice(1) called at $file line 20
+#     thrice(2) called at $file line 20
+#     thrice(3) called at $file line 20
+END
+chomp $diag_call_history;
+
 # -----------------
 # verify() exceptions
 
@@ -46,7 +57,7 @@ verify($mock)->once;
 test_test 'simple verify() that passes';
 
 $test_name = 'one() was called 1 time(s)';
-$line = __LINE__ + 18;
+$line = __LINE__ + 12;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
@@ -54,13 +65,7 @@ chomp($err = <<ERR);
 # Error: unexpected number of calls to 'one()'
 #          got: 0 time(s)
 #     expected: 1 time(s)
-# Complete method call history (most recent call last):
-#     once()
-#     twice()
-#     twice()
-#     thrice(1)
-#     thrice(2)
-#     thrice(3)
+$diag_call_history
 ERR
 test_err $err;
 {
@@ -81,7 +86,7 @@ verify($mock, times => 2)->twice();
 test_test "verify() with 'times' option that passes";
 
 $test_name = 'twice() was called 1 time(s)';
-$line = __LINE__ + 18;
+$line = __LINE__ + 12;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
@@ -89,13 +94,7 @@ chomp($err = <<ERR);
 # Error: unexpected number of calls to 'twice()'
 #          got: 2 time(s)
 #     expected: 1 time(s)
-# Complete method call history (most recent call last):
-#     once()
-#     twice()
-#     twice()
-#     thrice(1)
-#     thrice(2)
-#     thrice(3)
+$diag_call_history
 ERR
 test_err $err;
 {
@@ -115,7 +114,7 @@ verify($mock, at_least => 1)->once;
 test_test "verify() with 'at_least' option that passes";
 
 $test_name = 'once() was called at least 2 time(s)';
-$line = __LINE__ + 18;
+$line = __LINE__ + 12;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
@@ -123,13 +122,7 @@ chomp($err = <<ERR);
 # Error: unexpected number of calls to 'once()'
 #          got: 1 time(s)
 #     expected: at least 2 time(s)
-# Complete method call history (most recent call last):
-#     once()
-#     twice()
-#     twice()
-#     thrice(1)
-#     thrice(2)
-#     thrice(3)
+$diag_call_history
 ERR
 test_err $err;
 {
@@ -149,7 +142,7 @@ verify($mock, at_most => 2)->twice;
 test_test "verify() with 'at_most' option that passes";
 
 $test_name = 'twice() was called at most 1 time(s)';
-$line = __LINE__ + 18;
+$line = __LINE__ + 12;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
@@ -157,13 +150,7 @@ chomp($err = <<ERR);
 # Error: unexpected number of calls to 'twice()'
 #          got: 2 time(s)
 #     expected: at most 1 time(s)
-# Complete method call history (most recent call last):
-#     once()
-#     twice()
-#     twice()
-#     thrice(1)
-#     thrice(2)
-#     thrice(3)
+$diag_call_history
 ERR
 test_err $err;
 {
@@ -187,7 +174,7 @@ verify($mock, between => [2, 3])->twice;
 test_test "verify() with 'between' option that passes (upper boundary)";
 
 $test_name = 'twice() was called between 0 and 1 time(s)';
-$line = __LINE__ + 18;
+$line = __LINE__ + 12;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
@@ -195,13 +182,7 @@ chomp($err = <<ERR);
 # Error: unexpected number of calls to 'twice()'
 #          got: 2 time(s)
 #     expected: between 0 and 1 time(s)
-# Complete method call history (most recent call last):
-#     once()
-#     twice()
-#     twice()
-#     thrice(1)
-#     thrice(2)
-#     thrice(3)
+$diag_call_history
 ERR
 test_err $err;
 {
@@ -210,7 +191,7 @@ test_err $err;
 test_test "verify() with 'between' option that fails (lower boundary)";
 
 $test_name = 'twice() was called between 3 and 4 time(s)';
-$line = __LINE__ + 18;
+$line = __LINE__ + 12;
 test_out "not ok 1 - $test_name";
 chomp($err = <<ERR);
 #   Failed test '$test_name'
@@ -218,13 +199,7 @@ chomp($err = <<ERR);
 # Error: unexpected number of calls to 'twice()'
 #          got: 2 time(s)
 #     expected: between 3 and 4 time(s)
-# Complete method call history (most recent call last):
-#     once()
-#     twice()
-#     twice()
-#     thrice(1)
-#     thrice(2)
-#     thrice(3)
+$diag_call_history
 ERR
 test_err $err;
 {

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -20,12 +20,14 @@ like exception { inspect_all('string') },
     'invalid argument exception';
 
 my @all = inspect_all($mock);
+isa_ok $all[0], 'Test::Mocha::MethodCall';
 is @all, 6, 'inspect_all() returns all method calls';
-is_deeply \@all, [qw(
-    once()
-    twice(1)
-    twice(1)
-    thrice(1)
-    thrice(2)
-    thrice(3)
-)], ' and in the right order';
+my $file = __FILE__;
+is_deeply \@all, [
+    "once() called at $file line 11",
+    "twice(1) called at $file line 12",
+    "twice(1) called at $file line 12",
+    "thrice(1) called at $file line 13",
+    "thrice(2) called at $file line 13",
+    "thrice(3) called at $file line 13",
+], ' and in the right order';

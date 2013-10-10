@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 17;
 use Test::Fatal;
 use Types::Standard qw( Int slurpy );
 
@@ -21,17 +21,26 @@ like exception { inspect('string') },
     qr/^inspect\(\) must be given a mock object/,
     'invalid argument exception';
 
+my $file = __FILE__;
 my ($once) = inspect($mock)->once;
-is $once, 'once()', 'inspect() returns method call';
+isa_ok $once, 'Test::Mocha::MethodCall';
+is $once, "once() called at $file line 12",
+    'inspect() returns method call';
 
 my @twice = inspect($mock)->twice(1);
 is @twice, 2, 'inspect() with argument returns method call';
-is $twice[0], 'twice(1)', ' and method call stringifies';
+isa_ok $twice[0], 'Test::Mocha::MethodCall';
+is $twice[0], "twice(1) called at $file line 13",
+    ' and method call stringifies';
 
 my @thrice = inspect($mock)->thrice(Int);
 is @thrice, 3, 'inspect() works with argument matcher';
-is_deeply \@thrice, [qw( thrice(1) thrice(2) thrice(3) )],
-    ' and returns calls in the right order';
+isa_ok $thrice[0], 'Test::Mocha::MethodCall';
+is_deeply \@thrice, [
+    "thrice(1) called at $file line 14",
+    "thrice(2) called at $file line 14",
+    "thrice(3) called at $file line 14",
+], ' and returns calls in the right order';
 
 # ----------------------
 # inspect() with type constraint arguments

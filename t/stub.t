@@ -26,7 +26,7 @@ like exception { stub('string') },
 subtest 'create a method stub that returns a scalar' => sub {
     stub($mock)->foo(1)->returns(4);
 
-    is $stubs->{foo}[0]->as_string,   'foo(1)';
+    is $stubs->{foo}[0]->stringify,   'foo(1)';
     is $mock->foo(1), 4,              'and stub returns the scalar';
     is_deeply [ $mock->foo(1) ], [4], 'or the single-element in a list';
 };
@@ -34,7 +34,7 @@ subtest 'create a method stub that returns a scalar' => sub {
 subtest 'create a method stub that returns an array' => sub {
     stub($mock)->foo(2)->returns(1, 2, 3);
 
-    is $stubs->{foo}[0]->as_string,         'foo(2)';
+    is $stubs->{foo}[0]->stringify,         'foo(2)';
     is_deeply [ $mock->foo(2) ], [1, 2, 3], 'and stub returns the array';
     is $mock->foo(2), 3,                'or the array size in scalar context';
 };
@@ -42,7 +42,7 @@ subtest 'create a method stub that returns an array' => sub {
 subtest 'create a method stub that returns nothing' => sub {
     stub($mock)->foo(3)->returns;
 
-    is $stubs->{foo}[0]->as_string,     'foo(3)';
+    is $stubs->{foo}[0]->stringify,     'foo(3)';
     is $mock->foo(3), undef,            'and stub returns undef';
     is_deeply [ $mock->foo(3) ], [ ],   'or an empty list';
 };
@@ -50,7 +50,7 @@ subtest 'create a method stub that returns nothing' => sub {
 subtest 'create a method stub that dies' => sub {
     stub($mock)->foo(4)->dies( 'error, ', 'stopped' );
 
-    is $stubs->{foo}[0]->as_string, 'foo(4)';
+    is $stubs->{foo}[0]->stringify, 'foo(4)';
 
     my $exception = exception { $mock->foo(4) };
     like $exception, qr/^error, stopped at /, 'and stub does die';
@@ -60,7 +60,7 @@ subtest 'create a method stub that dies' => sub {
 subtest 'create a method stub that dies with no arguments' => sub {
     stub($mock)->foo('4a')->dies();
 
-    is $stubs->{foo}[0]->as_string, 'foo("4a")';
+    is $stubs->{foo}[0]->stringify, 'foo("4a")';
 
     my $exception = exception { $mock->foo('4a') };
     like $exception, qr/^ at /,   'and stub does die';
@@ -97,7 +97,7 @@ subtest 'create stub dies with a non-exception object' => sub {
 
 subtest 'create a method stub with no specified response' => sub {
     stub($mock)->foo(7);
-    is $stubs->{foo}[0]->as_string,   'foo(7)';
+    is $stubs->{foo}[0]->stringify,   'foo(7)';
     is $mock->foo(7), undef,          'and stub returns undef';
     is_deeply [ $mock->foo(7) ], [ ], 'or an empty list';
 };

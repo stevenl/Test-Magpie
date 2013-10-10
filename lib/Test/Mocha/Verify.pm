@@ -5,9 +5,9 @@ use strict;
 use warnings;
 
 use Test::Builder;
-use Test::Mocha::MethodCall;
+use Test::Mocha::Method;
 use Test::Mocha::Types qw( Mock NumRange );
-use Test::Mocha::Util  qw( extract_method_name getattr );
+use Test::Mocha::Util  qw( extract_method_name find_caller getattr );
 use Types::Standard    qw( Num Str );
 
 our $AUTOLOAD;
@@ -70,7 +70,7 @@ my $diag = sub {
 sub AUTOLOAD {
     my $self = shift;
 
-    my $call_to_verify = Test::Mocha::MethodCall->new(
+    my $call_to_verify = Test::Mocha::Method->new(
         name => extract_method_name($AUTOLOAD),
         args => \@_,
     );
@@ -101,8 +101,8 @@ sub AUTOLOAD {
         $test_ok = $lower <= $got && $got <= $upper;
     }
 
-    $ok->( $test_ok, $call_to_verify->as_string, $exp, $self->{test_name} );
-    $diag->( $call_to_verify->as_string, $got, $exp, $calls )
+    $ok->( $test_ok, $call_to_verify->stringify, $exp, $self->{test_name} );
+    $diag->( $call_to_verify->stringify, $got, $exp, $calls )
         unless $test_ok;
 
     return;

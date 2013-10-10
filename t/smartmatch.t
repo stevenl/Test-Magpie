@@ -12,8 +12,6 @@ use Test::More tests => 11;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use constant MethodCall => 'Test::Mocha::MethodCall';
-
 subtest 'X ~~ Array' => sub {
     my $mock = mock;
 

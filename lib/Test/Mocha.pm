@@ -314,14 +314,27 @@ C<inspect()> returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed C<verify()> calls. Or use
 it in place of a complex C<verify()> call to break it down into smaller tests.
 
-Each method call object has a C<name> and an C<args> property, and it
-is C<string> overloaded.
+Each method call object has the following accessor methods:
 
-    my ($method_calls) = inspect($warehouse)->remove_inventory(Str, Int);
+=for :list
+* C<name> - The name of the method called.
+* C<args> - The list of arguments passed to the method call.
+* C<caller_file> - The file from which the method was called.
+* C<caller_line> - The line number from which the method was called.
+* C<stringify> - The string representation of the method call.
 
-    is( $method_call->name, 'remove_inventory',       'method name' );
-    is_deeply( [$method_call->args], ['book', 50],    'method args array' );
-    is( $method_call, 'remove_inventory("book", 50)', 'method as string' );
+Further to that, the method call object is C<string> overloaded.
+
+    my ($method_call) = inspect($warehouse)->remove_inventory(Str, Int);
+
+    is( $method_call->name, 'remove_inventory',    'method name' );
+    is_deeply( [$method_call->args], ['book', 50], 'method args array' );
+    is( $method_call->caller_file, 'test.pl',      'caller file' );
+    is( $method_call->caller_line, '5',            'caller line' );
+
+    is( $method_call,
+        'remove_inventory("book", 50) called at test.pl line 5',
+        'method call stringified' );
 
 =cut
 
