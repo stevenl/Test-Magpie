@@ -1,5 +1,11 @@
 Revision history for Test-Mocha
 
+0.20    2013-10-11
+        Allow ref() to be stubbed.
+        Provide better diagnostics with method call history and caller info
+        when verify() fails.
+        Make Moose an optional prerequisite.
+
 0.19    2013-09-18
         Add inspect_all() function.
         Remove Exception::Tiny test dependency.
