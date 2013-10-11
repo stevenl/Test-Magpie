@@ -35,12 +35,10 @@ sub AUTOLOAD {
         unless @invalid_args == 0;
 
     # record the method call for verification
-    my ( $file, $line ) = find_caller;
     my $method_call = Test::Mocha::MethodCall->new(
-        name        => $method_name,
-        args        => \@args,
-        caller_file => $file,
-        caller_line => $line,
+        name   => $method_name,
+        args   => \@args,
+        caller => [ find_caller ],
     );
 
     my $calls = getattr($self, 'calls');

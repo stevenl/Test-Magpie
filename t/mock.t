@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 18;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -54,13 +54,7 @@ stub($mock)->ref->returns('Foo');
 is $mock->ref, 'Foo', 'mock has a ref';
 is ref($mock), 'Foo', ' and ref() returns the class';
 
-is $calls->[-1]->caller_file, __FILE__, ' and caller is not UNIVERSAL::ref';
-
-TODO: {
-    local $TODO = 'unimplemented';
-    stub($mock)->blessed->returns('Foo');
-    is blessed($mock), 'Foo', ' and blessed() returns the class';
-}
+is( ($calls->[-1]->caller)[0], __FILE__, ' and caller is not UNIVERSAL::ref' );
 
 $mock->DESTROY;
 isnt $calls->[-1]->stringify, 'DESTROY()', 'DESTROY() is not AUTOLOADed';

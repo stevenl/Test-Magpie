@@ -13,19 +13,15 @@ use overload '""' => \&stringify, fallback => 1;
 sub new {
     # uncoverable pod
     my ($class, %args) = @_;
-    ### assert: defined $args{caller_file}
-    ### assert: defined $args{caller_line}
+    # caller should be an arrayref tuple [file, line]
+    ### assert: defined $args{caller}
+    ### assert: ref $args{caller} eq 'ARRAY' && @{$args{caller}} == 2
     return $class->SUPER::new(%args);
 }
 
-sub caller_file {
+sub caller {
     # uncoverable pod
-    return $_[0]->{caller_file};
-}
-
-sub caller_line {
-    # uncoverable pod
-    return $_[0]->{caller_line};
+    return @{ $_[0]->{caller} };
 }
 
 sub stringify {
@@ -34,8 +30,7 @@ sub stringify {
     return sprintf(
         '%s called at %s line %d',
         $self->SUPER::stringify,
-        $self->caller_file,
-        $self->caller_line,
+        $self->caller,
     );
 }
 

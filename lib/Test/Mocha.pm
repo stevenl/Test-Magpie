@@ -310,31 +310,25 @@ sub verify {
 
     @method_calls = inspect($mock)->method(@args)
 
+    ( $method_call ) = inspect($warehouse)->remove_inventory(Str, Int);
+
+    is( $method_call->name,            'remove_inventory' );
+    is_deeply( [$method_call->args],   ['book', 50] );
+    is_deeply( [$method_call->caller], ['test.pl', 5] );
+    is( "$method_call", 'remove_inventory("book", 50) called at test.pl line 5' );
+
 C<inspect()> returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed C<verify()> calls. Or use
 it in place of a complex C<verify()> call to break it down into smaller tests.
 
-Each method call object has the following accessor methods:
+The method call objects have the following accessor methods:
 
 =for :list
 * C<name> - The name of the method called.
 * C<args> - The list of arguments passed to the method call.
-* C<caller_file> - The file from which the method was called.
-* C<caller_line> - The line number from which the method was called.
-* C<stringify> - The string representation of the method call.
+* C<caller> - The file and line number from which the method was called.
 
-Further to that, the method call object is C<string> overloaded.
-
-    my ($method_call) = inspect($warehouse)->remove_inventory(Str, Int);
-
-    is( $method_call->name, 'remove_inventory',    'method name' );
-    is_deeply( [$method_call->args], ['book', 50], 'method args array' );
-    is( $method_call->caller_file, 'test.pl',      'caller file' );
-    is( $method_call->caller_line, '5',            'caller line' );
-
-    is( $method_call,
-        'remove_inventory("book", 50) called at test.pl line 5',
-        'method call stringified' );
+They are also C<string> overloaded.
 
 =cut
 
