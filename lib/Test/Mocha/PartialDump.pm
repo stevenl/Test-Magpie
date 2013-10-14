@@ -30,10 +30,12 @@ sub dump {
 
     my $dump = $self->$method(1, @args);
 
-    if ( defined $self->{max_length} ) {
-        if ( length($dump) > $self->{max_length} ) {
-            $dump = substr($dump, 0, $self->{max_length} - 3) . "...";
-        }
+    if ( defined $self->{max_length}
+          and length($dump) > $self->{max_length}
+    ) {
+ 		my $max_length = $self->{max_length} - 3;
+ 		$max_length = 0 if $max_length < 0;
+ 		substr( $dump, $max_length, length($dump) - $max_length, '...' );
     }
 
     if ( not defined wantarray ) {
