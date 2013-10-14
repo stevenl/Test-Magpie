@@ -145,6 +145,7 @@ sub format_array {
     my ( $self, $depth, $array ) = @_;
 
     my $class = blessed($array) || '';
+    $class .= "=" if $class;
 
     return $class . "[ " . $self->dump_as_list($depth + 1, @$array) . " ]";
 }
@@ -153,6 +154,7 @@ sub format_hash {
     my ( $self, $depth, $hash ) = @_;
 
     my $class = blessed($hash) || '';
+    $class .= "=" if $class;
 
     return $class . "{ "
       . $self->dump_as_pairs(
