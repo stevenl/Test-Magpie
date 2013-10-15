@@ -90,6 +90,10 @@ sub can {
     # """
     # uncoverable pod
     my ($self, $method_name) = @_;
+
+    # Carp 1.32 will call this if it is available
+    return if $method_name eq 'CARP_TRACE';
+
     return sub {
         $AUTOLOAD = $method_name;
         goto &AUTOLOAD;
