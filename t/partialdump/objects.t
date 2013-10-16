@@ -7,15 +7,15 @@ use Test::More tests => 11;
 
 use constant CLASS => 'Test::Mocha::PartialDump';
 
-use ok CLASS;
+BEGIN { use_ok CLASS }
 
 package My::Object::Hash;
 {
     use overload '""' => \&stringify;
 
     sub new {
-        my $class = shift;
-        bless { value => $_[0] }, $class;
+        my ($class, $value) = @_;
+        bless { value => $value }, $class;
     }
     sub stringify { $_[0]->{value} }
 }
@@ -25,8 +25,8 @@ package My::Object::Array;
     use overload '""' => \&stringify;
 
     sub new {
-        my $class = shift;
-        bless [$_[0]], $class;
+        my ($class, $value) = @_;
+        bless [ $value ], $class;
     }
     sub stringify { $_[0]->[0] }
 }
@@ -36,8 +36,8 @@ package My::Object::Scalar;
     use overload '""' => \&stringify;
 
     sub new {
-        my $class = shift;
-        bless \$_[0], $class;
+        my ($class, $value) = @_;
+        bless \$value, $class;
     }
     sub stringify { ${$_[0]} }
 }
