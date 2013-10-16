@@ -14,6 +14,18 @@ use UNIVERSAL::ref;
 
 our $AUTOLOAD;
 
+# Classes for which mock isa() should return false
+our %Isnota = (
+    'Type::Tiny' => undef,
+    'Moose::Meta::TypeConstraint' => undef,
+);
+
+# Methods for which mock can() should return false
+our %Cannot = (
+    # Carp 1.32 will call CARP_TRACE on the mock if can() is true
+    CARP_TRACE => undef,
+);
+
 sub new {
     # uncoverable pod
     my $class = shift;
@@ -47,7 +59,7 @@ sub AUTOLOAD {
     push @$calls, $method_call;
 
     # find a stub to return a response
-    if (defined $stubs->{$method_name}) {
+    if ( defined $stubs->{$method_name} ) {
         foreach my $stub ( @{$stubs->{$method_name}} ) {
             return $stub->do_next_execution($self, @args)
                 if $stub->satisfied_by($method_call);
@@ -62,13 +74,13 @@ sub DESTROY { }
 sub isa {
     # """
     # Always returns true. It allows the mock object to C<isa()> any class
-    # that is required.
+    # except those that exist in %Isnota.
     # """
     # uncoverable pod
     my ($self, $package) = @_;
+
     return if (
-        $package eq 'Type::Tiny'                  ||
-        $package eq 'Moose::Meta::TypeConstraint' ||
+        exists $Isnota{ $package } ||
         has_caller_package('UNIVERSAL::ref')
     );
     return 1;
@@ -76,8 +88,7 @@ sub isa {
 
 sub does {
     # """
-    # Always returns true. It allows the mock object to C<does()> any role
-    # that is required.
+    # Always returns true. It allows the mock object to C<does()> any role.
     # """
     # uncoverable pod
     return 1;
@@ -86,13 +97,12 @@ sub does {
 sub can {
     # """
     # Always returns a reference to the C<AUTOLOAD()> method. It allows the
-    # mock object to C<can()> do any method that is required.
+    # mock object to C<can()> do any method except those that exist in %Cannot.
     # """
     # uncoverable pod
     my ($self, $method_name) = @_;
 
-    # Carp 1.32 will call this if it is available
-    return if $method_name eq 'CARP_TRACE';
+    return if exists $Cannot{ $method_name };
 
     return sub {
         $AUTOLOAD = $method_name;

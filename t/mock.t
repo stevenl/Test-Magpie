@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -32,6 +32,8 @@ is $coderef->($mock, 1), undef, ' and can() coderef returns undef by default';
 is $calls->[-1]->stringify,
     sprintf('foo(1) called at %s line %d', __FILE__, __LINE__ - 2),
     ' and method call is recorded';
+
+ok !$mock->can('CARP_TRACE'), 'mock cannot(CARP_TRACE)';
 
 is $mock->foo(bar => 1), undef,
     'mock accepts any method call, returning undef by default';
