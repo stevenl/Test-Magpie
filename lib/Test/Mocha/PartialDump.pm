@@ -1,10 +1,19 @@
 package Test::Mocha::PartialDump;
+# ABSTRACT: Partial dumping of data structures, optimized for argument printing
+
+# ===================================================================
+# This code was copied and adapted from Devel::PartialDump 0.15.
+#
+#   Copyright (c) 2008, 2009 Yuval Kogman. All rights reserved
+#   This program is free software; you can redistribute
+#   it and/or modify it under the same terms as Perl itself.
+#
+# ===================================================================
 
 use strict;
 use warnings;
 
-use Carp ();
-use Scalar::Util qw(looks_like_number reftype blessed);
+use Scalar::Util qw( looks_like_number reftype blessed );
 
 sub new {
     # uncoverable pod
