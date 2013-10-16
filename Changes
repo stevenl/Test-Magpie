@@ -1,5 +1,15 @@
 Revision history for Test-Mocha
 
+0.21    2013-10-16
+        Fix test failure with Carp 1.32 where CARP_TRACE is called on mocks.
+        Copy Devel::PartialDump code into the distribution with changes:
+         - Removed Moose dependency
+         - Removed all functions (only dump() remains as a method)
+         - Minor bug fixes:
+            'list_delim' attribute is now used to separate lists.
+            'max_length' attribute with value 0 now dumps '...'.
+            Object dumps have '=' after the class name.
+
 0.20    2013-10-11
         Allow ref() to be stubbed.
         Provide better diagnostics with method call history and caller info
