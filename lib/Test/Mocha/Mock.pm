@@ -4,8 +4,9 @@ package Test::Mocha::Mock;
 use strict;
 use warnings;
 
-use Carp qw( croak );
+use Carp                qw( croak );
 use Test::Mocha::MethodCall;
+use Test::Mocha::MethodStub;
 use Test::Mocha::Types  qw( Matcher );
 use Test::Mocha::Util   qw( extract_method_name find_caller
                             getattr has_caller_package );
@@ -15,26 +16,66 @@ use UNIVERSAL::ref;
 our $AUTOLOAD;
 
 # Classes for which mock isa() should return false
-our %Isnota = (
+my %Isnota = (
     'Type::Tiny' => undef,
     'Moose::Meta::TypeConstraint' => undef,
 );
 
 # Methods for which mock can() should return false
-our %Cannot = (
+my %Cannot = (
     # Carp 1.32 will call CARP_TRACE on the mock if can() is true
     CARP_TRACE => undef,
 );
 
+
+# can() should always return a reference to the C<AUTOLOAD()> method
+my $CAN = Test::Mocha::MethodStub->new(
+    name => 'can',
+    args => [ Str ],
+)->executes(sub {
+    my ($self, $method_name) = @_;
+    return sub {
+        $AUTOLOAD = $method_name;
+        goto &AUTOLOAD;
+    };
+});
+
+# DOES() should always return true
+my $DOES_UC = Test::Mocha::MethodStub->new(
+    name => 'DOES',
+    args => [ Str ],
+)->returns(1);
+
+# does() should always return true
+my $DOES_LC = Test::Mocha::MethodStub->new(
+    name => 'does',
+    args => [ Str ],
+)->returns(1);
+
+# isa() should always returns true
+my $ISA = Test::Mocha::MethodStub->new(
+    name => 'isa',
+    args => [ Str ] ,
+)->returns(1);
+
+
 sub new {
     # uncoverable pod
     my $class = shift;
-    my $self  = {@_};
+    my $self  = bless {@_}, $class;
 
-    $self->{calls} = [];  # ArrayRef[ MethodCall ]
-    $self->{stubs} = {};  # $method_name => ArrayRef[ MethodStub ]
+    # ArrayRef[ MethodCall ]
+    $self->{calls} = [];
 
-    return bless $self, $class;
+    # $method_name => ArrayRef[ MethodStub ]
+    $self->{stubs} = {
+        can  => [ $CAN     ],
+        DOES => [ $DOES_UC ],
+        does => [ $DOES_LC ],
+        isa  => [ $ISA     ],
+    };
+
+    return $self;
 }
 
 sub AUTOLOAD {
@@ -68,46 +109,48 @@ sub AUTOLOAD {
     return;
 }
 
-# Don't let AUTOLOAD() handle DESTROY()
-sub DESTROY { }
+# Let AUTOLOAD() handle the UNIVERSAL methods
 
 sub isa {
-    # """
-    # Always returns true. It allows the mock object to C<isa()> any class
-    # except those that exist in %Isnota.
-    # """
     # uncoverable pod
-    my ($self, $package) = @_;
+    my ($self, $class) = @_;
 
-    return if (
-        exists $Isnota{ $package } ||
-        has_caller_package('UNIVERSAL::ref')
-    );
-    return 1;
+    # Internal calls: Don't let these be recorded by AUTOLOAD()
+    return 1 if $class eq __PACKAGE__;
+    # Handle being called as a class method by UNIVERSAL::ref
+    return if !ref($self)
+        || exists $Isnota{ $class }
+        || has_caller_package('UNIVERSAL::ref');
+
+    $AUTOLOAD = 'isa';
+    goto &AUTOLOAD;
 }
 
-sub does {
-    # """
-    # Always returns true. It allows the mock object to C<does()> any role.
-    # """
+sub DOES {
     # uncoverable pod
-    return 1;
+    my ($self, $role) = @_;
+
+    # Internal calls: Don't let these be recorded by AUTOLOAD()
+    return 1 if $role eq __PACKAGE__;
+
+    return if !ref($self);
+
+    $AUTOLOAD = 'DOES';
+    goto &AUTOLOAD;
 }
 
 sub can {
-    # """
-    # Always returns a reference to the C<AUTOLOAD()> method. It allows the
-    # mock object to C<can()> do any method except those that exist in %Cannot.
-    # """
     # uncoverable pod
     my ($self, $method_name) = @_;
 
+    # Internal calls: Don't let these be recorded by AUTOLOAD()
     return if exists $Cannot{ $method_name };
 
-    return sub {
-        $AUTOLOAD = $method_name;
-        goto &AUTOLOAD;
-    };
+    $AUTOLOAD = 'can';
+    goto &AUTOLOAD;
 }
+
+# Don't let AUTOLOAD() handle DESTROY()
+sub DESTROY { }
 
 1;

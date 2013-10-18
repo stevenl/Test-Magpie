@@ -108,6 +108,26 @@ sub AUTOLOAD {
     return;
 }
 
+# Let AUTOLOAD() handle the UNIVERSAL methods
+
+sub isa {
+    # uncoverable pod
+    $AUTOLOAD = 'isa';
+    goto &AUTOLOAD;
+}
+
+sub DOES {
+    # uncoverable pod
+    $AUTOLOAD = 'DOES';
+    goto &AUTOLOAD;
+}
+
+sub can {
+    # uncoverable pod
+    $AUTOLOAD = 'can';
+    goto &AUTOLOAD;
+}
+
 # Don't let AUTOLOAD() handle DESTROY()
 sub DESTROY { }
 

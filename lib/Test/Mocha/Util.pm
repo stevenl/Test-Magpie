@@ -34,8 +34,10 @@ sub getattr {
     my ($object, $attribute) = @_;
 
     # uncoverable branch true
+    confess "getattr() must be given an object"
+        if not ref $object;
     confess "Attribute '$attribute' does not exist for object '$object'"
-        if not defined $object->{$attribute};
+        if not exists $object->{$attribute};
 
     return $object->{$attribute};
 }

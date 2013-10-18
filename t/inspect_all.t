@@ -1,4 +1,5 @@
 #!/usr/bin/perl -T
+
 use strict;
 use warnings;
 
@@ -15,19 +16,24 @@ $mock->thrice($_) for 1..3;
 like exception { inspect_all() },
     qr/^inspect_all\(\) must be given a mock object/,
     'no argument exception';
+
 like exception { inspect_all('string') },
     qr/^inspect_all\(\) must be given a mock object/,
     'invalid argument exception';
 
-my @all = inspect_all($mock);
-isa_ok $all[0], 'Test::Mocha::MethodCall';
-is @all, 6, 'inspect_all() returns all method calls';
+my @got = inspect_all($mock);
+
+isa_ok $got[0], 'Test::Mocha::MethodCall';
+
+is @got, 6, 'inspect_all() returns all method calls';
+
 my $file = __FILE__;
-is_deeply \@all, [
-    "once() called at $file line 11",
-    "twice(1) called at $file line 12",
-    "twice(1) called at $file line 12",
-    "thrice(1) called at $file line 13",
-    "thrice(2) called at $file line 13",
-    "thrice(3) called at $file line 13",
-], ' and in the right order';
+my @expect = (
+    "once() called at $file line 12",
+    "twice(1) called at $file line 13",
+    "twice(1) called at $file line 13",
+    "thrice(1) called at $file line 14",
+    "thrice(2) called at $file line 14",
+    "thrice(3) called at $file line 14",
+);
+is_deeply \@got, \@expect, ' and in the right order';
