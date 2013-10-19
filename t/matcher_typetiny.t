@@ -1,6 +1,8 @@
 #!/usr/bin/perl -T
+
 use strict;
 use warnings;
+use version 0.77;
 
 use Test::More tests => 18;
 use Test::Builder::Tester;
@@ -8,6 +10,11 @@ use Test::Fatal;
 
 use Type::Utils -all;
 use Types::Standard -all;
+
+use constant TBT_IS_VALID => (
+    version->parse( $Test::Builder::Tester::VERSION )
+      < version->parse('1.23_002')
+);
 
 BEGIN { use_ok 'Test::Mocha' }
 
@@ -19,10 +26,15 @@ $mock->set(+1, 'not an int');
 $mock->set(-1, 'negative');
 $mock->set( [qw( foo bar )] );
 
-test_out
-qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\) was called 2 time\(s\)\s?/;
-verify($mock, times => 2)->set( StrMatch[qr/^foo/] );
-test_test 'parameterized type works';
+SKIP: {
+    skip("test_out(qr//) does not work for Test::Builder::Tester 1.23_002", 1)
+        unless TBT_IS_VALID;
+
+    test_out
+    qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\) was called 2 time\(s\)\s?/;
+    verify($mock, times => 2)->set( StrMatch[qr/^foo/] );
+    test_test 'parameterized type works';
+}
 
 test_out 'ok 1 - set(Int, ~Int) was called 2 time(s)';
 verify($mock, times => 2)->set(Int, ~Int);
@@ -32,10 +44,15 @@ test_out 'ok 1 - set(Int|Str) was called 2 time(s)';
 verify($mock, times => 2)->set( Int | Str );
 test_test 'type union works';
 
-test_out
-qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\&StrMatch\[\(\?.*:bar\$\)\]\) was called 1 time\(s\)\s?/;
-verify($mock)->set( (StrMatch[qr/^foo/]) & (StrMatch[qr/bar$/]) );
-test_test 'type intersection works';
+SKIP: {
+    skip("test_out(qr//) does not work for Test::Builder::Tester 1.23_002", 1)
+        unless TBT_IS_VALID;
+
+    test_out
+    qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\&StrMatch\[\(\?.*:bar\$\)\]\) was called 1 time\(s\)\s?/;
+    verify($mock)->set( (StrMatch[qr/^foo/]) & (StrMatch[qr/bar$/]) );
+    test_test 'type intersection works';
+}
 
 test_out 'ok 1 - set(Tuple[Str,Str]) was called 1 time(s)';
 verify($mock)->set( Tuple[Str,Str] );
