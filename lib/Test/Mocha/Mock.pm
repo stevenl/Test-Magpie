@@ -21,13 +21,6 @@ my %Isnota = (
     'Moose::Meta::TypeConstraint' => undef,
 );
 
-# Methods for which mock can() should return false
-my %Cannot = (
-    # Carp 1.32 will call CARP_TRACE on the mock if can() is true
-    CARP_TRACE => undef,
-);
-
-
 # can() should always return a reference to the C<AUTOLOAD()> method
 my $CAN = Test::Mocha::MethodStub->new(
     name => 'can',
@@ -115,12 +108,14 @@ sub isa {
     # uncoverable pod
     my ($self, $class) = @_;
 
-    # Internal calls: Don't let these be recorded by AUTOLOAD()
+    # Handle internal calls from UNIVERSAL::ref::_hook()
+    # when ref($mock) is called
     return 1 if $class eq __PACKAGE__;
-    # Handle being called as a class method by UNIVERSAL::ref
-    return if !ref($self)
-        || exists $Isnota{ $class }
-        || has_caller_package('UNIVERSAL::ref');
+
+    # In order to allow mock methods to be called with other mocks as
+    # arguments, mocks cannot isa() type constraints, which are not allowed
+    # as arguments.
+    return if exists $Isnota{ $class };
 
     $AUTOLOAD = 'isa';
     goto &AUTOLOAD;
@@ -130,7 +125,8 @@ sub DOES {
     # uncoverable pod
     my ($self, $role) = @_;
 
-    # Internal calls: Don't let these be recorded by AUTOLOAD()
+    # Handle internal calls from UNIVERSAL::ref::_hook()
+    # when ref($mock) is called
     return 1 if $role eq __PACKAGE__;
 
     return if !ref($self);
@@ -143,10 +139,21 @@ sub can {
     # uncoverable pod
     my ($self, $method_name) = @_;
 
-    # Internal calls: Don't let these be recorded by AUTOLOAD()
-    return if exists $Cannot{ $method_name };
+    # Handle can('CARP_TRACE') for internal croak()'s (Carp v1.32+)
+    return if has_caller_package(__PACKAGE__)
+        || has_caller_package('Test::Mocha');
 
     $AUTOLOAD = 'can';
+    goto &AUTOLOAD;
+}
+
+sub ref {
+    # Handle ref() for internal croak()'s (Carp v1.11 only)
+    # uncoverable pod
+    # uncoverable branch true
+    return __PACKAGE__ if has_caller_package('Test::Mocha');
+
+    $AUTOLOAD = 'ref';
     goto &AUTOLOAD;
 }
 

@@ -4,10 +4,10 @@ package Test::Mocha::Stub;
 use strict;
 use warnings;
 
-use Carp qw( croak );
+use Carp                qw( croak );
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types  qw( Mock Slurpy );
-use Test::Mocha::Util   qw( extract_method_name getattr );
+use Test::Mocha::Util   qw( extract_method_name getattr has_caller_package );
 use Types::Standard     qw( ArrayRef HashRef );
 
 our $AUTOLOAD;
@@ -73,6 +73,11 @@ sub DOES {
 
 sub can {
     # uncoverable pod
+    my ($self, $method_name) = @_;
+
+    # Handle can('CARP_TRACE') for internal croak()'s (Carp v1.32+)
+    return if has_caller_package(__PACKAGE__);
+
     $AUTOLOAD = 'can';
     goto &AUTOLOAD;
 }
