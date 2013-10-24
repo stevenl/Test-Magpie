@@ -1,5 +1,9 @@
 Revision history for Test-Mocha
 
+0.21_02 2013-10-24
+        Enable isa(), DOES() and can() to be stubbed and verified.
+        Fix test failure with Carp 1.11 where Carp::Heavy calls ref() on mocks.
+
 0.21_01 2013-10-19
         Skip failing tests with Test::Builder::Test 1.23_002 where
         `test_out(qr//)` does not work because it tries to stringify `qr//`.
