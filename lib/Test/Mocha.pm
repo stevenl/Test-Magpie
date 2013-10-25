@@ -361,21 +361,20 @@ sub inspect_all {
 
 =func clear
 
-    clear($mock)
+    clear(@mocks)
 
-Clears the method call history of the mock for it to be reused in another test.
-Note that this does not affect the stubbed methods.
+Clears the method call history for one or more mocks so that they can be
+reused in another test. Note that this does not affect the stubbed methods.
 
 =cut
 
 sub clear {
-    my ($mock) = @_;
+    my @mocks = @_;
 
-    croak 'clear() must be given a mock object'
-        unless defined $mock && MockType->check($mock);
+    croak 'clear() must be given one or more mock objects'
+        if !@mocks || grep { ! MockType->check($_) } @mocks;
 
-    my $calls = getattr($mock, 'calls');
-    @$calls = ();
+    @{ getattr($_, 'calls') } = ( ) foreach @mocks;
 
     return;
 }

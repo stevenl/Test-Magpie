@@ -241,10 +241,10 @@ object. This is mainly used for debugging.
 
 ## clear
 
-    clear($mock)
+    clear(@mocks)
 
-Clears the method call history of the mock for it to be reused in another test.
-Note that this does not affect the stubbed methods.
+Clears the method call history for one or more mocks so that they can be
+reused in another test. Note that this does not affect the stubbed methods.
 
 # ARGUMENT MATCHING
 
