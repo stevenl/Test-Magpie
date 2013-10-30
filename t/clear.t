@@ -14,8 +14,8 @@ my $mock1 = mock;
 my $mock2 = mock;
 my @mocks = ($mock1, $mock2);
 
-my $calls1 = getattr($mock1, 'calls');
-my $calls2 = getattr($mock2, 'calls');
+my $calls1 = getattr( $mock1, 'calls' );
+my $calls2 = getattr( $mock2, 'calls' );
 
 $mock1->foo;
 $mock2->bar;
@@ -27,12 +27,14 @@ is( (@$calls1 + @$calls2), 0, '... and no calls after clear()' );
 # ----------------------
 # exceptions
 
-ok exception { clear() },  'clear() must be given an argument';
-ok exception { clear(1) }, '... and argument must be a mock';
+ok( exception { clear() },  'clear() must be given an argument' );
+ok( exception { clear(1) }, '... and argument must be a mock' );
 
 # ----------------------
 # Miscellaneous test to cover Test::Mocha::Util::getattr
 
-like exception { getattr($mock1, 'notexists') },
+like(
+    exception { getattr($mock1, 'notexists') },
     qr/^Attribute \'notexists\' does not exist for object/,
-    'getattr() throws for non-existent attribute';
+    'getattr() throws for non-existent attribute'
+);

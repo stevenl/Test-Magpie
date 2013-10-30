@@ -13,19 +13,23 @@ $mock->once;
 $mock->twice(1)   for 1..2;
 $mock->thrice($_) for 1..3;
 
-like exception { inspect_all() },
+like(
+    exception { inspect_all() },
     qr/^inspect_all\(\) must be given a mock object/,
-    'no argument exception';
+    'no argument exception'
+);
 
-like exception { inspect_all('string') },
+like(
+    exception { inspect_all('string') },
     qr/^inspect_all\(\) must be given a mock object/,
-    'invalid argument exception';
+    'invalid argument exception'
+);
 
 my @got = inspect_all($mock);
 
-isa_ok $got[0], 'Test::Mocha::MethodCall';
+isa_ok( $got[0], 'Test::Mocha::MethodCall' );
 
-is @got, 6, 'inspect_all() returns all method calls';
+is( @got, 6, 'inspect_all() returns all method calls' );
 
 my $file = __FILE__;
 my @expect = (
@@ -36,4 +40,4 @@ my @expect = (
     "thrice(2) called at $file line 14",
     "thrice(3) called at $file line 14",
 );
-is_deeply \@got, \@expect, ' and in the right order';
+is_deeply( \@got, \@expect, '... in the right order' );
