@@ -33,8 +33,8 @@ sub returns {
     return $self;
 }
 
-sub dies {
-    # """Adds a die response to the end of the executions queue."""
+sub throws {
+    # """Adds an exception response to the end of the executions queue."""
     # uncoverable pod
     my ($self, @exception) = @_;
 

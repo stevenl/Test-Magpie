@@ -119,7 +119,7 @@ sub mock {
 
 =func stub
 
-    stub($mock)->method(@args)->returns|dies|executes($response)
+    stub($mock)->method(@args)->returns|throws|executes($response)
 
 By default, the mock object already acts as a stub that accepts any method
 call and returns C<undef>. However, you can use C<stub()> to tell a method to
@@ -134,11 +134,11 @@ Specifies that a stub should return 1 or more values.
     stub($mock)->method(@args)->returns(1, 2, 3);
     is_deeply( [ $mock->method(@args) ], [ 1, 2, 3 ] );
 
-= C<dies($message)>
+= C<throws($message)>
 
 Specifies that a stub should raise an exception.
 
-    stub($mock)->method(@args)->dies('exception');
+    stub($mock)->method(@args)->throws('exception');
     ok( exception { $mock->method(@args) } );
 
 = C<executes($coderef)>
@@ -174,7 +174,10 @@ L</"ARGUMENT MATCHING"> for a shortcut around this).
 Chain responses together to provide a consecutive series.
 
     stub($iterator)->next
-        ->returns(1)->returns(2)->returns(3)->dies('exhuasted');
+        ->returns(1)
+        ->returns(2)
+        ->returns(3)
+        ->throws('exhuasted');
 
     ok( $iterator->next == 1 );
     ok( $iterator->next == 2 );

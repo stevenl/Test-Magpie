@@ -23,7 +23,7 @@ subtest 'How about some stubbing?' => sub {
     my $mocked_list = mock;
 
     stub($mocked_list)->get(0)->returns('first');
-    stub($mocked_list)->get(1)->dies('Kaboom!');
+    stub($mocked_list)->get(1)->throws('Kaboom!');
 
     is($mocked_list->get(0) => 'first');
     ok(exception { $mocked_list->get(1) });

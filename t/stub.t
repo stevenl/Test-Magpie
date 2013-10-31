@@ -48,8 +48,8 @@ subtest 'create a method stub that returns nothing' => sub {
     is_deeply [ $mock->foo(3) ], [ ],   'or an empty list';
 };
 
-subtest 'create a method stub that dies' => sub {
-    stub($mock)->foo(4)->dies( 'error, ', 'stopped' );
+subtest 'create a method stub that throws' => sub {
+    stub($mock)->foo(4)->throws( 'error, ', 'stopped' );
 
     is $stubs->{foo}[0]->stringify, 'foo(4)';
 
@@ -58,8 +58,8 @@ subtest 'create a method stub that dies' => sub {
     like $exception, qr/stub\.t/, 'and error traces back to this script';
 };
 
-subtest 'create a method stub that dies with no arguments' => sub {
-    stub($mock)->foo('4a')->dies();
+subtest 'create a method stub that throws with no arguments' => sub {
+    stub($mock)->foo('4a')->throws();
 
     is $stubs->{foo}[0]->stringify, 'foo("4a")';
 
@@ -77,7 +77,7 @@ subtest 'create a method stub that dies with no arguments' => sub {
     sub throw { die $_[0]->{message} }
 }
 subtest 'create a method stub that throws exception' => sub {
-    stub($mock)->foo(5)->dies(
+    stub($mock)->foo(5)->throws(
         My::Throwable->new('my exception'),
         qw( remaining args are ignored ),
     );
@@ -91,8 +91,8 @@ subtest 'create a method stub that throws exception' => sub {
     sub new { bless [], $_[0] }
     sub message {'died'}
 }
-subtest 'create stub dies with a non-exception object' => sub {
-    stub($mock)->foo(6)->dies( My::NonThrowable->new );
+subtest 'create stub throws with a non-exception object' => sub {
+    stub($mock)->foo(6)->throws( My::NonThrowable->new );
     like exception { $mock->foo(6) }, qr/^died/, 'and stub does die';
 };
 
@@ -129,7 +129,10 @@ subtest 'stub response persists until it is overridden' => sub {
 subtest 'stub can chain responses' => sub {
     my $iterator = mock;
     stub($iterator)->next
-        ->returns(1)->returns(2)->returns(3)->dies('exhuasted');
+        ->returns(1)
+        ->returns(2)
+        ->returns(3)
+        ->throws('exhuasted');
 
     ok $iterator->next == 1;
     ok $iterator->next == 2;
