@@ -31,13 +31,12 @@ isa_ok( $got[0], 'Test::Mocha::MethodCall' );
 
 is( @got, 6, 'inspect_all() returns all method calls' );
 
-my $file = __FILE__;
-my @expect = (
-    "once() called at $file line 12",
-    "twice(1) called at $file line 13",
-    "twice(1) called at $file line 13",
-    "thrice(1) called at $file line 14",
-    "thrice(2) called at $file line 14",
-    "thrice(3) called at $file line 14",
+my @expect = qw(
+    once()
+    twice(1)
+    twice(1)
+    thrice(1)
+    thrice(2)
+    thrice(3)
 );
 is_deeply( \@got, \@expect, '... in the right order' );

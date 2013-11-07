@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+
 package Test::Mocha;
 # ABSTRACT: Test Spy/Stub Framework
 
@@ -63,7 +64,7 @@ use Test::Mocha::Inspect;
 use Test::Mocha::Mock;
 use Test::Mocha::Stub;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( getattr );
+use Test::Mocha::Util qw( getattr get_method_call is_called );
 use Test::Mocha::Verify;
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
@@ -199,19 +200,28 @@ The last stubbed response will persist until it is overridden.
 =cut
 
 sub stub {
-    my ($mock) = @_;
+    my ( $arg ) = @_;
 
-    croak 'stub() must be given a mock object'
-        unless defined $mock && MockType->check($mock);
+    if ( defined $arg ) {
+        if ( ref($arg) eq 'CODE' ) {
+            $Test::Mocha::Mock::num_method_calls = 0;
+            my $method_call = get_method_call($arg);
+            my $stubs = getattr( $method_call->invocant, 'stubs' );
+            unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
-    return Test::Mocha::Stub->new(mock => $mock);
+            return Test::Mocha::MethodStub->cast( $method_call );
+        }
+        elsif ( MockType->check($arg) ) {
+            warnings::warnif( 'deprecated', 'stub() interface has changed' );
+            return Test::Mocha::Stub->new( mock => $arg );
+        }
+    }
+    croak 'stub() must be given a coderef';
 }
 
 =func called_ok
 
     called_ok( sub { $mock->method(@args) }, [%option], [$test_name] )
-
-(This function was previously named C<verify()>.)
 
 C<called_ok()> is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -279,7 +289,35 @@ default.
 =cut
 
 sub called_ok {
-    my $mock = shift;
+    my ( $coderef, %options ) = _get_called_ok_args(@_);
+
+    croak 'called_ok() must be given a coderef'
+        unless defined($coderef) && ref($coderef) eq 'CODE';
+
+    $Test::Mocha::Mock::num_method_calls = 0;
+    is_called( get_method_call($coderef), %options );
+    return;
+}
+
+# verify() has been retained for backwards compatibility only
+=for Pod::Coverage verify
+=cut
+
+sub verify {
+    my ( $mock, %options ) = _get_called_ok_args(@_);
+
+    warnings::warnif(
+        'deprecated',
+        'verify() is deprecated; use called_ok() instead'
+    );
+    croak 'verify() must be given a mock object'
+        unless defined($mock) && MockType->check($mock);
+
+    return Test::Mocha::Verify->new( mock => $mock, %options );
+}
+
+sub _get_called_ok_args {
+    my $coderef = shift;
     my $test_name;
     $test_name = pop if (@_ % 2 == 1);
     my %options = @_;
@@ -287,43 +325,35 @@ sub called_ok {
     # set default option if none given
     $options{times} = 1 if keys %options == 0;
 
-    croak 'called_ok() must be given a mock object'
-        unless defined $mock && MockType->check($mock);
-
     croak 'You can set only one of these options: '
-        . join ', ', map {"'$_'"} keys %options
+        . join ', ', map { "'$_'" } keys %options
         unless keys %options == 1;
 
-    if (defined $options{times}) {
+    if ( defined $options{times} ) {
         croak "'times' option must be a number"
             unless Num->check( $options{times} );
     }
-    elsif (defined $options{at_least}) {
+    elsif ( defined $options{at_least} ) {
         croak "'at_least' option must be a number"
             unless Num->check( $options{at_least} );
     }
-    elsif (defined $options{at_most}) {
+    elsif ( defined $options{at_most} ) {
         croak "'at_most' option must be a number"
             unless Num->check( $options{at_most} );
     }
-    elsif (defined $options{between}) {
+    elsif ( defined $options{between} ) {
         croak "'between' option must be an arrayref "
             . "with 2 numbers in ascending order"
             unless NumRange->check( $options{between} );
     }
     else {
-        my ($option) = keys %options;
+        my ( $option ) = keys %options;
         croak "called_ok() was given an invalid option: '$option'";
     }
+    $options{ test_name } = $test_name if defined $test_name;
 
-    # set test name if given
-    $options{test_name} = $test_name if defined $test_name;
-
-    return Test::Mocha::Verify->new(mock => $mock, %options);
+    return ( $coderef, %options );
 }
-
-# for backwards compatibility
-*verify = \&called_ok;
 
 =func inspect
 
@@ -353,12 +383,22 @@ They are also C<string> overloaded.
 =cut
 
 sub inspect {
-    my ($mock) = @_;
+    my ( $arg ) = @_;
 
-    croak 'inspect() must be given a mock object'
-        unless defined $mock && MockType->check($mock);
-
-    return Test::Mocha::Inspect->new(mock => $mock);
+    if ( defined $arg ) {
+        if ( ref($arg) eq 'CODE' ) {
+            $Test::Mocha::Mock::num_method_calls = 0;
+            my $method_call = get_method_call($arg);
+            my $mock        = $method_call->invocant;
+            my $calls       = getattr( $mock, 'calls' );
+            return grep { $method_call->satisfied_by($_) } @$calls;
+        }
+        elsif ( MockType->check($arg) ) {
+            warnings::warnif( 'deprecated', 'inspect() interface has changed' );
+            return Test::Mocha::Stub->new( mock => $arg );
+        }
+    }
+    croak 'inspect() must be given a coderef';
 }
 
 =func inspect_all
@@ -371,7 +411,7 @@ object. This is mainly used for debugging.
 =cut
 
 sub inspect_all {
-    my ($mock) = @_;
+    my ( $mock ) = @_;
 
     croak 'inspect_all() must be given a mock object'
         unless defined $mock && MockType->check($mock);
@@ -394,7 +434,7 @@ sub clear {
     croak 'clear() must be given one or more mock objects'
         if !@mocks || grep { ! MockType->check($_) } @mocks;
 
-    @{ getattr($_, 'calls') } = ( ) foreach @mocks;
+    @{ getattr( $_, 'calls' ) } = ( ) foreach @mocks;
 
     return;
 }

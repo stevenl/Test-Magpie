@@ -47,8 +47,8 @@ sub AUTOLOAD {
         args => \@args,
     );
 
-    my $mock  = getattr($self, 'mock');
-    my $stubs = getattr($mock, 'stubs');
+    my $mock  = getattr( $self, 'mock'  );
+    my $stubs = getattr( $mock, 'stubs' );
 
     # add new stub to front of queue so that it takes precedence
     # over existing stubs that would satisfy the same invocations

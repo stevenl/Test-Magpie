@@ -25,8 +25,8 @@ sub AUTOLOAD {
         args => \@_,
     );
 
-    my $mock  = getattr($self, 'mock');
-    my $calls = getattr($mock, 'calls');
+    my $mock  = getattr( $self, 'mock'  );
+    my $calls = getattr( $mock, 'calls' );
 
     return grep { $inspect->satisfied_by($_) } @$calls;
 }

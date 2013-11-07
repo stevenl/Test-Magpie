@@ -7,13 +7,16 @@ use warnings;
 use Carp                qw( croak );
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
-use Test::Mocha::Types  qw( Matcher );
-use Test::Mocha::Util   qw( extract_method_name find_caller
+use Test::Mocha::Types  qw( Matcher Slurpy );
+use Test::Mocha::Util   qw( extract_method_name find_caller find_stub
                             getattr has_caller_package );
-use Types::Standard     qw( Str );
+use Types::Standard     qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
+our $num_method_calls = 0;
+our $last_method_call;
+our $last_execution;
 
 # Classes for which mock isa() should return false
 my %Isnota = (
@@ -72,32 +75,60 @@ sub new {
 }
 
 sub AUTOLOAD {
-    my ($self, @args) = @_;
+    my ( $self, @args ) = @_;
     my $method_name = extract_method_name($AUTOLOAD);
 
-    my @invalid_args = grep { Matcher->check($_) } @args;
-    croak 'Mock methods may not be called with '
-        . 'type constraint arguments: ' . join(', ', @invalid_args)
-        unless @invalid_args == 0;
+    undef $last_method_call;
+    undef $last_execution;
+
+    # check slurpy type constraint
+    {
+        my $i = 0;
+        my $seen_slurpy;
+        foreach ( @args ) {
+            if ( Slurpy->check($_) ) {
+                $seen_slurpy = 1;
+                last;
+            }
+            $i++;
+        }
+        croak 'No arguments allowed after a slurpy type constraint'
+            if $i < $#args;
+
+        if ( $seen_slurpy ) {
+            my $slurpy = $args[$i]->{slurpy};
+            croak 'Slurpy argument must be a type of ArrayRef or HashRef'
+                unless $slurpy->is_a_type_of(ArrayRef)
+                    || $slurpy->is_a_type_of(HashRef);
+        }
+    }
+    #my @invalid_args = grep { Matcher->check($_) } @args;
+    #croak 'Mock methods may not be called with '
+    #    . 'type constraint arguments: ' . join(', ', @invalid_args)
+    #    unless @invalid_args == 0;
+
+    $num_method_calls++;
+
+    my $calls = getattr( $self, 'calls' );
+    my $stubs = getattr( $self, 'stubs' );
 
     # record the method call for verification
-    my $method_call = Test::Mocha::MethodCall->new(
-        name   => $method_name,
-        args   => \@args,
-        caller => [ find_caller ],
+    $last_method_call = Test::Mocha::MethodCall->new(
+        invocant => $self,
+        name     => $method_name,
+        args     => \@args,
+        caller   => [ find_caller ],
     );
-
-    my $calls = getattr($self, 'calls');
-    my $stubs = getattr($self, 'stubs');
-
-    push @$calls, $method_call;
+    push @$calls, $last_method_call;
 
     # find a stub to return a response
-    if ( defined $stubs->{$method_name} ) {
-        foreach my $stub ( @{$stubs->{$method_name}} ) {
-            return $stub->do_next_execution($self, @args)
-                if $stub->satisfied_by($method_call);
-        }
+    my $stub = find_stub( $self, $last_method_call );
+    if ( defined $stub ) {
+        # save reference to stub execution so it can be restored
+        my $executions  = getattr( $stub, 'executions' );
+        $last_execution = $executions->[0] if @$executions > 1;
+
+        return $stub->do_next_execution( $self, @args );
     }
     return;
 }
@@ -106,7 +137,7 @@ sub AUTOLOAD {
 
 sub isa {
     # uncoverable pod
-    my ($self, $class) = @_;
+    my ( $self, $class ) = @_;
 
     # Handle internal calls from UNIVERSAL::ref::_hook()
     # when ref($mock) is called
@@ -123,7 +154,7 @@ sub isa {
 
 sub DOES {
     # uncoverable pod
-    my ($self, $role) = @_;
+    my ( $self, $role ) = @_;
 
     # Handle internal calls from UNIVERSAL::ref::_hook()
     # when ref($mock) is called
@@ -137,11 +168,10 @@ sub DOES {
 
 sub can {
     # uncoverable pod
-    my ($self, $method_name) = @_;
+    my ( $self, $method_name ) = @_;
 
     # Handle can('CARP_TRACE') for internal croak()'s (Carp v1.32+)
-    return if has_caller_package(__PACKAGE__)
-        || has_caller_package('Test::Mocha');
+    return if $method_name eq 'CARP_TRACE';
 
     $AUTOLOAD = 'can';
     goto &AUTOLOAD;
@@ -151,7 +181,7 @@ sub ref {
     # Handle ref() for internal croak()'s (Carp v1.11 only)
     # uncoverable pod
     # uncoverable branch true
-    return __PACKAGE__ if has_caller_package('Test::Mocha');
+    #return __PACKAGE__ if has_caller_package('Test::Mocha');
 
     $AUTOLOAD = 'ref';
     goto &AUTOLOAD;

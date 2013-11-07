@@ -17,7 +17,7 @@ subtest 'X ~~ Array' => sub {
     my $mock = mock;
 
     $mock->array( [1, 2, 3] );
-    called_ok( sub { $mock->array( [1, 2, 3] } ), 'Array ~~ Array' );
+    called_ok( sub { $mock->array( [1, 2, 3] ) }, 'Array ~~ Array' );
     called_ok(
         sub { $mock->array( [1, 2] ) },
         times => 0, 'Array.size != Array.size'

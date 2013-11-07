@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 13;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -37,7 +37,7 @@ is(
     '... and can() coderef returns undef by default'
 );
 is(
-    $calls->[-1]->stringify,
+    $calls->[-1]->stringify_long,
     sprintf('foo(1) called at %s line %d', __FILE__, __LINE__ - 6),
     '... and method call is recorded'
 );
@@ -47,20 +47,21 @@ is(
     'mock accepts any method call, returning undef by default'
 );
 is(
-    $calls->[-1]->stringify,
+    $calls->[-1]->stringify_long,
     sprintf('foo(bar: 1) called at %s line %d', __FILE__, __LINE__ - 6),
     '... and method call is recorded'
 );
 
+# These tests are not valid anymore
 # ----------------------
 # type constraints
-
-my $e = exception { $mock->foo(1, Int) };
-like(
-    $e, qr/Int/,
-    'mock does not accept method call with type constraint argument'
-);
-like( $e, qr/mock\.t/, '... and message traces back to this script' );
+#
+# my $e = exception { $mock->foo(1, Int) };
+# like(
+#     $e, qr/Int/,
+#     'mock does not accept method call with type constraint argument'
+# );
+# like( $e, qr/mock\.t/, '... and message traces back to this script' );
 
 is(
     $mock->foo(1, mock), undef,
@@ -68,4 +69,7 @@ is(
 );
 
 $mock->DESTROY;
-isnt( $calls->[-1]->stringify, 'DESTROY()', 'DESTROY() is not AUTOLOADed' );
+isnt(
+    $calls->[-1]->stringify_long, 'DESTROY()',
+    'DESTROY() is not AUTOLOADed'
+);

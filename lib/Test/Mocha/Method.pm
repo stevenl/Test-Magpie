@@ -24,7 +24,7 @@ my $Dumper = Test::Mocha::PartialDump->new(objects => 0, stringify => 1);
 
 sub new {
     # uncoverable pod
-    my ($class, %args) = @_;
+    my ( $class, %args ) = @_;
     ### assert: Str->check( $args{name} )
     ### assert: ArrayRef->check( $args{args} )
     return bless \%args, $class;
@@ -46,13 +46,13 @@ sub stringify {
     # you'd type in Perl.
     # """
     # uncoverable pod
-    my ($self) = @_;
+    my ( $self ) = @_;
     return $self->name . '(' . $Dumper->dump($self->args) . ')';
 }
 
 my $slurp = sub {
     # """check slurpy arguments"""
-    my ($slurpy_matcher, @to_match) = @_;
+    my ( $slurpy_matcher, @to_match ) = @_;
 
     ### assert: Slurpy->check($slurpy_matcher)
     my $matcher = $slurpy_matcher->{slurpy};
@@ -77,7 +77,7 @@ sub satisfied_by {
     # Returns true if the given C<$invocation> satisfies this method call.
     # """
     # uncoverable pod
-    my ($self, $invocation) = @_;
+    my ( $self, $invocation ) = @_;
 
     return unless $invocation->name eq $self->name;
 
@@ -93,15 +93,15 @@ sub satisfied_by {
             croak 'No arguments allowed after a slurpy type constraint'
                 unless @expected == 0;
 
-            return unless $slurp->($matcher, @input);
+            return unless $slurp->( $matcher, @input );
 
             @input = ();
         }
         elsif ( Matcher->check($matcher) ) {
-            return unless $matcher->check(shift @input);
+            return unless $matcher->check( shift @input );
         }
         else {
-            return unless match(shift(@input), $matcher);
+            return unless match( shift(@input), $matcher );
         }
     }
 
@@ -113,7 +113,7 @@ sub satisfied_by {
             unless @expected == 0;
 
         # uncoverable branch true
-        return if ! $slurp->($matcher, @input);
+        return unless $slurp->( $matcher, @input );
     }
 
     return @input == 0 && @expected == 0;
