@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -13,16 +13,22 @@ $mock->once;
 $mock->twice(1)   for 1..2;
 $mock->thrice($_) for 1..3;
 
-like(
-    exception { inspect_all() },
-    qr/^inspect_all\(\) must be given a mock object/,
-    'no argument exception'
-);
+my $file = __FILE__;
+my $e;
 
 like(
-    exception { inspect_all('string') },
+    $e = exception { inspect_all() },
     qr/^inspect_all\(\) must be given a mock object/,
-    'invalid argument exception'
+    'inspect_all expects an argument'
+);
+like(
+    $e = exception { inspect_all('string') },
+    qr/^inspect_all\(\) must be given a mock object/,
+    '... and argument must be a mock object'
+);
+like(
+    $e, qr/at \Q$file\E/,
+    '... and error traces back to this script'
 );
 
 my @got = inspect_all($mock);

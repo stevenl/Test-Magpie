@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 16;
+use Test::More tests => 17;
 use Test::Fatal;
 use Types::Standard qw( Int slurpy );
 
@@ -14,19 +14,25 @@ $mock->once;
 $mock->twice(1)   for 1..2;
 $mock->thrice($_) for 1..3;
 
+my $file = __FILE__;
+my $e;
+
 # inspect() argument checks
 like(
-    exception { inspect() },
+    $e = exception { inspect() },
     qr/^inspect\(\) must be given a coderef/,
     'no argument exception'
 );
 like(
-    exception { inspect('string') },
+    $e = exception { inspect('string') },
     qr/^inspect\(\) must be given a coderef/,
     'invalid argument exception'
 );
+like(
+    $e, qr/at \Q$file\E/,
+    '... and error traces back to this script'
+);
 
-my $file = __FILE__;
 my ( $once ) = inspect( sub { $mock->once } );
 isa_ok( $once, 'Test::Mocha::MethodCall' );
 is(
@@ -60,18 +66,22 @@ is_deeply(
 @thrice = inspect( sub { $mock->thrice(SlurpyArray) } );
 is( @thrice, 3, 'inspect() works with slurpy argument matcher' );
 
-my $e = exception { inspect( sub { $mock->twice(SlurpyArray, 1) } ) };
 like(
-    $e, qr/^No arguments allowed after a slurpy type constraint/,
+    $e = exception { inspect( sub { $mock->twice(SlurpyArray, 1) } ) },
+    qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint'
 );
-like( $e, qr/inspect\.t/, '... and message traces back to this script' );
-
-$e = exception { inspect( sub { $mock->twice(slurpy Int) } ) };
 like(
-    $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    $e, qr/at \Q$file\E/,
+    '... and error traces back to this script'
+);
+
+like(
+    $e = exception { inspect( sub { $mock->twice(slurpy Int) } ) },
+    qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument'
 );
-like( $e, qr/inspect\.t/, '... and message traces back to this script' );
-
-# is( inspect( sub { $mock->DESTROY } ), undef, 'DESTROY() is not AUTOLOADed' );
+like(
+    $e, qr/at \Q$file\E/,
+    '... and error traces back to this script'
+);

@@ -4,7 +4,7 @@ package Test::Mocha::Mock;
 use strict;
 use warnings;
 
-use Carp                qw( croak );
+use Carp 1.22           qw( croak );
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types  qw( Matcher Slurpy );
@@ -102,10 +102,6 @@ sub AUTOLOAD {
                     || $slurpy->is_a_type_of(HashRef);
         }
     }
-    #my @invalid_args = grep { Matcher->check($_) } @args;
-    #croak 'Mock methods may not be called with '
-    #    . 'type constraint arguments: ' . join(', ', @invalid_args)
-    #    unless @invalid_args == 0;
 
     $num_method_calls++;
 
@@ -178,11 +174,7 @@ sub can {
 }
 
 sub ref {
-    # Handle ref() for internal croak()'s (Carp v1.11 only)
     # uncoverable pod
-    # uncoverable branch true
-    #return __PACKAGE__ if has_caller_package('Test::Mocha');
-
     $AUTOLOAD = 'ref';
     goto &AUTOLOAD;
 }

@@ -21,10 +21,10 @@ BEGIN { use_ok 'Test::Mocha' }
 
 my $mock = mock;
 
-$mock->set('foo');
-$mock->set('foobar');
-$mock->set(+1, 'not an int');
-$mock->set(-1, 'negative');
+$mock->set( 'foo' );
+$mock->set( 'foobar' );
+$mock->set( +1, 'not an int' );
+$mock->set( -1, 'negative' );
 $mock->set( [qw( foo bar )] );
 
 SKIP: {

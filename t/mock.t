@@ -3,14 +3,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
-use Test::Fatal;
+use Test::More tests => 12;
 
 BEGIN { use_ok 'Test::Mocha' }
 
 use Scalar::Util      qw( blessed );
 use Test::Mocha::Util qw( getattr );
-use Types::Standard   qw( Int );
 
 # ----------------------
 # creating a mock
@@ -52,24 +50,8 @@ is(
     '... and method call is recorded'
 );
 
-# These tests are not valid anymore
-# ----------------------
-# type constraints
-#
-# my $e = exception { $mock->foo(1, Int) };
-# like(
-#     $e, qr/Int/,
-#     'mock does not accept method call with type constraint argument'
-# );
-# like( $e, qr/mock\.t/, '... and message traces back to this script' );
-
-is(
-    $mock->foo(1, mock), undef,
-    'mock as method argument not isa(Type::Tiny)'
-);
-
 $mock->DESTROY;
 isnt(
-    $calls->[-1]->stringify_long, 'DESTROY()',
+    $calls->[-1]->stringify, 'DESTROY()',
     'DESTROY() is not AUTOLOADed'
 );

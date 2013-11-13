@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
@@ -27,8 +27,23 @@ is( (@$calls1 + @$calls2), 0, '... and no calls after clear()' );
 # ----------------------
 # exceptions
 
-ok( exception { clear() },  'clear() must be given an argument' );
-ok( exception { clear(1) }, '... and argument must be a mock' );
+my $file = __FILE__;
+my $e;
+
+like(
+    $e = exception { clear() },
+    qr/^clear\(\) must be given one or more mock objects/,
+    'clear() must be given an argument'
+);
+like(
+    $e = exception { clear(1) },
+    qr/^clear\(\) must be given one or more mock objects/,
+    '... and argument must be a mock'
+);
+like(
+    $e, qr/at \Q$file\E/,
+    '... and error traces back to this script'
+);
 
 # ----------------------
 # Miscellaneous test to cover Test::Mocha::Util::getattr

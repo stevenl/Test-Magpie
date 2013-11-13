@@ -25,8 +25,6 @@ our @EXPORT_OK = qw(
     match
 );
 
-$Carp::Internal{'Test::Mocha'}++;
-
 my $TB = Test::Builder->new;
 
 sub extract_method_name {
@@ -103,9 +101,9 @@ sub get_method_call {
     my $mock = $method_call->invocant;
 
     # restore the last method stub execution
-    if ( defined $Test::Mocha::Mocha::last_execution ) {
+    if ( defined $Test::Mocha::Mock::last_execution ) {
         my $stub = find_stub( $mock, $method_call );
-        unshift @{ $stub->{executions} }, $Test::Mocha::Mocha::last_execution;
+        unshift @{ $stub->{executions} }, $Test::Mocha::Mock::last_execution;
     }
 
     # remove the last method call from the invocation history
@@ -172,7 +170,7 @@ sub is_called {
     $TB->ok( $test_ok, $test_name );
 
     # output diagnostics to aid with debugging
-    if ( !$test_ok && !$TB->in_todo ) {
+    unless ( $test_ok || $TB->in_todo ) {
         my $diag = <<END;
 Error: unexpected number of calls to '$method_call'
          got: $got time(s)
@@ -235,5 +233,20 @@ sub match {
 
     return $x ~~ $y;
 }
+
+# sub print_call_stack {
+#     # """
+#     # Returns whether the given C<$package> is in the current call stack.
+#     # """
+#     # uncoverable pod
+#     my ( $message ) = @_;
+#
+#     print $message, "\n";
+#     my $level = 1;
+#     while ( my ( $caller, $file, $line, $sub ) = caller $level++ ) {
+#         print "\t[$caller] $sub\n";
+#     }
+#     return;
+# }
 
 1;

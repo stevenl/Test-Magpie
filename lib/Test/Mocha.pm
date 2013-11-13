@@ -77,6 +77,15 @@ our @EXPORT = qw(
     SlurpyHash
 );
 
+# croak() messages should not trace back to Mocha modules
+$Carp::Internal{$_}++ foreach qw(
+    Test::Mocha
+    Test::Mocha::Inspect
+    Test::Mocha::Mock
+    Test::Mocha::Util
+    Test::Mocha::Verify
+);
+
 =for Pod::Coverage SlurpyArray SlurpyHash
 =cut
 
@@ -305,6 +314,7 @@ sub called_ok {
 =cut
 
 sub verify {
+    # uncoverable pod
     my ( $mock, %options ) = _get_called_ok_args(@_);
 
     warnings::warnif(

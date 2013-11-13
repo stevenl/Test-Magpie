@@ -4,9 +4,8 @@ use strict;
 use warnings;
 use version 0.77;
 
-use Test::More tests => 18;
+use Test::More tests => 20;
 use Test::Builder::Tester;
-use Test::Fatal;
 
 use Type::Utils -all;
 use Types::Standard -all;
@@ -20,11 +19,23 @@ BEGIN { use_ok 'Test::Mocha' }
 
 my $mock = mock;
 
-$mock->set('foo');
-$mock->set('foobar');
-$mock->set(+1, 'not an int');
-$mock->set(-1, 'negative');
+$mock->set( 'foo' );
+$mock->set( 'foobar' );
+$mock->set( +1, 'not an int' );
+$mock->set( -1, 'negative' );
 $mock->set( [qw( foo bar )] );
+
+is(
+    $mock->foo(1, Int), undef,
+    'Type constraints can be passed as method arguments to mock methods'
+);
+
+# This test checks that mock args are not treated as Type::Tiny objects
+# since mocks are meant to isa() anything
+is(
+    $mock->foo(1, mock), undef,
+    'mocks can be passed as method arguments to mock methods'
+);
 
 SKIP: {
     skip("test_out(qr//) does not work for Test::Builder::Tester 1.23_002", 1)

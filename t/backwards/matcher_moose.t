@@ -16,23 +16,15 @@ no warnings 'deprecated';
 
 use Test::More tests => 8;
 use Test::Builder::Tester;
-use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
 my $mock = mock;
 
-$mock->set(['foo']);
-$mock->set(['foo', 'bar']);
-$mock->set(+1, 'not an int');
-$mock->set(-1, 'negative');
-
-# my $e = exception { $mock->foo(1, Int) };
-# like(
-#     $e, qr/Int/,
-#     'mock does not accept method calls with type constraint arguments'
-# );
-# like( $e, qr/matcher_moose\.t/, '... and message traces back to this script' );
+$mock->set( ['foo'] );
+$mock->set( ['foo', 'bar'] );
+$mock->set( +1, 'not an int' );
+$mock->set( -1, 'negative' );
 
 is(
     $mock->foo(1, mock), undef,

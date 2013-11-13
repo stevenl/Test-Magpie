@@ -12,14 +12,6 @@ use Types::Standard    qw( ArrayRef HashRef Str );
 
 use overload '""' => \&stringify, fallback => 1;
 
-# croak() messages should not trace back to Mocha modules
-$Carp::Internal{$_}++ foreach qw(
-    Test::Mocha::Inspect
-    Test::Mocha::Mock
-    Test::Mocha::Util
-    Test::Mocha::Verify
-);
-
 # cause string overloaded objects (Matchers) to be stringified
 my $Dumper = Test::Mocha::PartialDump->new(objects => 0, stringify => 1);
 
