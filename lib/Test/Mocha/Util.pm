@@ -25,7 +25,7 @@ our @EXPORT_OK = qw(
     match
 );
 
-our @CARP_NOT = qw( Test::Mocha );
+$Carp::Internal{'Test::Mocha'}++;
 
 my $TB = Test::Builder->new;
 

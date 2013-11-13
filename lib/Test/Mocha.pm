@@ -60,13 +60,10 @@ interfaces rather than on internal state.
 
 use Carp     qw( croak );
 use Exporter qw( import );
-use Test::Mocha::Inspect;
 use Test::Mocha::Mock;
-use Test::Mocha::Stub;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 use Test::Mocha::Util qw( getattr get_method_call is_called );
-use Test::Mocha::Verify;
-use Types::Standard qw( ArrayRef HashRef Num slurpy );
+use Types::Standard   qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
     mock
@@ -203,17 +200,21 @@ sub stub {
     my ( $arg ) = @_;
 
     if ( defined $arg ) {
-        if ( ref($arg) eq 'CODE' ) {
+        if ( MockType->check($arg) ) {
+            warnings::warnif(
+                'deprecated',
+                'Calling stub() with a mock object parameter is deprecated; pass it a coderef instead'
+            );
+            require Test::Mocha::Stub;
+            return Test::Mocha::Stub->new( mock => $arg );
+        }
+        elsif ( ref($arg) eq 'CODE' ) {
             $Test::Mocha::Mock::num_method_calls = 0;
             my $method_call = get_method_call($arg);
             my $stubs = getattr( $method_call->invocant, 'stubs' );
             unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
             return Test::Mocha::MethodStub->cast( $method_call );
-        }
-        elsif ( MockType->check($arg) ) {
-            warnings::warnif( 'deprecated', 'stub() interface has changed' );
-            return Test::Mocha::Stub->new( mock => $arg );
         }
     }
     croak 'stub() must be given a coderef';
@@ -313,6 +314,7 @@ sub verify {
     croak 'verify() must be given a mock object'
         unless defined($mock) && MockType->check($mock);
 
+    require Test::Mocha::Verify;
     return Test::Mocha::Verify->new( mock => $mock, %options );
 }
 
@@ -386,16 +388,20 @@ sub inspect {
     my ( $arg ) = @_;
 
     if ( defined $arg ) {
-        if ( ref($arg) eq 'CODE' ) {
+        if ( MockType->check($arg) ) {
+            warnings::warnif(
+                'deprecated',
+                'Calling inspect() with a mock object parameter is deprecated; pass it a coderef instead'
+            );
+            require Test::Mocha::Inspect;
+            return Test::Mocha::Inspect->new( mock => $arg );
+        }
+        elsif ( ref($arg) eq 'CODE' ) {
             $Test::Mocha::Mock::num_method_calls = 0;
             my $method_call = get_method_call($arg);
             my $mock        = $method_call->invocant;
             my $calls       = getattr( $mock, 'calls' );
             return grep { $method_call->satisfied_by($_) } @$calls;
-        }
-        elsif ( MockType->check($arg) ) {
-            warnings::warnif( 'deprecated', 'inspect() interface has changed' );
-            return Test::Mocha::Stub->new( mock => $arg );
         }
     }
     croak 'inspect() must be given a coderef';

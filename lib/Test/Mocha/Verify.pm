@@ -4,7 +4,7 @@ package Test::Mocha::Verify;
 use strict;
 use warnings;
 
-use Test::Mocha::Method;
+use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
 use Test::Mocha::Util  qw( extract_method_name is_called );
 use Types::Standard    qw( Num Str );
@@ -16,11 +16,11 @@ sub new {
     my ($class, %args) = @_;
 
     ### assert: defined $args{mock} && Mock->check( $args{mock} )
-    ### assert: !defined $args{ name     } || Str->check( $args{ name     } )
-    ### assert: !defined $args{ times    } || Num->check( $args{ times    } )
-    ### assert: !defined $args{ at_least } || Num->check( $args{ at_least } )
-    ### assert: !defined $args{ at_most  } || Num->check( $args{ at_most  } )
-    ### assert: !defined $args{ between  } || NumRange->check( $args{between} )
+    ### assert: !defined $args{ test_name } || Str->check( $args{ test_name } )
+    ### assert: !defined $args{ times     } || Num->check( $args{ times     } )
+    ### assert: !defined $args{ at_least  } || Num->check( $args{ at_least  } )
+    ### assert: !defined $args{ at_most   } || Num->check( $args{ at_most   } )
+    ### assert: !defined $args{ between   } || NumRange->check( $args{between} )
     ### assert: 1 == grep { defined } @args{ times at_least at_most between }
 
     return bless \%args, $class;
@@ -29,7 +29,8 @@ sub new {
 sub AUTOLOAD {
     my $self = shift;
 
-    my $method_call = Test::Mocha::Method->new(
+    my $method_call = Test::Mocha::MethodCall->new(
+        invocant => $self->{mock},
         name => extract_method_name($AUTOLOAD),
         args => \@_,
     );
