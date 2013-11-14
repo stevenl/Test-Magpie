@@ -4,7 +4,7 @@ Test::Mocha - Test Spy/Stub Framework
 
 # VERSION
 
-version 0.21\_02
+version 0.49\_01
 
 # SYNOPSIS
 
@@ -19,7 +19,7 @@ other objects.
     my $warehouse = mock;
 
     # stub method calls (with type constraint for matching argument)
-    stub($warehouse)->has_inventory($item1, Int)->returns(1);
+    stub( sub { $warehouse->has_inventory($item1, Int) } )->returns(1);
 
     # execute the code under test
     my $order = Order->new(item => $item1, quantity => 50);
@@ -27,7 +27,10 @@ other objects.
 
     # verify interactions with the dependent object
     ok( $order->is_filled, 'Order is filled' );
-    verify( $warehouse, '... and inventory is removed' )->remove_inventory($item1, 50);
+    called_ok(
+        sub { $warehouse->remove_inventory($item1, 50) },
+        '... and inventory is removed'
+    );
 
     # clear the invocation history
     clear($warehouse);
@@ -81,13 +84,13 @@ return `undef` (in scalar context) or an empty list (in list context).
 You can stub `ref()` to specify the value it should return (see below for
 more info about stubbing).
 
-    stub($mock)->ref->returns('AnyClass');
+    stub( sub{ $mock->ref } )->returns('AnyClass');
     is( $mock->ref, 'AnyClass' );
     is( ref($mock), 'AnyClass' );
 
 ## stub
 
-    stub($mock)->method(@args)->returns|dies|executes($response)
+    stub( sub { $mock->method(@args) } )->returns|throws|executes($response)
 
 By default, the mock object already acts as a stub that accepts any method
 call and returns `undef`. However, you can use `stub()` to tell a method to
@@ -97,14 +100,14 @@ give an alternative response. You can specify 3 types of responses:
 
     Specifies that a stub should return 1 or more values.
 
-        stub($mock)->method(@args)->returns(1, 2, 3);
+        stub( sub { $mock->method(@args) } )->returns(1, 2, 3);
         is_deeply( [ $mock->method(@args) ], [ 1, 2, 3 ] );
 
-- `dies($message)`
+- `throws($message)`
 
     Specifies that a stub should raise an exception.
 
-        stub($mock)->method(@args)->dies('exception');
+        stub( sub { $mock->method(@args) } )->throws('exception');
         ok( exception { $mock->method(@args) } );
 
 - `executes($coderef)`
@@ -114,8 +117,8 @@ give an alternative response. You can specify 3 types of responses:
 
         my @returns = qw( first second third );
 
-        stub($list)->get(Int)->executes(sub {
-            my ($self, $i) = @_;
+        stub( sub { $list->get(Int) } )->executes(sub {
+            my ( $self, $i ) = @_;
             die "index out of bounds" if $i < 0;
             return $returns[$i];
         });
@@ -128,17 +131,20 @@ give an alternative response. You can specify 3 types of responses:
 A stub applies to the exact method and arguments specified (but see also
 ["ARGUMENT MATCHING"](#ARGUMENT MATCHING) for a shortcut around this).
 
-    stub($list)->get(0)->returns('first');
-    stub($list)->get(1)->returns('second');
+    stub( sub { $list->get(0) } )->returns('first');
+    stub( sub { $list->get(1) } )->returns('second');
 
-    is( $list->get(0), 'first' );
+    is( $list->get(0), 'first'  );
     is( $list->get(1), 'second' );
-    is( $list->get(2), undef );
+    is( $list->get(2),  undef   );
 
 Chain responses together to provide a consecutive series.
 
-    stub($iterator)->next
-        ->returns(1)->returns(2)->returns(3)->dies('exhuasted');
+    stub( sub { $iterator->next } )
+        ->returns(1)
+        ->returns(2)
+        ->returns(3)
+        ->throws('exhuasted');
 
     ok( $iterator->next == 1 );
     ok( $iterator->next == 2 );
@@ -147,23 +153,23 @@ Chain responses together to provide a consecutive series.
 
 The last stubbed response will persist until it is overridden.
 
-    stub($warehouse)->has_inventory($item, 10)->returns(1);
+    stub( sub { $warehouse->has_inventory($item, 10) } )->returns(1);
     ok( $warehouse->has_inventory($item, 10) ) for 1 .. 5;
 
-    stub($warehouse)->has_inventory($item, 10)->returns(0);
+    stub( sub { $warehouse->has_inventory($item, 10) } )->returns(0);
     ok( !$warehouse->has_inventory($item, 10) ) for 1 .. 5;
 
-## verify
+## called\_ok
 
-    verify($mock, [%option], [$test_name])->method(@args)
+    called_ok( sub { $mock->method(@args) }, [%option], [$test_name] )
 
-`verify()` is used to test the interactions with the mock object. You can use
-it to verify that the correct methods were called, with the correct set of
-arguments, and the correct number of times. `verify()` plays nicely with
+`called_ok()` is used to test the interactions with the mock object. You can
+use it to verify that the correct method was called, with the correct set of
+arguments, and the correct number of times. `called_ok()` plays nicely with
 [Test::Simple](https://metacpan.org/module/Test::Simple) and Co - it will print the test result along with your other
-tests and calls to `verify()` are counted in the test plan.
+tests and you must count calls to `called_ok()` in your test plans.
 
-    verify($warehouse)->remove($item, 50);
+    called_ok( sub { $warehouse->remove($item, 50) } );
     # prints: ok 1 - remove("book", 50) was called 1 time(s)
 
 An option may be specified to constrain the test.
@@ -173,47 +179,54 @@ An option may be specified to constrain the test.
     Specifies the number of times the given method is expected to be called.
     The default is 1 if no other option is specified.
 
-        verify( $mock, times => 3 )->method(@args)
-        # print: ok 1 - method(@args) was called 3 time(s)
+        called_ok( sub { $mock->method(@args) }, times => 3 )
+        # prints: ok 1 - method(@args) was called 3 time(s)
 
 - `at_least`
 
     Specifies the minimum number of times the given method is expected to be
     called.
 
-        verify( $mock, at_least => 3 )->method(@args)
-        # print: ok 1 - method(@args) was called at least 3 time(s)
+        called_ok( sub { $mock->method(@args) }, at_least => 3 )
+        # prints: ok 1 - method(@args) was called at least 3 time(s)
 
 - `at_most`
 
     Specifies the maximum number of times the given method is expected to be
     called.
 
-        verify( $mock, at_most => 5 )->method(@args)
-        # print: ok 1 - method(@args) was called at most 5 time(s)
+        called_ok( sub { $mock->method(@args) }, at_most => 5 )
+        # prints: ok 1 - method(@args) was called at most 5 time(s)
 
 - `between`
 
     Specifies the minimum and maximum number of times the given method is
     expected to be called.
 
-        verify( $mock, between => [3, 5] )->method(@args)
+        called_ok( sub { $mock->method(@args) }, between => [3, 5] )
         # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
 
 An optional `$test_name` may be specified to be printed instead of the
 default.
 
-    verify( $warehouse, 'inventory removed' )->remove_inventory($item, 50);
+    called_ok(
+        sub { $warehouse->remove_inventory($item, 50) },
+        'inventory removed'
+    );
     # prints: ok 1 - inventory removed
 
-    verify( $warehouse, times => 0, 'inventory not removed' )->remove_inventory($item, 50);
+    called_ok(
+        sub { $warehouse->remove_inventory($item, 50) },
+        times => 0,
+        'inventory not removed'
+    );
     # prints: ok 2 - inventory not removed
 
 ## inspect
 
-    @method_calls = inspect($mock)->method(@args)
+    @method_calls = inspect( sub { $mock->method(@args) } )
 
-    ( $method_call ) = inspect($warehouse)->remove_inventory(Str, Int);
+    ( $method_call ) = inspect( sub { $warehouse->remove_inventory(Str, Int) } );
 
     is( $method_call->name,            'remove_inventory' );
     is_deeply( [$method_call->args],   ['book', 50] );
@@ -221,8 +234,9 @@ default.
     is( "$method_call", 'remove_inventory("book", 50) called at test.pl line 5' );
 
 `inspect()` returns a list of method calls matching the given method call
-specification. It can be useful for debugging failed `verify()` calls. Or use
-it in place of a complex `verify()` call to break it down into smaller tests.
+specification. It can be useful for debugging failed `called_ok()` calls.
+Or use it in place of a complex `called_ok()` call to break it down into
+smaller tests.
 
 The method call objects have the following accessor methods:
 
@@ -251,7 +265,7 @@ reused in another test. Note that this does not affect the stubbed methods.
 Argument matchers may be used in place of specifying exact method arguments.
 They allow you to be more general and will save you much time in your
 method specifications to stubs and verifications. Argument matchers may be used
-with `stub()`, `verify()` and `inspect`.
+with `stub()`, `called_ok()` and `inspect`.
 
 ## Pre-defined types
 
@@ -262,12 +276,12 @@ Moose types like those in [MooseX::Types::Moose](https://metacpan.org/module/Moo
     use Types::Standard qw( Any );
 
     my $mock = mock;
-    stub($mock)->foo(Any)->returns('ok');
+    stub( sub { $mock->foo(Any) } )->returns('ok');
 
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
 
-    verify($mock, times => 2)->foo(Defined);
+    called_ok( sub { $mock->foo(Defined) }, times => 2 );
     # prints: ok 1 - foo(Defined) was called 2 time(s)
 
 You may use the normal features of the types: parameterized and structured
@@ -282,7 +296,7 @@ use coercions).
 
     # parameterized type
     # prints: ok 1 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
-    verify($list)->set( Int, StrMatch[qr/^foo/] );
+    called_ok( sub { $list->set( Int, StrMatch[qr/^foo/] ) } );
 
 ## Self-defined types
 
@@ -290,11 +304,11 @@ You may also use your own types, defined using [Type::Utils](https://metacpan.or
 
     use Type::Utils -all;
 
-    # naming the type means it will be printed nicely in the verify() output
+    # naming the type means it will be printed nicely in called_ok()'s output
     my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
 
     # prints: ok 2 - set(PositiveInt, Any) was called 1 time(s)
-    verify($list)->set( $positive_int, Any );
+    called_ok( sub { $list->set($positive_int, Any) } );
 
 ## Argument slurping
 
@@ -302,8 +316,8 @@ You may also use your own types, defined using [Type::Utils](https://metacpan.or
 Test::Mocha that you can use when you don't care what arguments are used.
 They will just slurp up the remaining arguments as though they match.
 
-    verify($list)->set( SlurpyArray );
-    verify($list)->set( Int, SlurpyHash );
+    called_ok( sub { $list->set(SlurpyArray) } );
+    called_ok( sub { $list->set(Int, SlurpyHash) } );
 
 Because they consume the remaining arguments, you can't use further argument
 validators after them. But you can, of course, use them before. Note also that
