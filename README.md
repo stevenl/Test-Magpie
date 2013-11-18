@@ -4,7 +4,7 @@ Test::Mocha - Test Spy/Stub Framework
 
 # VERSION
 
-version 0.49\_01
+version 0.50
 
 # SYNOPSIS
 

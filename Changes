@@ -1,95 +1,113 @@
 Revision history for Test-Mocha
 
-0.49_01 2013-11-14
-        Major interface change.
-         - dies() is now called throws().
-         - verify() is now called_ok().
-         - stub(), called_ok() and inspect() now take a coderef with a method
-           spec instead of a mock object.
-         - Backwards compatibility has been maintained with deprecation
-           warnings.
-        Carp 1.11 is no longer supported.
+0.50    2013-11-18  Major interface change
+
+    - dies() is now throws().
+    - verify() is now called_ok().
+    - stub(), called_ok() and inspect() now take a coderef with a method
+      spec instead of a mock object.
+    - Backwards compatibility has been maintained with deprecation warnings.
+    - Carp 1.11 is no longer supported.
 
 0.21_02 2013-10-24
-        Enable isa(), DOES() and can() to be stubbed and verified.
-        Fix test failure with Carp 1.11 where Carp::Heavy calls ref() on mocks.
-        Skip failing tests with Test::Builder::Test 1.23_002 where
-        `test_out(qr//)` does not work because it tries to stringify `qr//`.
+
+    - Enable isa(), DOES() and can() to be stubbed and verified.
+    - Fix test failure with Carp 1.11 where Carp::Heavy calls ref() on mocks.
+    - Skip failing tests with Test::Builder::Test 1.23_002 where
+      `test_out(qr//)` does not work because it tries to stringify `qr//`.
 
 0.21    2013-10-16
-        Fix test failure with Carp 1.32 where CARP_TRACE is called on mocks.
-        Copy Devel::PartialDump code into the distribution with changes:
-         - Removed Moose dependency
-         - Removed all functions (only dump() remains as a method)
-         - Minor bug fixes:
-            'list_delim' attribute is now used to separate lists.
-            'max_length' attribute with value 0 now dumps '...'.
-            Object dumps have '=' after the class name.
+
+    - Fix test failure with Carp 1.32 where CARP_TRACE is called on mocks.
+
+    [Internal modifications to Devel::PartialDump]
+    - Removed Moose dependency
+    - Removed all functions (only dump() remains as a method)
+    - Minor bug fixes:
+        - 'list_delim' attribute is now used to separate lists.
+        - 'max_length' attribute with value 0 now dumps '...'.
+        - Object dumps have '=' after the class name.
 
 0.20    2013-10-11
-        Allow ref() to be stubbed.
-        Provide better diagnostics with method call history and caller info
-        when verify() fails.
-        Make Moose an optional prerequisite.
+
+    - Allow ref() to be stubbed.
+    - Provide better diagnostics with method call history and caller info
+      when verify() fails.
+    - Make Moose an optional prerequisite.
 
 0.19    2013-09-18
-        Add inspect_all() function.
-        Remove Exception::Tiny test dependency.
-        Fix returns() and dies() when no arguments.
+
+    - Add inspect_all() function.
+    - Remove Exception::Tiny test dependency.
+    - Fix returns() and dies() when no arguments.
 
 0.18    2013-09-13
-        Fix tests for Perl versions older than 5.014 (operator precedence for
-        bitwise '&').
-        Make matcher_moose.t optional using Test::Requires.
-        Stub executes() should be given mock $self as its first argument.
+
+    - Fix tests for Perl versions older than 5.014 (operator precedence for
+      bitwise '&').
+    - Make matcher_moose.t optional using Test::Requires.
+    - Stub executes() should be given mock $self as its first argument.
 
 0.17    2013-09-10
-        Set version dependency for Types::Standard to 0.008 when InstanceOf
-        was introduced.
+
+    - Set version dependency for Types::Standard to 0.008 when InstanceOf
+      was introduced.
 
 0.16    2013-09-04
-        Fix for Perl versions older than 5.014 (s/// operator with /r switch).
+
+    - Fix for Perl versions older than 5.014 (s/// operator with /r switch).
 
 0.15    2013-09-02
-        Don't let AUTOLOAD() handle DESTROY().
-        Added stubbing with callbacks.
+
+    - Don't let AUTOLOAD() handle DESTROY().
+    - Added stubbing with callbacks.
 
 0.14    2013-08-30
-        Made inspect() public.
-        Removed Moose and other dependencies.
+
+    - Made inspect() public.
+    - Removed Moose and other dependencies.
 
 0.13    2013-08-26
-        Distribution fix (no modules provided)
+
+    - Distribution fix (no modules were provided).
 
 0.12    2013-08-26
-        Added support for using Type::Tiny type constraints as matchers.
+
+    - Added support for using Type::Tiny type constraints as matchers.
 
 0.11    2013-08-16
-        Forked from Test-Magpie.
-        Removed deprecated functions.
-        Refined documentation.
+
+    - Forked from Test-Magpie.
+    - Removed deprecated functions.
+    - Refined documentation.
 
 0.10    2013-08-12
-        Changed when->then_return to stub->returns.
-        Changed stubbing behaviour to match Mockito.
-         - The last stubbed response persists.
-         - New stubs take precedence over oldder stubs.
+
+    - Changed when->then_return to stub->returns.
+
+    [Stub behaviour changed to match Mockito]
+    - The last stubbed response persists.
+    - New stubs take precedence over older stubs.
 
 0.09    2013-08-03
-        Export main functions by default
-        Add optional parameter $test_name to verify()
+
+    - Export main functions by default.
+    - Add optional parameter $test_name to verify().
 
 0.08    2013-07-22
-        Fixed use of smartmatching and removed warnings
-        Improved verify() print messages
-        Added Mock::can() method
+
+    - Fixed use of smartmatching and removed warnings
+    - Improved verify() print messages
+    - Added Mock::can() method
 
 0.07    2013-07-15
-        Deprecated at_least() and at_most() functions
-        Added verify() options: at_least, at_most and between
-        Added argument checks for public functions
-        Added more comprehensive tests
+
+    - Deprecated at_least() and at_most() functions.
+    - Added verify() options: at_least, at_most and between.
+    - Added argument checks for public functions.
+    - Added more comprehensive tests.
 
 0.06    2013-07-03
-        Enable calling ref() on mock object to return a specified type
+
+    - Enable calling ref() on mock object to return a specified type.
 
