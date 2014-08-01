@@ -58,32 +58,32 @@ interfaces rather than on internal state.
 
 =cut
 
-use Carp     qw( croak );
+use Carp qw( croak );
 use Exporter qw( import );
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 use Test::Mocha::Util qw( getattr get_method_call is_called );
-use Types::Standard   qw( ArrayRef HashRef Num slurpy );
+use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
-    mock
-    stub
-    called_ok
-    verify
-    inspect
-    inspect_all
-    clear
-    SlurpyArray
-    SlurpyHash
+  mock
+  stub
+  called_ok
+  verify
+  inspect
+  inspect_all
+  clear
+  SlurpyArray
+  SlurpyHash
 );
 
 # croak() messages should not trace back to Mocha modules
 $Carp::Internal{$_}++ foreach qw(
-    Test::Mocha
-    Test::Mocha::Inspect
-    Test::Mocha::Mock
-    Test::Mocha::Util
-    Test::Mocha::Verify
+  Test::Mocha
+  Test::Mocha::Inspect
+  Test::Mocha::Mock
+  Test::Mocha::Util
+  Test::Mocha::Verify
 );
 
 =for Pod::Coverage SlurpyArray SlurpyHash
@@ -206,14 +206,13 @@ The last stubbed response will persist until it is overridden.
 =cut
 
 sub stub {
-    my ( $arg ) = @_;
+    my ($arg) = @_;
 
     if ( defined $arg ) {
         if ( MockType->check($arg) ) {
-            warnings::warnif(
-                'deprecated',
-                'Calling stub() with a mock object parameter is deprecated; pass it a coderef instead'
-            );
+            warnings::warnif( 'deprecated',
+                'Calling stub() with a mock object parameter is deprecated; '
+                  . 'pass it a coderef instead' );
             require Test::Mocha::Stub;
             return Test::Mocha::Stub->new( mock => $arg );
         }
@@ -223,7 +222,7 @@ sub stub {
             my $stubs = getattr( $method_call->invocant, 'stubs' );
             unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
-            return Test::Mocha::MethodStub->cast( $method_call );
+            return Test::Mocha::MethodStub->cast($method_call);
         }
     }
     croak 'stub() must be given a coderef';
@@ -302,27 +301,25 @@ sub called_ok {
     my ( $coderef, %options ) = _get_called_ok_args(@_);
 
     croak 'called_ok() must be given a coderef'
-        unless defined($coderef) && ref($coderef) eq 'CODE';
+      unless defined($coderef) && ref($coderef) eq 'CODE';
 
     $Test::Mocha::Mock::num_method_calls = 0;
     is_called( get_method_call($coderef), %options );
     return;
 }
 
-# verify() has been retained for backwards compatibility only
 =for Pod::Coverage verify
 =cut
 
+# verify() has been retained for backwards compatibility only
 sub verify {
     # uncoverable pod
     my ( $mock, %options ) = _get_called_ok_args(@_);
 
-    warnings::warnif(
-        'deprecated',
-        'verify() is deprecated; use called_ok() instead'
-    );
+    warnings::warnif( 'deprecated',
+        'verify() is deprecated; use called_ok() instead' );
     croak 'verify() must be given a mock object'
-        unless defined($mock) && MockType->check($mock);
+      unless defined($mock) && MockType->check($mock);
 
     require Test::Mocha::Verify;
     return Test::Mocha::Verify->new( mock => $mock, %options );
@@ -331,38 +328,38 @@ sub verify {
 sub _get_called_ok_args {
     my $coderef = shift;
     my $test_name;
-    $test_name = pop if (@_ % 2 == 1);
+    $test_name = pop if ( @_ % 2 == 1 );
     my %options = @_;
 
     # set default option if none given
     $options{times} = 1 if keys %options == 0;
 
     croak 'You can set only one of these options: '
-        . join ', ', map { "'$_'" } keys %options
-        unless keys %options == 1;
+      . join( ', ', map { "'$_'" } keys %options )
+      unless keys %options == 1;
 
     if ( defined $options{times} ) {
         croak "'times' option must be a number"
-            unless Num->check( $options{times} );
+          unless Num->check( $options{times} );
     }
     elsif ( defined $options{at_least} ) {
         croak "'at_least' option must be a number"
-            unless Num->check( $options{at_least} );
+          unless Num->check( $options{at_least} );
     }
     elsif ( defined $options{at_most} ) {
         croak "'at_most' option must be a number"
-            unless Num->check( $options{at_most} );
+          unless Num->check( $options{at_most} );
     }
     elsif ( defined $options{between} ) {
         croak "'between' option must be an arrayref "
-            . "with 2 numbers in ascending order"
-            unless NumRange->check( $options{between} );
+          . "with 2 numbers in ascending order"
+          unless NumRange->check( $options{between} );
     }
     else {
-        my ( $option ) = keys %options;
+        my ($option) = keys %options;
         croak "called_ok() was given an invalid option: '$option'";
     }
-    $options{ test_name } = $test_name if defined $test_name;
+    $options{test_name} = $test_name if defined $test_name;
 
     return ( $coderef, %options );
 }
@@ -395,14 +392,13 @@ They are also C<string> overloaded.
 =cut
 
 sub inspect {
-    my ( $arg ) = @_;
+    my ($arg) = @_;
 
     if ( defined $arg ) {
         if ( MockType->check($arg) ) {
-            warnings::warnif(
-                'deprecated',
-                'Calling inspect() with a mock object parameter is deprecated; pass it a coderef instead'
-            );
+            warnings::warnif( 'deprecated',
+                'Calling inspect() with a mock object parameter is deprecated; '
+                  . 'pass it a coderef instead' );
             require Test::Mocha::Inspect;
             return Test::Mocha::Inspect->new( mock => $arg );
         }
@@ -427,10 +423,10 @@ object. This is mainly used for debugging.
 =cut
 
 sub inspect_all {
-    my ( $mock ) = @_;
+    my ($mock) = @_;
 
     croak 'inspect_all() must be given a mock object'
-        unless defined $mock && MockType->check($mock);
+      unless defined $mock && MockType->check($mock);
 
     return @{ $mock->{calls} };
 }
@@ -448,9 +444,9 @@ sub clear {
     my @mocks = @_;
 
     croak 'clear() must be given one or more mock objects'
-        if !@mocks || grep { ! MockType->check($_) } @mocks;
+      if !@mocks || grep { !MockType->check($_) } @mocks;
 
-    @{ getattr( $_, 'calls' ) } = ( ) foreach @mocks;
+    @{ getattr( $_, 'calls' ) } = () foreach @mocks;
 
     return;
 }

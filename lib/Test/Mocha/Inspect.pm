@@ -6,13 +6,13 @@ use warnings;
 
 use Test::Mocha::Method;
 use Test::Mocha::Types qw( Mock );
-use Test::Mocha::Util  qw( extract_method_name getattr );
+use Test::Mocha::Util qw( extract_method_name getattr );
 
 our $AUTOLOAD;
 
 sub new {
     # uncoverable pod
-    my ($class, %args) = @_;
+    my ( $class, %args ) = @_;
     ### assert: defined $args{mock} && Mock->check( $args{mock} )
     return bless \%args, $class;
 }
@@ -25,7 +25,7 @@ sub AUTOLOAD {
         args => \@_,
     );
 
-    my $mock  = getattr( $self, 'mock'  );
+    my $mock  = getattr( $self, 'mock' );
     my $calls = getattr( $mock, 'calls' );
 
     return grep { $inspect->satisfied_by($_) } @$calls;

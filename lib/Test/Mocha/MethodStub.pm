@@ -15,7 +15,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
 
-    $self->{executions} = []; # ArrayRef[ CodeRef ]
+    $self->{executions} = [];  # ArrayRef[ CodeRef ]
 
     return $self;
 }
@@ -34,9 +34,9 @@ sub returns {
     my ( $self, @return_values ) = @_;
 
     push @{ $self->{executions} },
-        @return_values == 1 ? sub { $return_values[0] } :
-        @return_values  > 1 ? sub { @return_values    } :
-                              sub { };  # @return_values == 0
+        @return_values == 1 ? sub { $return_values[0] }
+      : @return_values > 1  ? sub { @return_values }
+      :                       sub { };                  # @return_values == 0
 
     return $self;
 }
@@ -47,10 +47,11 @@ sub throws {
     my ( $self, @exception ) = @_;
 
     push @{ $self->{executions} },
-        # check if first arg is a throwable exception
-        blessed($exception[0]) && $exception[0]->can('throw')
-          ? sub { $exception[0]->throw }
-          : sub { croak @exception     };
+      # check if first arg is a throwable exception
+      ( blessed( $exception[0] )
+      && $exception[0]->can('throw') )
+      ? sub { $exception[0]->throw }
+      : sub { croak @exception };
 
     return $self;
 }
@@ -61,7 +62,7 @@ sub executes {
     my ( $self, $callback ) = @_;
 
     croak 'executes() must be given a coderef'
-        unless ref($callback) eq 'CODE';
+      unless ref($callback) eq 'CODE';
 
     push @{ $self->{executions} }, $callback;
 
@@ -79,9 +80,7 @@ sub do_next_execution {
 
     # shift the next execution off the front of the queue
     # ... except for the last one
-    my $execution = @$executions > 1
-        ? shift(@$executions)
-        : $executions->[0];
+    my $execution = @$executions > 1 ? shift(@$executions) : $executions->[0];
 
     return $execution->(@args);
 }

@@ -10,7 +10,7 @@ our @ISA = qw( Test::Mocha::Method );
 
 sub new {
     # uncoverable pod
-    my ($class, %args) = @_;
+    my ( $class, %args ) = @_;
     # caller should be an arrayref tuple [file, line]
     ### assert: defined $args{invocant}
     ### assert: defined $args{caller}
@@ -30,12 +30,9 @@ sub caller {
 
 sub stringify_long {
     # uncoverable pod
-    my ( $self ) = @_;
-    return sprintf(
-        '%s called at %s line %d',
-        $self->SUPER::stringify,
-        $self->caller,
-    );
+    my ($self) = @_;
+    return sprintf( '%s called at %s line %d',
+        $self->SUPER::stringify, $self->caller );
 }
 
 1;

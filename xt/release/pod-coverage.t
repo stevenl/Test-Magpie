@@ -12,4 +12,5 @@ plan skip_all => "Pod::Coverage::TrustPod required for testing POD coverage"
 
 # test public modules only
 plan tests => 1;
-pod_coverage_ok('Test::Mocha', {coverage_class => 'Pod::Coverage::TrustPod'})
+pod_coverage_ok( 'Test::Mocha',
+    { coverage_class => 'Pod::Coverage::TrustPod' } )

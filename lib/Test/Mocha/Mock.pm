@@ -4,13 +4,13 @@ package Test::Mocha::Mock;
 use strict;
 use warnings;
 
-use Carp 1.22           qw( croak );
+use Carp 1.22 qw( croak );
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
-use Test::Mocha::Types  qw( Matcher Slurpy );
-use Test::Mocha::Util   qw( extract_method_name find_caller find_stub
-                            getattr has_caller_package );
-use Types::Standard     qw( ArrayRef HashRef Str );
+use Test::Mocha::Types qw( Matcher Slurpy );
+use Test::Mocha::Util qw( extract_method_name find_caller find_stub
+  getattr has_caller_package );
+use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
@@ -20,55 +20,56 @@ our $last_execution;
 
 # Classes for which mock isa() should return false
 my %Isnota = (
-    'Type::Tiny' => undef,
+    'Type::Tiny'                  => undef,
     'Moose::Meta::TypeConstraint' => undef,
 );
 
 # can() should always return a reference to the C<AUTOLOAD()> method
 my $CAN = Test::Mocha::MethodStub->new(
     name => 'can',
-    args => [ Str ],
-)->executes(sub {
-    my ($self, $method_name) = @_;
-    return sub {
-        $AUTOLOAD = $method_name;
-        goto &AUTOLOAD;
-    };
-});
+    args => [Str],
+  )->executes(
+    sub {
+        my ( $self, $method_name ) = @_;
+        return sub {
+            $AUTOLOAD = $method_name;
+            goto &AUTOLOAD;
+        };
+    }
+  );
 
 # DOES() should always return true
 my $DOES_UC = Test::Mocha::MethodStub->new(
     name => 'DOES',
-    args => [ Str ],
+    args => [Str],
 )->returns(1);
 
 # does() should always return true
 my $DOES_LC = Test::Mocha::MethodStub->new(
     name => 'does',
-    args => [ Str ],
+    args => [Str],
 )->returns(1);
 
 # isa() should always returns true
 my $ISA = Test::Mocha::MethodStub->new(
     name => 'isa',
-    args => [ Str ] ,
+    args => [Str],
 )->returns(1);
-
 
 sub new {
     # uncoverable pod
     my $class = shift;
-    my $self  = bless {@_}, $class;
+    my $self = bless {@_}, $class;
 
     # ArrayRef[ MethodCall ]
     $self->{calls} = [];
 
     # $method_name => ArrayRef[ MethodStub ]
     $self->{stubs} = {
-        can  => [ $CAN     ],
-        DOES => [ $DOES_UC ],
-        does => [ $DOES_LC ],
-        isa  => [ $ISA     ],
+        can  => [$CAN],
+        DOES => [$DOES_UC],
+        does => [$DOES_LC],
+        isa  => [$ISA],
     };
 
     return $self;
@@ -85,7 +86,7 @@ sub AUTOLOAD {
     {
         my $i = 0;
         my $seen_slurpy;
-        foreach ( @args ) {
+        foreach (@args) {
             if ( Slurpy->check($_) ) {
                 $seen_slurpy = 1;
                 last;
@@ -93,13 +94,13 @@ sub AUTOLOAD {
             $i++;
         }
         croak 'No arguments allowed after a slurpy type constraint'
-            if $i < $#args;
+          if $i < $#args;
 
-        if ( $seen_slurpy ) {
+        if ($seen_slurpy) {
             my $slurpy = $args[$i]->{slurpy};
             croak 'Slurpy argument must be a type of ArrayRef or HashRef'
-                unless $slurpy->is_a_type_of(ArrayRef)
-                    || $slurpy->is_a_type_of(HashRef);
+              unless $slurpy->is_a_type_of(ArrayRef)
+              || $slurpy->is_a_type_of(HashRef);
         }
     }
 
@@ -113,7 +114,7 @@ sub AUTOLOAD {
         invocant => $self,
         name     => $method_name,
         args     => \@args,
-        caller   => [ find_caller ],
+        caller   => [find_caller],
     );
     push @$calls, $last_method_call;
 
@@ -121,7 +122,7 @@ sub AUTOLOAD {
     my $stub = find_stub( $self, $last_method_call );
     if ( defined $stub ) {
         # save reference to stub execution so it can be restored
-        my $executions  = getattr( $stub, 'executions' );
+        my $executions = getattr( $stub, 'executions' );
         $last_execution = $executions->[0] if @$executions > 1;
 
         return $stub->do_next_execution( $self, @args );
@@ -142,7 +143,7 @@ sub isa {
     # In order to allow mock methods to be called with other mocks as
     # arguments, mocks cannot isa() type constraints, which are not allowed
     # as arguments.
-    return if exists $Isnota{ $class };
+    return if exists $Isnota{$class};
 
     $AUTOLOAD = 'isa';
     goto &AUTOLOAD;

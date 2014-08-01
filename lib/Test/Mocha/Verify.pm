@@ -6,14 +6,14 @@ use warnings;
 
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
-use Test::Mocha::Util  qw( extract_method_name is_called );
-use Types::Standard    qw( Num Str );
+use Test::Mocha::Util qw( extract_method_name is_called );
+use Types::Standard qw( Num Str );
 
 our $AUTOLOAD;
 
 sub new {
     # uncoverable pod
-    my ($class, %args) = @_;
+    my ( $class, %args ) = @_;
 
     ### assert: defined $args{mock} && Mock->check( $args{mock} )
     ### assert: !defined $args{ test_name } || Str->check( $args{ test_name } )
@@ -31,8 +31,8 @@ sub AUTOLOAD {
 
     my $method_call = Test::Mocha::MethodCall->new(
         invocant => $self->{mock},
-        name => extract_method_name($AUTOLOAD),
-        args => \@_,
+        name     => extract_method_name($AUTOLOAD),
+        args     => \@_,
     );
     is_called( $method_call, %$self );
     return;

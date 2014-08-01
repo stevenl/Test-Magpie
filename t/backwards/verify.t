@@ -18,8 +18,8 @@ my $err;
 
 my $mock = mock;
 $mock->once;
-$mock->twice() for 1..2;
-$mock->thrice($_) for 1..3;
+$mock->twice() for 1 .. 2;
+$mock->thrice($_) for 1 .. 3;
 
 my $diag_call_history = <<END;
 # Complete method call history (most recent call last):
@@ -48,13 +48,13 @@ like(
 );
 
 like(
-    exception { verify($mock, times => 2, at_least => 2)->twice },
+    exception { verify( $mock, times => 2, at_least => 2 )->twice },
     qr/^You can set only one of these options:/,
     'verify() called with multiple options'
 );
 
 like(
-    exception { verify($mock, tiny => 1)->once },
+    exception { verify( $mock, tiny => 1 )->once },
     qr/^called_ok\(\) was given an invalid option: 'tiny'/,
     'verify() called with an invalid option'
 );
@@ -67,9 +67,9 @@ verify($mock)->once;
 test_test('simple verify() that passes');
 
 $test_name = 'one() was called 1 time(s)';
-$line = __LINE__ + 12;
+$line      = __LINE__ + 12;
 test_out("not ok 1 - $test_name");
-chomp($err = <<ERR);
+chomp( $err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
 # Error: unexpected number of calls to 'one()'
@@ -85,20 +85,20 @@ test_test('simple verify`() that fails');
 
 $test_name = 'once() was called once';
 test_out("ok 1 - $test_name");
-verify($mock, $test_name)->once;
+verify( $mock, $test_name )->once;
 test_test('simple verify() with a test name');
 
 # -----------------
 # verify() with 'times' option
 
 test_out('ok 1 - twice() was called 2 time(s)');
-verify($mock, times => 2)->twice();
+verify( $mock, times => 2 )->twice();
 test_test("verify() with 'times' option that passes");
 
 $test_name = 'twice() was called 1 time(s)';
-$line = __LINE__ + 12;
+$line      = __LINE__ + 12;
 test_out("not ok 1 - $test_name");
-chomp($err = <<ERR);
+chomp( $err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
 # Error: unexpected number of calls to 'twice()'
@@ -108,12 +108,12 @@ $diag_call_history
 ERR
 test_err $err;
 {
-    verify($mock, times => 1)->twice;
+    verify( $mock, times => 1 )->twice;
 }
 test_test("verify() with 'times' option that fails");
 
 like(
-    exception { verify($mock, times => 'string') },
+    exception { verify( $mock, times => 'string' ) },
     qr/^'times' option must be a number/,
     "verify() with invalid 'times' value"
 );
@@ -122,13 +122,13 @@ like(
 # verify() with 'at_least' option
 
 test_out('ok 1 - once() was called at least 1 time(s)');
-verify($mock, at_least => 1)->once;
+verify( $mock, at_least => 1 )->once;
 test_test("verify() with 'at_least' option that passes");
 
 $test_name = 'once() was called at least 2 time(s)';
-$line = __LINE__ + 12;
+$line      = __LINE__ + 12;
 test_out("not ok 1 - $test_name");
-chomp($err = <<ERR);
+chomp( $err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
 # Error: unexpected number of calls to 'once()'
@@ -138,12 +138,12 @@ $diag_call_history
 ERR
 test_err $err;
 {
-    verify($mock, at_least => 2)->once;
+    verify( $mock, at_least => 2 )->once;
 }
 test_test("verify() with 'at_least' option that fails");
 
 like(
-    exception { verify($mock, at_least => 'string') },
+    exception { verify( $mock, at_least => 'string' ) },
     qr/^'at_least' option must be a number/,
     "verify() with invalid 'at_least' value"
 );
@@ -152,13 +152,13 @@ like(
 # verify() with 'at_most' option
 
 test_out('ok 1 - twice() was called at most 2 time(s)');
-verify($mock, at_most => 2)->twice;
+verify( $mock, at_most => 2 )->twice;
 test_test("verify() with 'at_most' option that passes");
 
 $test_name = 'twice() was called at most 1 time(s)';
-$line = __LINE__ + 12;
+$line      = __LINE__ + 12;
 test_out("not ok 1 - $test_name");
-chomp($err = <<ERR);
+chomp( $err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
 # Error: unexpected number of calls to 'twice()'
@@ -168,12 +168,12 @@ $diag_call_history
 ERR
 test_err $err;
 {
-    verify($mock, at_most => 1)->twice;
+    verify( $mock, at_most => 1 )->twice;
 }
 test_test("verify() with 'at_most' option that fails");
 
 like(
-    exception { verify($mock, at_most => 'string') },
+    exception { verify( $mock, at_most => 'string' ) },
     qr/^'at_most' option must be a number/,
     "verify() with invalid 'at_most' value"
 );
@@ -182,17 +182,17 @@ like(
 # verify() with 'between' option
 
 test_out('ok 1 - twice() was called between 1 and 2 time(s)');
-verify($mock, between => [1, 2])->twice;
+verify( $mock, between => [ 1, 2 ] )->twice;
 test_test("verify() with 'between' option that passes (lower boundary)");
 
 test_out('ok 1 - twice() was called between 2 and 3 time(s)');
-verify($mock, between => [2, 3])->twice;
+verify( $mock, between => [ 2, 3 ] )->twice;
 test_test("verify() with 'between' option that passes (upper boundary)");
 
 $test_name = 'twice() was called between 0 and 1 time(s)';
-$line = __LINE__ + 12;
+$line      = __LINE__ + 12;
 test_out("not ok 1 - $test_name");
-chomp($err = <<ERR);
+chomp( $err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
 # Error: unexpected number of calls to 'twice()'
@@ -202,14 +202,14 @@ $diag_call_history
 ERR
 test_err $err;
 {
-    verify($mock, between => [0, 1])->twice;
+    verify( $mock, between => [ 0, 1 ] )->twice;
 }
 test_test("verify() with 'between' option that fails (lower boundary)");
 
 $test_name = 'twice() was called between 3 and 4 time(s)';
-$line = __LINE__ + 12;
+$line      = __LINE__ + 12;
 test_out("not ok 1 - $test_name");
-chomp($err = <<ERR);
+chomp( $err = <<ERR);
 #   Failed test '$test_name'
 #   at $file line $line.
 # Error: unexpected number of calls to 'twice()'
@@ -219,30 +219,30 @@ $diag_call_history
 ERR
 test_err $err;
 {
-    verify($mock, between => [3, 4])->twice;
+    verify( $mock, between => [ 3, 4 ] )->twice;
 }
 test_test("verify() with 'between' option that fails (upper boundary)");
 
 like(
-    exception { verify($mock, between => 1)->twice },
+    exception { verify( $mock, between => 1 )->twice },
     qr/'between' option must be an arrayref with 2 numbers in ascending order/,
     "verify() with invalid 'between' value (not an arrayref)"
 );
 
 like(
-    exception { verify($mock, between => [1])->twice },
+    exception { verify( $mock, between => [1] )->twice },
     qr/'between' option must be an arrayref with 2 numbers in ascending order/,
     "verify() with invalid 'between' value (not a pair)"
 );
 
 like(
-    exception { verify($mock, between => ['one', 'two'])->twice },
+    exception { verify( $mock, between => [ 'one', 'two' ] )->twice },
     qr/'between' option must be an arrayref with 2 numbers in ascending order/,
     "verify() with invalid 'between' value (pair are not numbers)"
 );
 
 like(
-    exception { verify($mock, between => [2, 1])->twice },
+    exception { verify( $mock, between => [ 2, 1 ] )->twice },
     qr/'between' option must be an arrayref with 2 numbers in ascending order/,
     "verify() with invalid 'between' value (pair not ordered)"
 );
@@ -252,46 +252,49 @@ like(
 
 $test_name = 'name for my test';
 test_out("ok 1 - $test_name");
-verify($mock, times => 1, $test_name)->once;
+verify( $mock, times => 1, $test_name )->once;
 test_test("verify() with 'times' option and a name");
 
 test_out("ok 1 - $test_name");
-verify($mock, at_least => 1, $test_name)->once;
+verify( $mock, at_least => 1, $test_name )->once;
 test_test("verify() with 'at_least' option and a name");
 
 test_out("ok 1 - $test_name");
-verify($mock, at_most => 2, $test_name)->twice;
+verify( $mock, at_most => 2, $test_name )->twice;
 test_test("verify() with 'at_most' option and a name");
 
 test_out("ok 1 - $test_name");
-verify($mock, between => [1, 2], $test_name)->twice;
+verify( $mock, between => [ 1, 2 ], $test_name )->twice;
 test_test("verify() with 'between' option and a name");
 
 # -----------------
 # verify() with type constraint arguments
 
 test_out('ok 1 - thrice(Any) was called 3 time(s)');
-verify($mock, times => 3)->thrice(Any);
+verify( $mock, times => 3 )->thrice(Any);
 test_test('verify() accepts type constraints');
 
-my $e = exception { verify($mock)->thrice(SlurpyArray, 1) };
+my $e = exception { verify($mock)->thrice( SlurpyArray, 1 ) };
 like(
-    $e, qr/^No arguments allowed after a slurpy type constraint/,
+    $e,
+    qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint'
 );
 like( $e, qr/verify\.t/, '... and message traces back to this script' );
 
 # to complete test coverage - once() has no arguments
-$e = exception { verify($mock)->once(SlurpyArray, 1) };
+$e = exception { verify($mock)->once( SlurpyArray, 1 ) };
 like(
-    $e, qr/^No arguments allowed after a slurpy type constraint/,
+    $e,
+    qr/^No arguments allowed after a slurpy type constraint/,
     'Disallow arguments after a slurpy type constraint'
 );
 like( $e, qr/verify\.t/, '... and message traces back to this script' );
 
-$e = exception { verify($mock)->thrice(slurpy Any) };
+$e = exception { verify($mock)->thrice( slurpy Any ) };
 like(
-    $e, qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    $e,
+    qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
     'Invalid Slurpy argument for verify()'
 );
 like( $e, qr/verify\.t/, '... and message traces back to this script' );
@@ -300,8 +303,8 @@ like( $e, qr/verify\.t/, '... and message traces back to this script' );
 # conditional verifications - verify that failure diagnostics are not output
 
 $test_name = 'method_not_called() was called 1 time(s)';
-$line = __LINE__ + 9;
-chomp(my $out = <<OUT);
+$line      = __LINE__ + 9;
+chomp( my $out = <<OUT);
 not ok 1 - $test_name # TODO should fail
 #   Failed (TODO) test '$test_name'
 #   at $file line $line.
