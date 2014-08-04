@@ -21,7 +21,7 @@ $mock1->foo;
 $mock2->bar;
 is( ( @{$calls1} + @{$calls2} ), 2, 'mocks have calls before clear()' );
 
-clear @mocks;
+clear(@mocks);
 is( ( @{$calls1} + @{$calls2} ), 0, '... and no calls after clear()' );
 
 # ----------------------
@@ -31,12 +31,12 @@ my $file = __FILE__;
 my $e;
 
 like(
-    $e = exception { clear },
+    $e = exception { clear() },
     qr/^clear\(\) must be given one or more mock objects/,
     'clear() must be given an argument'
 );
 like(
-    $e = exception { clear 1 },
+    $e = exception { clear(1) },
     qr/^clear\(\) must be given one or more mock objects/,
     '... and argument must be a mock'
 );

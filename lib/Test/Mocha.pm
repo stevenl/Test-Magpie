@@ -428,19 +428,19 @@ sub inspect_all {
 
 =func clear
 
-    clear(@mocks)
+    clear $mock1, $mock2, ...
 
 Clears the method call history for one or more mocks so that they can be
 reused in another test. Note that this does not affect the stubbed methods.
 
 =cut
 
-sub clear {
+sub clear (@) {
     my @mocks = @_;
 
     ## no critic (ProhibitBooleanGrep)
     croak 'clear() must be given one or more mock objects'
-      if !@mocks || ( grep { !MockType->check($_) } @mocks );
+      if !@mocks || grep { !MockType->check($_) } @mocks;
     ## use critic
 
     @{ getattr( $_, 'calls' ) } = () foreach @mocks;
@@ -515,11 +515,11 @@ they will match empty argument lists.
 =cut
 
 ## no critic (NamingConventions::Capitalization)
-sub SlurpyArray {
+sub SlurpyArray () {
     # uncoverable pod
     return slurpy(ArrayRef);
 }
-sub SlurpyHash  {
+sub SlurpyHash () {
     # uncoverable pod
     return slurpy(HashRef);
 }
