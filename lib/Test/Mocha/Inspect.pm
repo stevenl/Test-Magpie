@@ -18,17 +18,17 @@ sub new {
 }
 
 sub AUTOLOAD {
-    my $self = shift;
+    my ( $self, @args ) = @_;
 
     my $inspect = Test::Mocha::Method->new(
         name => extract_method_name($AUTOLOAD),
-        args => \@_,
+        args => \@args,
     );
 
     my $mock  = getattr( $self, 'mock' );
     my $calls = getattr( $mock, 'calls' );
 
-    return grep { $inspect->satisfied_by($_) } @$calls;
+    return grep { $inspect->satisfied_by($_) } @{$calls};
 }
 
 # Don't let AUTOLOAD() handle DESTROY()

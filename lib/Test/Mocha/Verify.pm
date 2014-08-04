@@ -6,7 +6,7 @@ use warnings;
 
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
-use Test::Mocha::Util qw( extract_method_name is_called );
+use Test::Mocha::Util qw( extract_method_name has_caller_package is_called );
 use Types::Standard qw( Num Str );
 
 our $AUTOLOAD;
@@ -27,14 +27,14 @@ sub new {
 }
 
 sub AUTOLOAD {
-    my $self = shift;
+    my ( $self, @args ) = @_;
 
     my $method_call = Test::Mocha::MethodCall->new(
         invocant => $self->{mock},
         name     => extract_method_name($AUTOLOAD),
-        args     => \@_,
+        args     => \@args,
     );
-    is_called( $method_call, %$self );
+    is_called( $method_call, %{$self} );
     return;
 }
 
@@ -53,7 +53,10 @@ sub DOES {
 }
 
 sub can {
+    # Handle can('CARP_TRACE') for internal croak()'s (Carp v1.32+)
     # uncoverable pod
+    return if has_caller_package(__PACKAGE__);
+
     $AUTOLOAD = 'can';
     goto &AUTOLOAD;
 }

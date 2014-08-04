@@ -31,7 +31,7 @@ sub extract_method_name {
     # """Extracts the method name from its fully qualified name."""
     # uncoverable pod
     my ($method_name) = @_;
-    $method_name =~ s/.*:://;
+    $method_name =~ s/.*:://sm;
     return $method_name;
 }
 
@@ -40,9 +40,11 @@ sub find_caller {
     # uncoverable pod
     my ( $package, $file, $line );
 
-    for ( my $i = 1 ; 1 ; $i++ ) {
-        ( $package, $file, $line ) = caller($i);
+    my $i = 1;
+    while () {
+        ( $package, $file, $line ) = caller $i;
         last if $package ne 'UNIVERSAL::ref';
+        $i++;
     }
     return ( $file, $line );
 }
@@ -52,7 +54,7 @@ sub find_stub {
     my ( $mock, $method_call ) = @_;
 
     my $stubs = getattr( $mock, 'stubs' );
-    return unless defined $stubs->{ $method_call->name };
+    return if !defined $stubs->{ $method_call->name };
 
     foreach my $stub ( @{ $stubs->{ $method_call->name } } ) {
         return $stub if $stub->satisfied_by($method_call);
@@ -66,7 +68,7 @@ sub getattr {
     my ( $object, $attribute ) = @_;
 
     # uncoverable branch true
-    confess "getattr() must be given an object"
+    confess 'getattr() must be given an object'
       if not ref $object;
     confess "Attribute '$attribute' does not exist for object '$object'"
       if not exists $object->{$attribute};
@@ -87,14 +89,14 @@ sub get_method_call {
         $coderef->();
     }
     catch {
-        die $_ if /^(?:
-            No\ arguments\ allowed\ after\ a\ slurpy\ type\ constraint
-                |
-            Slurpy\ argument\ must\ be\ a\ type\ of\ ArrayRef\ or\ HashRef
-        )/x;
+        ## no critic (RequireCarping,RequireExtendedFormatting)
+        die $_
+          if ( m{^No arguments allowed after a slurpy type constraint}sm
+            || m{^Slurpy argument must be a type of ArrayRef or HashRef}sm );
+        ## use critic
     };
 
-    croak "Coderef must have a single method invocation on a mock object"
+    croak 'Coderef must have a single method invocation on a mock object'
       if $Test::Mocha::Mock::num_method_calls != 1;
 
     my $method_call = $Test::Mocha::Mock::last_method_call;
@@ -137,10 +139,11 @@ sub is_called {
     my $mock = $method_call->invocant;
     my $calls = getattr( $mock, 'calls' );
 
-    my $got = grep { $method_call->satisfied_by($_) } @$calls;
+    my $got = grep { $method_call->satisfied_by($_) } @{$calls};
     my $exp;
     my $test_ok;
 
+    ## no critic (ProhibitCascadingIfElse)
     # uncoverable branch false count:4
     if ( defined $options{times} ) {
         $exp     = $options{times};
@@ -159,11 +162,12 @@ sub is_called {
         $exp = "between $lower and $upper";
         $test_ok = $lower <= $got && $got <= $upper;
     }
+    ## use critic
 
     my $test_name =
       defined $options{test_name}
       ? $options{test_name}
-      : sprintf( '%s was called %s time(s)', $method_call, $exp );
+      : sprintf '%s was called %s time(s)', $method_call, $exp;
 
     # Test failure report should not trace back to Mocha modules
     local $Test::Builder::Level = 2;
@@ -172,14 +176,15 @@ sub is_called {
 
     # output diagnostics to aid with debugging
     unless ( $test_ok || $TB->in_todo ) {
-        my $diag = <<END;
+        my $diag = <<"END";
 Error: unexpected number of calls to '$method_call'
          got: $got time(s)
     expected: $exp time(s)
 Complete method call history (most recent call last):
 END
-        if (@$calls) {
-            $diag .= ( '    ' . $_->stringify_long . "\n" ) foreach @$calls;
+        if ( @{$calls} ) {
+            $diag .= ( (q{    }) . $_->stringify_long . "\n" )
+              foreach @{$calls};
         }
         else {
             $diag .= "    (No methods were called)\n";
@@ -198,7 +203,7 @@ sub match {
     # in which it is used because of its quirks.
 
     # ref types must match
-    return if ref($x) ne ref($y);
+    return if ref $x ne ref $y;
 
     # objects match only if they are the same object
     if ( blessed($x) || ref($x) eq 'CODE' ) {
@@ -219,10 +224,10 @@ sub match {
 
     if ( ref($x) eq 'HASH' ) {
         # smartmatch only matches the hash keys
-        return unless $x ~~ $y;
+        return if not $x ~~ $y;
 
         # ... but we want to match the hash values too
-        foreach ( keys %$x ) {
+        foreach ( keys %{$x} ) {
             return if !match( $x->{$_}, $y->{$_} );
         }
         return 1;

@@ -43,7 +43,7 @@ sub stringify {
     return $self->name . '(' . $Dumper->dump( $self->args ) . ')';
 }
 
-my $slurp = sub {
+my $Slurp = sub {
     # """check slurpy arguments"""
     my ( $slurpy_matcher, @to_match ) = @_;
 
@@ -59,7 +59,7 @@ my $slurp = sub {
         $value = {@to_match};
     }
     else {
-        croak('Slurpy argument must be a type of ArrayRef or HashRef');
+        croak 'Slurpy argument must be a type of ArrayRef or HashRef';
     }
 
     return $matcher->check($value);
@@ -86,7 +86,7 @@ sub satisfied_by {
             croak 'No arguments allowed after a slurpy type constraint'
               unless @expected == 0;
 
-            return unless $slurp->( $matcher, @input );
+            return unless $Slurp->( $matcher, @input );
 
             @input = ();
         }
@@ -106,7 +106,7 @@ sub satisfied_by {
           unless @expected == 0;
 
         # uncoverable branch true
-        return unless $slurp->( $matcher, @input );
+        return unless $Slurp->( $matcher, @input );
     }
 
     return @input == 0 && @expected == 0;

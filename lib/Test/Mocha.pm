@@ -86,14 +86,6 @@ $Carp::Internal{$_}++ foreach qw(
   Test::Mocha::Verify
 );
 
-=for Pod::Coverage SlurpyArray SlurpyHash
-=cut
-
-use constant {
-    SlurpyArray => slurpy(ArrayRef),
-    SlurpyHash  => slurpy(HashRef),
-};
-
 =func mock
 
     my $mock = mock;
@@ -325,6 +317,7 @@ sub verify {
     return Test::Mocha::Verify->new( mock => $mock, %options );
 }
 
+## no critic (RequireArgUnpacking)
 sub _get_called_ok_args {
     my $coderef = shift;
     my $test_name;
@@ -334,10 +327,11 @@ sub _get_called_ok_args {
     # set default option if none given
     $options{times} = 1 if keys %options == 0;
 
-    croak 'You can set only one of these options: '
-      . join( ', ', map { "'$_'" } keys %options )
+    croak 'You can set only one of these options: ' . join ', ',
+      map { "'$_'" } keys %options
       unless keys %options == 1;
 
+    ## no critic (ProhibitCascadingIfElse)
     if ( defined $options{times} ) {
         croak "'times' option must be a number"
           unless Num->check( $options{times} );
@@ -352,7 +346,7 @@ sub _get_called_ok_args {
     }
     elsif ( defined $options{between} ) {
         croak "'between' option must be an arrayref "
-          . "with 2 numbers in ascending order"
+          . 'with 2 numbers in ascending order'
           unless NumRange->check( $options{between} );
     }
     else {
@@ -363,6 +357,7 @@ sub _get_called_ok_args {
 
     return ( $coderef, %options );
 }
+## use critic
 
 =func inspect
 
@@ -407,7 +402,7 @@ sub inspect {
             my $method_call = get_method_call($arg);
             my $mock        = $method_call->invocant;
             my $calls       = getattr( $mock, 'calls' );
-            return grep { $method_call->satisfied_by($_) } @$calls;
+            return grep { $method_call->satisfied_by($_) } @{$calls};
         }
     }
     croak 'inspect() must be given a coderef';
@@ -443,15 +438,15 @@ reused in another test. Note that this does not affect the stubbed methods.
 sub clear {
     my @mocks = @_;
 
+    ## no critic (ProhibitBooleanGrep)
     croak 'clear() must be given one or more mock objects'
-      if !@mocks || grep { !MockType->check($_) } @mocks;
+      if !@mocks || ( grep { !MockType->check($_) } @mocks );
+    ## use critic
 
     @{ getattr( $_, 'calls' ) } = () foreach @mocks;
 
     return;
 }
-
-1;
 
 =head1 ARGUMENT MATCHING
 
@@ -516,6 +511,20 @@ Because they consume the remaining arguments, you can't use further argument
 validators after them. But you can, of course, use them before. Note also that
 they will match empty argument lists.
 
+=for Pod::Coverage SlurpyArray SlurpyHash
+=cut
+
+## no critic (NamingConventions::Capitalization)
+sub SlurpyArray {
+    # uncoverable pod
+    return slurpy(ArrayRef);
+}
+sub SlurpyHash  {
+    # uncoverable pod
+    return slurpy(HashRef);
+}
+## use critic
+
 =head1 TO DO
 
 =for :list
@@ -535,3 +544,5 @@ for Java and Python by Szczepan Faber.
 L<Test::MockObject>
 
 =cut
+
+1;

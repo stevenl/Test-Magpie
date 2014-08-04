@@ -19,10 +19,10 @@ my $calls2 = getattr( $mock2, 'calls' );
 
 $mock1->foo;
 $mock2->bar;
-is( ( @$calls1 + @$calls2 ), 2, 'mocks have calls before clear()' );
+is( ( @{$calls1} + @{$calls2} ), 2, 'mocks have calls before clear()' );
 
 clear(@mocks);
-is( ( @$calls1 + @$calls2 ), 0, '... and no calls after clear()' );
+is( ( @{$calls1} + @{$calls2} ), 0, '... and no calls after clear()' );
 
 # ----------------------
 # exceptions

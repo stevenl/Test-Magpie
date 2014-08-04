@@ -56,6 +56,7 @@ my $ISA = Test::Mocha::MethodStub->new(
     args => [Str],
 )->returns(1);
 
+## no critic (RequireArgUnpacking)
 sub new {
     # uncoverable pod
     my $class = shift;
@@ -74,6 +75,7 @@ sub new {
 
     return $self;
 }
+## use critic
 
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
@@ -116,14 +118,14 @@ sub AUTOLOAD {
         args     => \@args,
         caller   => [find_caller],
     );
-    push @$calls, $last_method_call;
+    push @{$calls}, $last_method_call;
 
     # find a stub to return a response
     my $stub = find_stub( $self, $last_method_call );
     if ( defined $stub ) {
         # save reference to stub execution so it can be restored
         my $executions = getattr( $stub, 'executions' );
-        $last_execution = $executions->[0] if @$executions > 1;
+        $last_execution = $executions->[0] if @{$executions} > 1;
 
         return $stub->do_next_execution( $self, @args );
     }
@@ -157,7 +159,7 @@ sub DOES {
     # when ref($mock) is called
     return 1 if $role eq __PACKAGE__;
 
-    return if !ref($self);
+    return if !ref $self;
 
     $AUTOLOAD = 'DOES';
     goto &AUTOLOAD;
@@ -174,8 +176,8 @@ sub can {
     goto &AUTOLOAD;
 }
 
-sub ref {
-    # uncoverable pod
+sub ref {  ## no critic (ProhibitBuiltinHomonyms)
+           # uncoverable pod
     $AUTOLOAD = 'ref';
     goto &AUTOLOAD;
 }

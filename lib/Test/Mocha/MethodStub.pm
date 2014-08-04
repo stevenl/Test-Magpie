@@ -3,12 +3,10 @@ package Test::Mocha::MethodStub;
 
 use strict;
 use warnings;
+use parent qw( Test::Mocha::Method );
 
 use Carp qw( croak );
 use Scalar::Util qw( blessed );
-use Test::Mocha::Method;
-
-our @ISA = qw( Test::Mocha::Method );
 
 sub new {
     # uncoverable pod
@@ -48,8 +46,7 @@ sub throws {
 
     push @{ $self->{executions} },
       # check if first arg is a throwable exception
-      ( blessed( $exception[0] )
-      && $exception[0]->can('throw') )
+      ( blessed( $exception[0] ) && $exception[0]->can('throw') )
       ? sub { $exception[0]->throw }
       : sub { croak @exception };
 
@@ -76,11 +73,12 @@ sub do_next_execution {
     my $executions = $self->{executions};
 
     # return undef by default
-    return if @$executions == 0;
+    return if @{$executions} == 0;
 
     # shift the next execution off the front of the queue
     # ... except for the last one
-    my $execution = @$executions > 1 ? shift(@$executions) : $executions->[0];
+    my $execution =
+      @{$executions} > 1 ? shift( @{$executions} ) : $executions->[0];
 
     return $execution->(@args);
 }

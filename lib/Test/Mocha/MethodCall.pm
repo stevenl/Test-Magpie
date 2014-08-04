@@ -3,10 +3,7 @@ package Test::Mocha::MethodCall;
 
 use strict;
 use warnings;
-
-use Test::Mocha::Method;
-
-our @ISA = qw( Test::Mocha::Method );
+use parent qw( Test::Mocha::Method );
 
 sub new {
     # uncoverable pod
@@ -23,16 +20,16 @@ sub invocant {
     return $_[0]->{invocant};
 }
 
-sub caller {
-    # uncoverable pod
+sub caller {  ## no critic (ProhibitBuiltinHomonyms)
+              # uncoverable pod
     return @{ $_[0]->{caller} };
 }
 
 sub stringify_long {
     # uncoverable pod
     my ($self) = @_;
-    return sprintf( '%s called at %s line %d',
-        $self->SUPER::stringify, $self->caller );
+    return sprintf '%s called at %s line %d',
+      $self->SUPER::stringify, $self->caller;
 }
 
 1;
