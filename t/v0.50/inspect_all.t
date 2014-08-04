@@ -17,13 +17,13 @@ my $file = __FILE__;
 my $e;
 
 like(
-    $e = exception { inspect_all 'string' },
+    $e = exception { inspect_all('string') },
     qr/^inspect_all\(\) must be given a mock object/,
     '... and argument must be a mock object'
 );
 like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
 
-my @got = inspect_all $mock;
+my @got = inspect_all($mock);
 
 isa_ok( $got[0], 'Test::Mocha::MethodCall' );
 

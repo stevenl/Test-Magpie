@@ -361,14 +361,14 @@ sub _get_called_ok_args {
 
 =func inspect
 
-    @method_calls = inspect( sub { $mock->method(@args) } )
+    @method_calls = inspect { $mock->method(@args) };
 
-    ( $method_call ) = inspect( sub { $warehouse->remove_inventory(Str, Int) } );
+    ($method_call) = inspect { $warehouse->remove_inventory(Str, Int) };
 
-    is( $method_call->name,            'remove_inventory' );
-    is_deeply( [$method_call->args],   ['book', 50] );
-    is_deeply( [$method_call->caller], ['test.pl', 5] );
-    is( "$method_call", 'remove_inventory("book", 50) called at test.pl line 5' );
+    is $method_call->name,            'remove_inventory';
+    is_deeply [$method_call->args],   ['book', 50];
+    is_deeply [$method_call->caller], ['test.pl', 5];
+    is "$method_call", 'remove_inventory("book", 50) called at test.pl line 5';
 
 C<inspect()> returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed C<called_ok()> calls.
@@ -386,7 +386,7 @@ They are also C<string> overloaded.
 
 =cut
 
-sub inspect {
+sub inspect (&) {
     my ($arg) = @_;
 
     if ( defined $arg ) {
@@ -410,14 +410,14 @@ sub inspect {
 
 =func inspect_all
 
-    @all_method_calls = inspect_all($mock)
+    @all_method_calls = inspect_all $mock
 
 C<inspect_all()> returns a list containing all methods called on the mock
 object. This is mainly used for debugging.
 
 =cut
 
-sub inspect_all {
+sub inspect_all ($) {
     my ($mock) = @_;
 
     croak 'inspect_all() must be given a mock object'
