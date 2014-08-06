@@ -24,14 +24,11 @@ other objects.
     $order->fill($warehouse);
 
     # verify interactions with the dependent object
-    ok( $order->is_filled, 'Order is filled' );
-    called_ok(
-        sub { $warehouse->remove_inventory($item1, 50) },
-        '... and inventory is removed'
-    );
+    ok $order->is_filled, 'Order is filled';
+    called_ok { $warehouse->remove_inventory($item1, 50) } '... and inventory is removed';
 
     # clear the invocation history
-    clear($warehouse);
+    clear $warehouse;
 
 =head1 DESCRIPTION
 
@@ -222,7 +219,7 @@ sub stub {
 
 =func called_ok
 
-    called_ok( sub { $mock->method(@args) }, [%option], [$test_name] )
+    called_ok { $mock->method(@args) }, [%option], [$test_name]
 
 C<called_ok()> is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -230,7 +227,7 @@ arguments, and the correct number of times. C<called_ok()> plays nicely with
 L<Test::Simple> and Co - it will print the test result along with your other
 tests and you must count calls to C<called_ok()> in your test plans.
 
-    called_ok( sub { $warehouse->remove($item, 50) } );
+    called_ok { $warehouse->remove($item, 50) };
     # prints: ok 1 - remove("book", 50) was called 1 time(s)
 
 An option may be specified to constrain the test.
@@ -242,7 +239,7 @@ An option may be specified to constrain the test.
 Specifies the number of times the given method is expected to be called.
 The default is 1 if no other option is specified.
 
-    called_ok( sub { $mock->method(@args) }, times => 3 )
+    called_ok { $mock->method(@args) } times => 3;
     # prints: ok 1 - method(@args) was called 3 time(s)
 
 = C<at_least>
@@ -250,7 +247,7 @@ The default is 1 if no other option is specified.
 Specifies the minimum number of times the given method is expected to be
 called.
 
-    called_ok( sub { $mock->method(@args) }, at_least => 3 )
+    called_ok { $mock->method(@args) } at_least => 3;
     # prints: ok 1 - method(@args) was called at least 3 time(s)
 
 = C<at_most>
@@ -258,7 +255,7 @@ called.
 Specifies the maximum number of times the given method is expected to be
 called.
 
-    called_ok( sub { $mock->method(@args) }, at_most => 5 )
+    called_ok { $mock->method(@args) } at_most => 5;
     # prints: ok 1 - method(@args) was called at most 5 time(s)
 
 = C<between>
@@ -266,7 +263,7 @@ called.
 Specifies the minimum and maximum number of times the given method is
 expected to be called.
 
-    called_ok( sub { $mock->method(@args) }, between => [3, 5] )
+    called_ok { $mock->method(@args) } between => [3, 5];
     # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
 
 =end :list
@@ -274,22 +271,15 @@ expected to be called.
 An optional C<$test_name> may be specified to be printed instead of the
 default.
 
-    called_ok(
-        sub { $warehouse->remove_inventory($item, 50) },
-        'inventory removed'
-    );
+    called_ok { $warehouse->remove_inventory($item, 50) } 'inventory removed';
     # prints: ok 1 - inventory removed
 
-    called_ok(
-        sub { $warehouse->remove_inventory($item, 50) },
-        times => 0,
-        'inventory not removed'
-    );
+    called_ok { $warehouse->remove_inventory($item, 50) } times => 0, 'inventory not removed';
     # prints: ok 2 - inventory not removed
 
 =cut
 
-sub called_ok {
+sub called_ok (&;@) {
     my ( $coderef, %options ) = _get_called_ok_args(@_);
 
     croak 'called_ok() must be given a coderef'
@@ -469,7 +459,7 @@ L<MooseX::Types::Structured> will also work.)
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
 
-    called_ok( sub { $mock->foo(Defined) }, times => 2 );
+    called_ok { $mock->foo(Defined) } times => 2;
     # prints: ok 1 - foo(Defined) was called 2 time(s)
 
 You may use the normal features of the types: parameterized and structured
@@ -484,7 +474,7 @@ use coercions).
 
     # parameterized type
     # prints: ok 1 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
-    called_ok( sub { $list->set( Int, StrMatch[qr/^foo/] ) } );
+    called_ok { $list->set( Int, StrMatch[qr/^foo/] ) };
 
 =head2 Self-defined types
 
@@ -496,7 +486,7 @@ You may also use your own types, defined using L<Type::Utils>.
     my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
 
     # prints: ok 2 - set(PositiveInt, Any) was called 1 time(s)
-    called_ok( sub { $list->set($positive_int, Any) } );
+    called_ok { $list->set($positive_int, Any) };
 
 =head2 Argument slurping
 
@@ -504,8 +494,8 @@ C<SlurpyArray> and C<SlurpyHash> are special argument matchers exported by
 Test::Mocha that you can use when you don't care what arguments are used.
 They will just slurp up the remaining arguments as though they match.
 
-    called_ok( sub { $list->set(SlurpyArray) } );
-    called_ok( sub { $list->set(Int, SlurpyHash) } );
+    called_ok { $list->set(SlurpyArray) };
+    called_ok { $list->set(Int, SlurpyHash) };
 
 Because they consume the remaining arguments, you can't use further argument
 validators after them. But you can, of course, use them before. Note also that

@@ -26,14 +26,12 @@ other objects.
     $order->fill($warehouse);
 
     # verify interactions with the dependent object
-    ok( $order->is_filled, 'Order is filled' );
-    called_ok(
-        sub { $warehouse->remove_inventory($item1, 50) },
-        '... and inventory is removed'
-    );
+    ok $order->is_filled, 'Order is filled';
+    called_ok { $warehouse->remove_inventory($item1, 50) }
+        '... and inventory is removed';
 
     # clear the invocation history
-    clear($warehouse);
+    clear $warehouse;
 
 # DESCRIPTION
 
@@ -161,7 +159,7 @@ The last stubbed response will persist until it is overridden.
 
 ## called\_ok
 
-    called_ok( sub { $mock->method(@args) }, [%option], [$test_name] )
+    called_ok { $mock->method(@args) }, [%option], [$test_name]
 
 `called_ok()` is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -169,7 +167,7 @@ arguments, and the correct number of times. `called_ok()` plays nicely with
 [Test::Simple](https://metacpan.org/module/Test::Simple) and Co - it will print the test result along with your other
 tests and you must count calls to `called_ok()` in your test plans.
 
-    called_ok( sub { $warehouse->remove($item, 50) } );
+    called_ok { $warehouse->remove($item, 50) };
     # prints: ok 1 - remove("book", 50) was called 1 time(s)
 
 An option may be specified to constrain the test.
@@ -179,7 +177,7 @@ An option may be specified to constrain the test.
     Specifies the number of times the given method is expected to be called.
     The default is 1 if no other option is specified.
 
-        called_ok( sub { $mock->method(@args) }, times => 3 )
+        called_ok { $mock->method(@args) } times => 3;
         # prints: ok 1 - method(@args) was called 3 time(s)
 
 - `at_least`
@@ -187,7 +185,7 @@ An option may be specified to constrain the test.
     Specifies the minimum number of times the given method is expected to be
     called.
 
-        called_ok( sub { $mock->method(@args) }, at_least => 3 )
+        called_ok { $mock->method(@args) } at_least => 3;
         # prints: ok 1 - method(@args) was called at least 3 time(s)
 
 - `at_most`
@@ -195,7 +193,7 @@ An option may be specified to constrain the test.
     Specifies the maximum number of times the given method is expected to be
     called.
 
-        called_ok( sub { $mock->method(@args) }, at_most => 5 )
+        called_ok { $mock->method(@args) } at_most => 5;
         # prints: ok 1 - method(@args) was called at most 5 time(s)
 
 - `between`
@@ -203,35 +201,29 @@ An option may be specified to constrain the test.
     Specifies the minimum and maximum number of times the given method is
     expected to be called.
 
-        called_ok( sub { $mock->method(@args) }, between => [3, 5] )
+        called_ok { $mock->method(@args) } between => [3, 5];
         # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
 
 An optional `$test_name` may be specified to be printed instead of the
 default.
 
-    called_ok(
-        sub { $warehouse->remove_inventory($item, 50) },
-        'inventory removed'
-    );
+    called_ok { $warehouse->remove_inventory($item, 50) } 'inventory removed';
     # prints: ok 1 - inventory removed
 
-    called_ok(
-        sub { $warehouse->remove_inventory($item, 50) },
-        times => 0,
-        'inventory not removed'
-    );
+    called_ok { $warehouse->remove_inventory($item, 50) } times => 0,
+        'inventory not removed';
     # prints: ok 2 - inventory not removed
 
 ## inspect
 
-    @method_calls = inspect( sub { $mock->method(@args) } )
+    @method_calls = inspect { $mock->method(@args) };
 
-    ( $method_call ) = inspect( sub { $warehouse->remove_inventory(Str, Int) } );
+    ($method_call) = inspect { $warehouse->remove_inventory(Str, Int) };
 
-    is( $method_call->name,            'remove_inventory' );
-    is_deeply( [$method_call->args],   ['book', 50] );
-    is_deeply( [$method_call->caller], ['test.pl', 5] );
-    is( "$method_call", 'remove_inventory("book", 50) called at test.pl line 5' );
+    is $method_call->name,            'remove_inventory';
+    is_deeply [$method_call->args],   ['book', 50];
+    is_deeply [$method_call->caller], ['test.pl', 5];
+    is "$method_call", 'remove_inventory("book", 50) called at test.pl line 5';
 
 `inspect()` returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed `called_ok()` calls.
@@ -248,14 +240,14 @@ They are also `string` overloaded.
 
 ## inspect\_all
 
-    @all_method_calls = inspect_all($mock)
+    @all_method_calls = inspect_all $mock
 
 `inspect_all()` returns a list containing all methods called on the mock
 object. This is mainly used for debugging.
 
 ## clear
 
-    clear(@mocks)
+    clear $mock1, $mock2, ...
 
 Clears the method call history for one or more mocks so that they can be
 reused in another test. Note that this does not affect the stubbed methods.
@@ -281,7 +273,7 @@ Moose types like those in [MooseX::Types::Moose](https://metacpan.org/module/Moo
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
 
-    called_ok( sub { $mock->foo(Defined) }, times => 2 );
+    called_ok { $mock->foo(Defined) } times => 2;
     # prints: ok 1 - foo(Defined) was called 2 time(s)
 
 You may use the normal features of the types: parameterized and structured
@@ -296,7 +288,7 @@ use coercions).
 
     # parameterized type
     # prints: ok 1 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
-    called_ok( sub { $list->set( Int, StrMatch[qr/^foo/] ) } );
+    called_ok { $list->set( Int, StrMatch[qr/^foo/] ) };
 
 ## Self-defined types
 
@@ -308,7 +300,7 @@ You may also use your own types, defined using [Type::Utils](https://metacpan.or
     my $positive_int = declare 'PositiveInt', as Int, where { $_ > 0 };
 
     # prints: ok 2 - set(PositiveInt, Any) was called 1 time(s)
-    called_ok( sub { $list->set($positive_int, Any) } );
+    called_ok { $list->set($positive_int, Any) };
 
 ## Argument slurping
 
@@ -316,8 +308,8 @@ You may also use your own types, defined using [Type::Utils](https://metacpan.or
 Test::Mocha that you can use when you don't care what arguments are used.
 They will just slurp up the remaining arguments as though they match.
 
-    called_ok( sub { $list->set(SlurpyArray) } );
-    called_ok( sub { $list->set(Int, SlurpyHash) } );
+    called_ok { $list->set(SlurpyArray) };
+    called_ok { $list->set(Int, SlurpyHash) };
 
 Because they consume the remaining arguments, you can't use further argument
 validators after them. But you can, of course, use them before. Note also that
