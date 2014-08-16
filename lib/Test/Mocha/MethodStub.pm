@@ -13,7 +13,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
 
-    $self->{executions} = [];  # ArrayRef[ CodeRef ]
+    $self->{executions} ||= [];  # ArrayRef[ CodeRef ]
 
     return $self;
 }
@@ -22,7 +22,7 @@ sub cast {
     # """Convert the type of the given object to this class"""
     # uncoverable pod
     my ( $class, $obj ) = @_;
-    $obj->{executions} = [];
+    $obj->{executions} ||= [];
     return bless $obj, $class;
 }
 
@@ -30,6 +30,9 @@ sub returns {
     # """Adds a return response to the end of the executions queue."""
     # uncoverable pod
     my ( $self, @return_values ) = @_;
+
+    warnings::warnif( 'deprecated',
+        'returns() method is deprecated; use the returns() function instead' );
 
     push @{ $self->{executions} },
         @return_values == 1 ? sub { $return_values[0] }
@@ -44,6 +47,9 @@ sub throws {
     # uncoverable pod
     my ( $self, @exception ) = @_;
 
+    warnings::warnif( 'deprecated',
+        'throws() method is deprecated; use the throws() function instead' );
+
     push @{ $self->{executions} },
       # check if first arg is a throwable exception
       ( blessed( $exception[0] ) && $exception[0]->can('throw') )
@@ -57,6 +63,10 @@ sub executes {
     # """Adds a callback response to the end of the executions queue."""
     # uncoverable pod
     my ( $self, $callback ) = @_;
+
+    warnings::warnif( 'deprecated',
+        'executes() method is deprecated; use the executes() function instead'
+    );
 
     croak 'executes() must be given a coderef'
       unless ref($callback) eq 'CODE';

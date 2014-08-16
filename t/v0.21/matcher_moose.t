@@ -29,7 +29,7 @@ $mock->set( -1, 'negative' );
 is( $mock->foo( 1, mock ),
     undef, 'mock as method argument not isa(Moose::Meta::typeConstraint)' );
 
-stub($mock)->set(Any)->returns('any');
+stub( sub { $mock->set(Any) } )->returns('any');
 is( $mock->set(1), 'any', 'stub() accepts type constraints' );
 
 test_out('ok 1 - set(Int) was called 1 time(s)');

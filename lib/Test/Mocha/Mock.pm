@@ -26,56 +26,56 @@ my %Isnota = (
 
 # can() should always return a reference to the C<AUTOLOAD()> method
 my $CAN = Test::Mocha::MethodStub->new(
-    name => 'can',
-    args => [Str],
-  )->executes(
-    sub {
-        my ( $self, $method_name ) = @_;
-        return sub {
-            $AUTOLOAD = $method_name;
-            goto &AUTOLOAD;
-        };
-    }
-  );
+    name       => 'can',
+    args       => [Str],
+    executions => [
+        sub {
+            my ( $self, $method_name ) = @_;
+            return sub {
+                $AUTOLOAD = $method_name;
+                goto &AUTOLOAD;
+            };
+          }
+    ],
+);
 
 # DOES() should always return true
 my $DOES_UC = Test::Mocha::MethodStub->new(
-    name => 'DOES',
-    args => [Str],
-)->returns(1);
+    name       => 'DOES',
+    args       => [Str],
+    executions => [ sub { 1 } ],
+);
 
 # does() should always return true
 my $DOES_LC = Test::Mocha::MethodStub->new(
-    name => 'does',
-    args => [Str],
-)->returns(1);
+    name       => 'does',
+    args       => [Str],
+    executions => [ sub { 1 } ],
+);
 
 # isa() should always returns true
 my $ISA = Test::Mocha::MethodStub->new(
-    name => 'isa',
-    args => [Str],
-)->returns(1);
+    name       => 'isa',
+    args       => [Str],
+    executions => [ sub { 1 } ],
+);
 
-## no critic (RequireArgUnpacking)
 sub new {
     # uncoverable pod
-    my $class = shift;
-    my $self = bless {@_}, $class;
+    my ( $class, %args ) = @_;
 
     # ArrayRef[ MethodCall ]
-    $self->{calls} = [];
+    $args{calls} = [];
 
     # $method_name => ArrayRef[ MethodStub ]
-    $self->{stubs} = {
+    $args{stubs} = {
         can  => [$CAN],
         DOES => [$DOES_UC],
         does => [$DOES_LC],
         isa  => [$ISA],
     };
-
-    return $self;
+    return bless \%args, $class;
 }
-## use critic
 
 sub AUTOLOAD {
     my ( $self, @args ) = @_;

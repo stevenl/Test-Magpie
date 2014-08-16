@@ -19,7 +19,7 @@ other objects.
     my $warehouse = mock;
 
     # stub method calls (with type constraint for matching argument)
-    stub( sub { $warehouse->has_inventory($item1, Int) } )->returns(1);
+    stub { $warehouse->has_inventory($item1, Int) } returns 1;
 
     # execute the code under test
     my $order = Order->new(item => $item1, quantity => 50);
@@ -82,13 +82,13 @@ return `undef` (in scalar context) or an empty list (in list context).
 You can stub `ref()` to specify the value it should return (see below for
 more info about stubbing).
 
-    stub( sub{ $mock->ref } )->returns('AnyClass');
+    stub { $mock->ref } returns 'AnyClass';
     is( $mock->ref, 'AnyClass' );
     is( ref($mock), 'AnyClass' );
 
 ## stub
 
-    stub( sub { $mock->method(@args) } )->returns|throws|executes($response)
+    stub { $mock->method(@args) } returns(@values) | throws($exception) | executes($coderef)
 
 By default, the mock object already acts as a stub that accepts any method
 call and returns `undef`. However, you can use `stub()` to tell a method to
@@ -98,14 +98,14 @@ give an alternative response. You can specify 3 types of responses:
 
     Specifies that a stub should return 1 or more values.
 
-        stub( sub { $mock->method(@args) } )->returns(1, 2, 3);
+        stub { $mock->method(@args) } ) returns 1, 2, 3;
         is_deeply( [ $mock->method(@args) ], [ 1, 2, 3 ] );
 
 - `throws($message)`
 
     Specifies that a stub should raise an exception.
 
-        stub( sub { $mock->method(@args) } )->throws('exception');
+        stub { $mock->method(@args) } throws 'an error';
         ok( exception { $mock->method(@args) } );
 
 - `executes($coderef)`
@@ -115,11 +115,11 @@ give an alternative response. You can specify 3 types of responses:
 
         my @returns = qw( first second third );
 
-        stub( sub { $list->get(Int) } )->executes(sub {
+        stub { $list->get(Int) } executes {
             my ( $self, $i ) = @_;
             die "index out of bounds" if $i < 0;
             return $returns[$i];
-        });
+        };
 
         is( $list->get(0), 'first'  );
         is( $list->get(1), 'second' );
@@ -129,8 +129,8 @@ give an alternative response. You can specify 3 types of responses:
 A stub applies to the exact method and arguments specified (but see also
 ["ARGUMENT MATCHING"](#ARGUMENT MATCHING) for a shortcut around this).
 
-    stub( sub { $list->get(0) } )->returns('first');
-    stub( sub { $list->get(1) } )->returns('second');
+    stub { $list->get(0) } returns 'first';
+    stub { $list->get(1) } returns 'second';
 
     is( $list->get(0), 'first'  );
     is( $list->get(1), 'second' );
@@ -138,11 +138,8 @@ A stub applies to the exact method and arguments specified (but see also
 
 Chain responses together to provide a consecutive series.
 
-    stub( sub { $iterator->next } )
-        ->returns(1)
-        ->returns(2)
-        ->returns(3)
-        ->throws('exhuasted');
+    stub { $iterator->next }
+      returns(1), returns(2), returns(3), throws('exhausted');
 
     ok( $iterator->next == 1 );
     ok( $iterator->next == 2 );
@@ -151,10 +148,10 @@ Chain responses together to provide a consecutive series.
 
 The last stubbed response will persist until it is overridden.
 
-    stub( sub { $warehouse->has_inventory($item, 10) } )->returns(1);
+    stub { $warehouse->has_inventory($item, 10) } returns 1;
     ok( $warehouse->has_inventory($item, 10) ) for 1 .. 5;
 
-    stub( sub { $warehouse->has_inventory($item, 10) } )->returns(0);
+    stub { $warehouse->has_inventory($item, 10) } returns '';
     ok( !$warehouse->has_inventory($item, 10) ) for 1 .. 5;
 
 ## called\_ok
@@ -268,7 +265,7 @@ Moose types like those in [MooseX::Types::Moose](https://metacpan.org/module/Moo
     use Types::Standard qw( Any );
 
     my $mock = mock;
-    stub( sub { $mock->foo(Any) } )->returns('ok');
+    stub { $mock->foo(Any) } returns 'ok';
 
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
