@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'deprecated';
 
-use Test::More tests => 40;
+use Test::More tests => 39;
 use Test::Fatal;
 use Test::Builder::Tester;
 use Types::Standard qw( Any slurpy );
@@ -34,12 +34,6 @@ chomp $diag_call_history;
 
 # -----------------
 # verify() exceptions
-
-like(
-    exception { verify() },
-    qr/^verify\(\) must be given a mock object/,
-    'verify() called without an argument'
-);
 
 like(
     exception { verify('string') },

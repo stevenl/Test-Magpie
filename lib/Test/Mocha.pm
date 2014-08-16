@@ -291,14 +291,14 @@ sub called_ok (&;@) {
 =cut
 
 # verify() has been retained for backwards compatibility only
-sub verify {
+sub verify ($;@) {
     # uncoverable pod
     my ( $mock, %options ) = _get_called_ok_args(@_);
 
     warnings::warnif( 'deprecated',
         'verify() is deprecated; use called_ok() instead' );
     croak 'verify() must be given a mock object'
-      unless defined($mock) && MockType->check($mock);
+      if !MockType->check($mock);
 
     require Test::Mocha::Verify;
     return Test::Mocha::Verify->new( mock => $mock, %options );
