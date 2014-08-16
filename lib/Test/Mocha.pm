@@ -282,9 +282,6 @@ default.
 sub called_ok (&;@) {
     my ( $coderef, %options ) = _get_called_ok_args(@_);
 
-    croak 'called_ok() must be given a coderef'
-      unless defined($coderef) && ref($coderef) eq 'CODE';
-
     $Test::Mocha::Mock::num_method_calls = 0;
     is_called( get_method_call($coderef), %options );
     return;
@@ -379,23 +376,11 @@ They are also C<string> overloaded.
 sub inspect (&) {
     my ($arg) = @_;
 
-    if ( defined $arg ) {
-        if ( MockType->check($arg) ) {
-            warnings::warnif( 'deprecated',
-                'Calling inspect() with a mock object parameter is deprecated; '
-                  . 'pass it a coderef instead' );
-            require Test::Mocha::Inspect;
-            return Test::Mocha::Inspect->new( mock => $arg );
-        }
-        elsif ( ref($arg) eq 'CODE' ) {
-            $Test::Mocha::Mock::num_method_calls = 0;
-            my $method_call = get_method_call($arg);
-            my $mock        = $method_call->invocant;
-            my $calls       = getattr( $mock, 'calls' );
-            return grep { $method_call->satisfied_by($_) } @{$calls};
-        }
-    }
-    croak 'inspect() must be given a coderef';
+    $Test::Mocha::Mock::num_method_calls = 0;
+    my $method_call = get_method_call($arg);
+    my $mock        = $method_call->invocant;
+    my $calls       = getattr( $mock, 'calls' );
+    return grep { $method_call->satisfied_by($_) } @{$calls};
 }
 
 =func inspect_all
@@ -411,7 +396,7 @@ sub inspect_all ($) {
     my ($mock) = @_;
 
     croak 'inspect_all() must be given a mock object'
-      unless defined $mock && MockType->check($mock);
+      if !MockType->check($mock);
 
     return @{ $mock->{calls} };
 }
