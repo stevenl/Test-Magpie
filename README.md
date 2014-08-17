@@ -27,8 +27,7 @@ other objects.
 
     # verify interactions with the dependent object
     ok $order->is_filled, 'Order is filled';
-    called_ok { $warehouse->remove_inventory($item1, 50) }
-        '... and inventory is removed';
+    called_ok { $warehouse->remove_inventory($item1, 50) } '... and inventory is removed';
 
     # clear the invocation history
     clear $warehouse;
@@ -156,7 +155,7 @@ The last stubbed response will persist until it is overridden.
 
 ## called\_ok
 
-    called_ok { $mock->method(@args) }, [%option], [$test_name]
+    called_ok { $mock->method(@args) }, [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
 
 `called_ok()` is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -174,23 +173,23 @@ An option may be specified to constrain the test.
     Specifies the number of times the given method is expected to be called.
     The default is 1 if no other option is specified.
 
-        called_ok { $mock->method(@args) } times => 3;
+        called_ok { $mock->method(@args) } times(3);
         # prints: ok 1 - method(@args) was called 3 time(s)
 
-- `at_least`
+- `atleast`
 
     Specifies the minimum number of times the given method is expected to be
     called.
 
-        called_ok { $mock->method(@args) } at_least => 3;
+        called_ok { $mock->method(@args) } atleast(3);
         # prints: ok 1 - method(@args) was called at least 3 time(s)
 
-- `at_most`
+- `atmost`
 
     Specifies the maximum number of times the given method is expected to be
     called.
 
-        called_ok { $mock->method(@args) } at_most => 5;
+        called_ok { $mock->method(@args) } atmost(5);
         # prints: ok 1 - method(@args) was called at most 5 time(s)
 
 - `between`
@@ -198,7 +197,7 @@ An option may be specified to constrain the test.
     Specifies the minimum and maximum number of times the given method is
     expected to be called.
 
-        called_ok { $mock->method(@args) } between => [3, 5];
+        called_ok { $mock->method(@args) } between(3, 5);
         # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
 
 An optional `$test_name` may be specified to be printed instead of the
@@ -207,8 +206,7 @@ default.
     called_ok { $warehouse->remove_inventory($item, 50) } 'inventory removed';
     # prints: ok 1 - inventory removed
 
-    called_ok { $warehouse->remove_inventory($item, 50) } times => 0,
-        'inventory not removed';
+    called_ok { $warehouse->remove_inventory($item, 50) } times(0), 'inventory not removed';
     # prints: ok 2 - inventory not removed
 
 ## inspect
@@ -270,7 +268,7 @@ Moose types like those in [MooseX::Types::Moose](https://metacpan.org/module/Moo
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
 
-    called_ok { $mock->foo(Defined) } times => 2;
+    called_ok { $mock->foo(Defined) } times(2);
     # prints: ok 1 - foo(Defined) was called 2 time(s)
 
 You may use the normal features of the types: parameterized and structured

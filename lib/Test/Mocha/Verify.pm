@@ -34,7 +34,17 @@ sub AUTOLOAD {
         name     => extract_method_name($AUTOLOAD),
         args     => \@args,
     );
-    is_called( $method_call, %{$self} );
+
+    my ($class) =
+      grep { defined $self->{$_} } qw{ times at_least at_most between };
+    my %options = (
+        times    => 'Test::Mocha::CalledOk::Times',
+        at_least => 'Test::Mocha::CalledOk::AtLeast',
+        at_most  => 'Test::Mocha::CalledOk::AtMost',
+        between  => 'Test::Mocha::CalledOk::Between',
+    );
+
+    $options{$class}->test( $method_call, $self->{$class}, $self->{test_name} );
     return;
 }
 

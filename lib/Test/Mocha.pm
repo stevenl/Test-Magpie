@@ -58,6 +58,10 @@ interfaces rather than on internal state.
 use Carp qw( croak );
 use Exporter qw( import );
 use Scalar::Util qw( blessed );
+use Test::Mocha::CalledOk::Times;
+use Test::Mocha::CalledOk::AtLeast;
+use Test::Mocha::CalledOk::AtMost;
+use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 use Test::Mocha::Util qw( getattr get_method_call is_called );
@@ -70,6 +74,10 @@ our @EXPORT = qw(
   throws
   executes
   called_ok
+  times
+  atleast
+  atmost
+  between
   verify
   inspect
   inspect_all
@@ -81,6 +89,7 @@ our @EXPORT = qw(
 # croak() messages should not trace back to Mocha modules
 $Carp::Internal{$_}++ foreach qw(
   Test::Mocha
+  Test::Mocha::CalledOk
   Test::Mocha::Inspect
   Test::Mocha::Mock
   Test::Mocha::Util
@@ -200,9 +209,9 @@ sub stub (&@) {
     my ( $arg, @executions ) = @_;
 
     foreach (@executions) {
-        croak "stub() responses should be supplied using ",
-            "returns(), throws() or executes()"
-            if ref ne 'CODE';
+        croak 'stub() responses should be supplied using ',
+          'returns(), throws() or executes()'
+          if ref ne 'CODE';
     }
 
     $Test::Mocha::Mock::num_method_calls = 0;
@@ -212,14 +221,16 @@ sub stub (&@) {
 
     Test::Mocha::MethodStub->cast($method_call);
     push @{ getattr( $method_call, 'executions' ) }, @executions;
-    return $method_call; # for backwards compatibility
+    return $method_call;  # for backwards compatibility
 }
 
 sub returns (@) {
     my (@return_values) = @_;
-    return sub { $return_values[0] } if @return_values == 1;
-    return sub { @return_values }    if @return_values > 1;
-    return sub {};                 # if @return_values == 0
+    return sub { $return_values[0] }
+      if @return_values == 1;
+    return sub { @return_values }
+      if @return_values > 1;
+    return sub { };       # if @return_values == 0
 }
 
 sub throws (@) {
@@ -240,7 +251,7 @@ sub executes (&) {
 
 =func called_ok
 
-    called_ok { $mock->method(@args) }, [%option], [$test_name]
+    called_ok { $mock->method(@args) }, [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
 
 C<called_ok()> is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -260,23 +271,23 @@ An option may be specified to constrain the test.
 Specifies the number of times the given method is expected to be called.
 The default is 1 if no other option is specified.
 
-    called_ok { $mock->method(@args) } times => 3;
+    called_ok { $mock->method(@args) } times(3);
     # prints: ok 1 - method(@args) was called 3 time(s)
 
-= C<at_least>
+= C<atleast>
 
 Specifies the minimum number of times the given method is expected to be
 called.
 
-    called_ok { $mock->method(@args) } at_least => 3;
+    called_ok { $mock->method(@args) } atleast(3);
     # prints: ok 1 - method(@args) was called at least 3 time(s)
 
-= C<at_most>
+= C<atmost>
 
 Specifies the maximum number of times the given method is expected to be
 called.
 
-    called_ok { $mock->method(@args) } at_most => 5;
+    called_ok { $mock->method(@args) } atmost(5);
     # prints: ok 1 - method(@args) was called at most 5 time(s)
 
 = C<between>
@@ -284,7 +295,7 @@ called.
 Specifies the minimum and maximum number of times the given method is
 expected to be called.
 
-    called_ok { $mock->method(@args) } between => [3, 5];
+    called_ok { $mock->method(@args) } between(3, 5);
     # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
 
 =end :list
@@ -295,23 +306,130 @@ default.
     called_ok { $warehouse->remove_inventory($item, 50) } 'inventory removed';
     # prints: ok 1 - inventory removed
 
-    called_ok { $warehouse->remove_inventory($item, 50) } times => 0, 'inventory not removed';
+    called_ok { $warehouse->remove_inventory($item, 50) } times(0), 'inventory not removed';
     # prints: ok 2 - inventory not removed
 
 =cut
 
+## no critic (RequireArgUnpacking,ProhibitMagicNumbers)
 sub called_ok (&;@) {
-    my ( $coderef, %options ) = _get_called_ok_args(@_);
+    my $coderef = shift;
+    my $called_ok;
+    my $class;
+    my $value;
+    my $test_name;
+
+    # unpack the args - different possibilities due to backwards compatibility
+    if ( @_ == 1 ) {
+        if ( ref $_[0] eq 'CODE' ) {
+            $called_ok = $_[0];
+        }
+        else {
+            $test_name = $_[0];
+        }
+    }
+    elsif ( @_ == 2 ) {
+        if ( ref $_[0] eq 'CODE' ) {
+            ( $called_ok, $test_name ) = @_;
+        }
+        else {
+            ( $class, $value ) = @_;
+        }
+    }
+    elsif ( @_ == 3 ) {
+        ( $class, $value, $test_name ) = @_;
+    }
 
     $Test::Mocha::Mock::num_method_calls = 0;
-    is_called( get_method_call($coderef), %options );
+    my $method_call = get_method_call($coderef);
+
+    # v0.50 behaviour
+    if ( defined $class ) {
+        my %options = (
+            times    => 'Test::Mocha::CalledOk::Times',
+            atleast  => 'Test::Mocha::CalledOk::AtLeast',
+            atmost   => 'Test::Mocha::CalledOk::AtMost',
+            at_least => 'Test::Mocha::CalledOk::AtLeast',
+            at_most  => 'Test::Mocha::CalledOk::AtMost',
+            between  => 'Test::Mocha::CalledOk::Between',
+        );
+        croak "called_ok() was given an invalid option: '$class'"
+          unless defined $options{$class};
+
+        if ( $class ne 'between' ) {
+            croak "'$class' option must be a number"
+              unless Num->check($value);
+        }
+        else {
+            croak "'$class' option must be an arrayref "
+              . 'with 2 numbers in ascending order'
+              unless NumRange->check($value);
+        }
+
+        $options{$class}->test( $method_call, $value, $test_name );
+        return;
+    }
+
+    # current behaviour
+    ## no critic (ProhibitAmpersandSigils)
+    $called_ok ||= &times(1); # defaults to 1 if no times() is specified
+    $called_ok->( $method_call, $test_name );
     return;
 }
+## use critic
+
+## no critic (ProhibitBuiltinHomonyms)
+sub times ($) {
+    my ($n) = @_;
+    croak 'times() must be given a number'
+      unless Num->check($n);
+
+    return sub {
+        my ( $method_call, $test_name ) = @_;
+        Test::Mocha::CalledOk::Times->test( $method_call, $n, $test_name );
+    };
+}
+## use critic
+
+sub atleast ($) {
+    my ($n) = @_;
+    croak 'atleast() must be given a number'
+      unless Num->check($n);
+
+    return sub {
+        my ( $method_call, $test_name ) = @_;
+        Test::Mocha::CalledOk::AtLeast->test( $method_call, $n, $test_name );
+    };
+}
+
+sub atmost ($) {
+    my ($n) = @_;
+    croak 'atmost() must be given a number'
+      unless Num->check($n);
+
+    return sub {
+        my ( $method_call, $test_name ) = @_;
+        Test::Mocha::CalledOk::AtMost->test( $method_call, $n, $test_name );
+    };
+}
+
+sub between ($$) {
+    my ( $lower, $upper ) = @_;
+    croak 'between() must be given 2 numbers in ascending order'
+      unless NumRange->check( [ $lower, $upper ] );
+
+    return sub {
+        my ( $method_call, $test_name ) = @_;
+        Test::Mocha::CalledOk::Between->test( $method_call, [ $lower, $upper ],
+            $test_name );
+    };
+}
+
+# verify() has been retained for backwards compatibility only
 
 =for Pod::Coverage verify
 =cut
 
-# verify() has been retained for backwards compatibility only
 sub verify ($;@) {
     # uncoverable pod
     my ( $mock, %options ) = _get_called_ok_args(@_);
@@ -465,7 +583,7 @@ L<MooseX::Types::Structured> will also work.)
     print $mock->foo(1);        # prints: ok
     print $mock->foo('string'); # prints: ok
 
-    called_ok { $mock->foo(Defined) } times => 2;
+    called_ok { $mock->foo(Defined) } times(2);
     # prints: ok 1 - foo(Defined) was called 2 time(s)
 
 You may use the normal features of the types: parameterized and structured
@@ -515,6 +633,7 @@ sub SlurpyArray () {
     # uncoverable pod
     return slurpy(ArrayRef);
 }
+
 sub SlurpyHash () {
     # uncoverable pod
     return slurpy(HashRef);
@@ -524,7 +643,6 @@ sub SlurpyHash () {
 =head1 TO DO
 
 =for :list
-* Enhanced verifications
 * Module functions and class methods
 
 =head1 ACKNOWLEDGEMENTS

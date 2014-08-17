@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 44;
+use Test::More tests => 42;
 use Test::Fatal;
 use Test::Builder::Tester;
 use Types::Standard qw( Any slurpy );
@@ -34,16 +34,6 @@ chomp $diag_call_history;
 
 # -----------------
 # called_ok() exceptions
-
-$e = exception {
-    called_ok( sub { $mock->twice }, times => 2, at_least => 2 );
-};
-like(
-    $e,
-    qr/^You can set only one of these options:/,
-    'called_ok() cannot be given multiple options'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
 
 like(
     $e = exception {

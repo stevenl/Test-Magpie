@@ -128,71 +128,71 @@ sub has_caller_package {
     return;
 }
 
-sub is_called {
-    # """
-    # Tests whether the given method call was invoked the correct number of
-    # times. The test is run as a Test::Builder test.
-    # """
-    # uncoverable pod
-    my ( $method_call, %options ) = @_;
-
-    my $mock = $method_call->invocant;
-    my $calls = getattr( $mock, 'calls' );
-
-    my $got = grep { $method_call->satisfied_by($_) } @{$calls};
-    my $exp;
-    my $test_ok;
-
-    ## no critic (ProhibitCascadingIfElse)
-    # uncoverable branch false count:4
-    if ( defined $options{times} ) {
-        $exp     = $options{times};
-        $test_ok = $got == $options{times};
-    }
-    elsif ( defined $options{at_least} ) {
-        $exp     = "at least $options{at_least}";
-        $test_ok = $got >= $options{at_least};
-    }
-    elsif ( defined $options{at_most} ) {
-        $exp     = "at most $options{at_most}";
-        $test_ok = $got <= $options{at_most};
-    }
-    elsif ( defined $options{between} ) {
-        my ( $lower, $upper ) = @{ $options{between} };
-        $exp = "between $lower and $upper";
-        $test_ok = $lower <= $got && $got <= $upper;
-    }
-    ## use critic
-
-    my $test_name =
-      defined $options{test_name}
-      ? $options{test_name}
-      : sprintf '%s was called %s time(s)', $method_call, $exp;
-
-    # Test failure report should not trace back to Mocha modules
-    local $Test::Builder::Level = 2;
-
-    $TB->ok( $test_ok, $test_name );
-
-    # output diagnostics to aid with debugging
-    unless ( $test_ok || $TB->in_todo ) {
-        my $diag = <<"END";
-Error: unexpected number of calls to '$method_call'
-         got: $got time(s)
-    expected: $exp time(s)
-Complete method call history (most recent call last):
-END
-        if ( @{$calls} ) {
-            $diag .= ( (q{    }) . $_->stringify_long . "\n" )
-              foreach @{$calls};
-        }
-        else {
-            $diag .= "    (No methods were called)\n";
-        }
-        $TB->diag($diag);
-    }
-    return;
-}
+#sub is_called {
+#    # """
+#    # Tests whether the given method call was invoked the correct number of
+#    # times. The test is run as a Test::Builder test.
+#    # """
+#    # uncoverable pod
+#    my ( $method_call, %options ) = @_;
+#
+#    my $mock = $method_call->invocant;
+#    my $calls = getattr( $mock, 'calls' );
+#
+#    my $got = grep { $method_call->satisfied_by($_) } @{$calls};
+#    my $exp;
+#    my $test_ok;
+#
+#    ## no critic (ProhibitCascadingIfElse)
+#    # uncoverable branch false count:4
+#    if ( defined $options{times} ) {
+#        $exp     = $options{times};
+#        $test_ok = $got == $options{times};
+#    }
+#    elsif ( defined $options{at_least} ) {
+#        $exp     = "at least $options{at_least}";
+#        $test_ok = $got >= $options{at_least};
+#    }
+#    elsif ( defined $options{at_most} ) {
+#        $exp     = "at most $options{at_most}";
+#        $test_ok = $got <= $options{at_most};
+#    }
+#    elsif ( defined $options{between} ) {
+#        my ( $lower, $upper ) = @{ $options{between} };
+#        $exp = "between $lower and $upper";
+#        $test_ok = $lower <= $got && $got <= $upper;
+#    }
+#    ## use critic
+#
+#    my $test_name =
+#      defined $options{test_name}
+#      ? $options{test_name}
+#      : sprintf '%s was called %s time(s)', $method_call, $exp;
+#
+#    # Test failure report should not trace back to Mocha modules
+#    local $Test::Builder::Level = 2;
+#
+#    $TB->ok( $test_ok, $test_name );
+#
+#    # output diagnostics to aid with debugging
+#    unless ( $test_ok || $TB->in_todo ) {
+#        my $diag = <<"END";
+#Error: unexpected number of calls to '$method_call'
+#         got: $got time(s)
+#    expected: $exp time(s)
+#Complete method call history (most recent call last):
+#END
+#        if ( @{$calls} ) {
+#            $diag .= ( (q{    }) . $_->stringify_long . "\n" )
+#              foreach @{$calls};
+#        }
+#        else {
+#            $diag .= "    (No methods were called)\n";
+#        }
+#        $TB->diag($diag);
+#    }
+#    return;
+#}
 
 sub match {
     # """Match 2 values for equality."""

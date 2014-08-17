@@ -47,11 +47,11 @@ called_ok { $mock->set( $positive_int, Str ) };
 test_test('self-defined type constraint works');
 
 test_out('ok 1 - set(ArrayRef[Str]) was called 2 time(s)');
-called_ok { $mock->set( ArrayRef [Str] ) } times => 2;
+called_ok { $mock->set( ArrayRef [Str] ) } times(2);
 test_test('parameterized type works');
 
 test_out('ok 1 - set(ArrayRef|Int) was called 3 time(s)');
-called_ok { $mock->set( ArrayRef | Int ) } times => 3;
+called_ok { $mock->set( ArrayRef | Int ) } times(3);
 test_test('type union works');
 
 test_out(
