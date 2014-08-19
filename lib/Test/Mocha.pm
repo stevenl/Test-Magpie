@@ -32,6 +32,9 @@ other objects.
 
 =head1 DESCRIPTION
 
+B<The API may still be subject to change. I will try to keep it backwards
+compatible as much as possible.>
+
 We find all sorts of excuses to avoid writing tests for our code. Often it
 seems too hard to isolate the code we want to test from the objects it is
 dependent on. I'm too lazy and impatient to code my own mocks. Mocking

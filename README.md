@@ -34,6 +34,9 @@ other objects.
 
 # DESCRIPTION
 
+__The API may still be subject to change. I will try to keep it backwards
+compatible as much as possible.__
+
 We find all sorts of excuses to avoid writing tests for our code. Often it
 seems too hard to isolate the code we want to test from the objects it is
 dependent on. I'm too lazy and impatient to code my own mocks. Mocking
@@ -345,3 +348,9 @@ This software is copyright (c) 2014 by Steven Lee.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
+# DISCLAIMER OF WARRANTY
+
+THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
