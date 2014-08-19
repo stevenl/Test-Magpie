@@ -372,7 +372,8 @@ sub called_ok (&;@) {
 
     # current behaviour
     ## no critic (ProhibitAmpersandSigils)
-    $called_ok ||= &times(1); # defaults to 1 if no times() is specified
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    $called_ok ||= &times(1); # default if no times() is specified
     $called_ok->( $method_call, $test_name );
     return;
 }

@@ -20,10 +20,8 @@ sub test {
     $test_name = "$method_call was called $exp_times" if !defined $test_name;
 
     # Test failure report should not trace back to Mocha modules
-    ## no critic (ProhibitMagicNumbers)
-    local $Test::Builder::Level = 3;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     $TB->ok( $test_ok, $test_name );
-    ## use critic
 
     # output diagnostics to aid with debugging
     unless ( $test_ok || $TB->in_todo ) {
