@@ -1,5 +1,5 @@
 package Test::Mocha::Verify;
-# ABSTRACT: Mock wrapper to verify method calls
+# ABSTRACT: Mock wrapper to verify method calls (DEPRECATED)
 
 use strict;
 use warnings;

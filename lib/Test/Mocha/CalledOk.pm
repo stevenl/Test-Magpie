@@ -1,4 +1,6 @@
 package Test::Mocha::CalledOk;
+# ABSTRACT: Abstract base class for verifying method calls
+# Abstract class methods required of sub-classes: 'is' and 'stringify'
 
 use strict;
 use warnings;
@@ -9,6 +11,7 @@ use Test::Mocha::Util qw( getattr );
 my $TB = Test::Builder->new;
 
 sub test {
+    # uncoverable pod
     my ( $class, $method_call, $exp, $test_name ) = @_;
 
     my $mock    = $method_call->invocant;
