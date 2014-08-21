@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+no warnings 'deprecated';
 
 use Test::More tests => 26;
 use Test::Fatal;

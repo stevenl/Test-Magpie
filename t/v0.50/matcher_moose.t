@@ -34,8 +34,11 @@ is( $mock->foo( 1, Int ),
 is( $mock->foo( 1, mock ),
     undef, 'mocks can be passed as method arguments to mock methods' );
 
-stub( sub { $mock->set(Any) } )->returns('any');
-is( $mock->set(1), 'any', 'stub() accepts type constraints' );
+{
+    no warnings 'deprecated';
+    stub( sub { $mock->set(Any) } )->returns('any');
+    is( $mock->set(1), 'any', 'stub() accepts type constraints' );
+}
 
 test_out('ok 1 - set(Int) was called 1 time(s)');
 called_ok( sub { $mock->set(Int) } );
