@@ -4,7 +4,7 @@ Test::Mocha - Test Spy/Stub Framework
 
 # VERSION
 
-version 0.50
+version 0.60
 
 # SYNOPSIS
 
@@ -158,7 +158,7 @@ The last stubbed response will persist until it is overridden.
 
 ## called\_ok
 
-    called_ok { $mock->method(@args) }, [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
+    called_ok { $mock->method(@args) } [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
 
 `called_ok()` is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -315,7 +315,6 @@ they will match empty argument lists.
 
 # TO DO
 
-- Enhanced verifications
 - Module functions and class methods
 
 # SUPPORT

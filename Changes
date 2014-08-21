@@ -1,5 +1,13 @@
 Revision history for Test-Mocha
 
+{{$NEXT}}
+
+0.60    2014-08-22
+
+    - Added function prototypes to trim down syntax (API change).
+      stub() and inspect() are no longer backwards compatible for v0.21 API.
+    - Apply perltidy and perlcritic to code.
+
 0.50    2013-11-18  Major interface change
 
     - dies() is now throws().
