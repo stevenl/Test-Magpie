@@ -254,7 +254,7 @@ sub executes (&) {
 
 =func called_ok
 
-    called_ok { $mock->method(@args) }, [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
+    called_ok { $mock->method(@args) } [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
 
 C<called_ok()> is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -376,7 +376,7 @@ sub called_ok (&;@) {
     # current behaviour
     ## no critic (ProhibitAmpersandSigils)
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    $called_ok ||= &times(1); # default if no times() is specified
+    $called_ok ||= &times(1);  # default if no times() is specified
     $called_ok->( $method_call, $test_name );
     return;
 }
