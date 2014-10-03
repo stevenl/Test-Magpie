@@ -1,16 +1,14 @@
 language: perl
 
 perl:
+  - "5.20"
   - "5.18"
   - "5.16"
   - "5.14"
   - "5.12"
   - "5.10"
 
-install:
-  - cpanm Dist::Zilla                                 || { cat ~/.cpanm/build.log ; false ; }
-  - dzil authordeps --missing        | cpanm --notest || { cat ~/.cpanm/build.log ; false ; }
-  - dzil listdeps --author --missing | cpanm --notest || { cat ~/.cpanm/build.log ; false ; }
-
-script:
-  - dzil test --all
+branches:
+  only:
+    - build/master
+    - release
