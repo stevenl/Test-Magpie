@@ -42,9 +42,8 @@ sub find_caller {
 
     my $i = 1;
     while () {
-        ( $package, $file, $line ) = caller $i;
+        ( $package, $file, $line ) = caller $i++;
         last if $package ne 'UNIVERSAL::ref';
-        $i++;
     }
     return ( $file, $line );
 }

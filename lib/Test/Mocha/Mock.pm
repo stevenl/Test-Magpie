@@ -143,8 +143,8 @@ sub isa {
     return 1 if $class eq __PACKAGE__;
 
     # In order to allow mock methods to be called with other mocks as
-    # arguments, mocks cannot isa() type constraints, which are not allowed
-    # as arguments.
+    # arguments, mocks cannot have isa() called with type constraints,
+    # which are not allowed as arguments.
     return if exists $Isnota{$class};
 
     $AUTOLOAD = 'isa';

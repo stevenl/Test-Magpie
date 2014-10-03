@@ -29,11 +29,9 @@ called_ok { $mock->can('foo') } '... and verified';
 
 ok( ( stub { $mock->ref } returns 'Foo' ), 'ref() can be stubbed' );
 is( $mock->ref, 'Foo', '... and called as a method' );
-is( ref($mock), 'Foo', '... or as a function' );
+is( ref($mock), 'Foo', '... or as a function (via UNIVERSAL::ref)' );
 called_ok { $mock->ref } times(2), '... and verified';
 
 # Ensure UNIVERSAL::ref is not recorded as caller when it intercepts the call
-my $calls = getattr( $mock, 'calls' );
-is( ( $calls->[-1]->caller )[0],
-    __FILE__, '... and caller is not UNIVERSAL::ref' );
-
+my ($call) = inspect { $mock->ref };
+is( ( $call->caller )[0], __FILE__, '... and caller is not UNIVERSAL::ref' );

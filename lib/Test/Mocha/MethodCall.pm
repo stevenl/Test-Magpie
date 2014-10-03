@@ -21,8 +21,8 @@ sub invocant {
 }
 
 sub caller {  ## no critic (ProhibitBuiltinHomonyms)
-              # uncoverable pod
-    return @{ $_[0]->{caller} };
+                                  # uncoverable pod
+    return @{ $_[0]->{caller} };  # ($file, $line)
 }
 
 sub stringify_long {

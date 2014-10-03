@@ -498,7 +498,8 @@ sub _get_called_ok_args {
     is $method_call->name,            'remove_inventory';
     is_deeply [$method_call->args],   ['book', 50];
     is_deeply [$method_call->caller], ['test.pl', 5];
-    is "$method_call", 'remove_inventory("book", 50) called at test.pl line 5';
+    is $method_call->stringify_long,
+        'remove_inventory("book", 50) called at test.pl line 5';
 
 C<inspect()> returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed C<called_ok()> calls.
@@ -512,7 +513,7 @@ The method call objects have the following accessor methods:
 * C<args> - The list of arguments passed to the method call.
 * C<caller> - The file and line number from which the method was called.
 
-They are also C<string> overloaded.
+They are also C<string> overloaded to return the name.
 
 =cut
 

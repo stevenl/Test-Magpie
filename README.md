@@ -221,7 +221,8 @@ default.
     is $method_call->name,            'remove_inventory';
     is_deeply [$method_call->args],   ['book', 50];
     is_deeply [$method_call->caller], ['test.pl', 5];
-    is "$method_call", 'remove_inventory("book", 50) called at test.pl line 5';
+    is $method_call->stringify_long,
+        'remove_inventory("book", 50) called at test.pl line 5';
 
 `inspect()` returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed `called_ok()` calls.
@@ -234,7 +235,7 @@ The method call objects have the following accessor methods:
 - `args` - The list of arguments passed to the method call.
 - `caller` - The file and line number from which the method was called.
 
-They are also `string` overloaded.
+They are also `string` overloaded to return the name.
 
 ## inspect\_all
 
