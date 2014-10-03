@@ -10,5 +10,4 @@ perl:
 
 branches:
   only:
-    - build/master
     - release
