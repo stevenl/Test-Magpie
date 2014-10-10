@@ -175,17 +175,21 @@ tests and you must count calls to C<called_ok()> in your test plans.
     called_ok { $warehouse->remove($item, 50) };
     # prints: ok 1 - remove("book", 50) was called 1 time(s)
 
-An option may be specified to constrain the test.
+The following functions are available to verify the number of calls:
 
 =over 4
 
 =item C<times>
 
 Specifies the number of times the given method is expected to be called.
-The default is 1 if no other option is specified.
+C<times(1)> is the default if no option is specified.
 
     called_ok { $mock->method(@args) } times(3);
     # prints: ok 1 - method(@args) was called 3 time(s)
+
+Note: C<times()> may clash with the built-in function with the same name.
+You may explicitly specify which one you want by qualifying it as
+C<&times(3)> or C<CORE::times>.
 
 =item C<atleast>
 
@@ -231,12 +235,12 @@ default.
     is $method_call->name,            'remove_inventory';
     is_deeply [$method_call->args],   ['book', 50];
     is_deeply [$method_call->caller], ['test.pl', 5];
-    is $method_call->stringify_long,
-        'remove_inventory("book", 50) called at test.pl line 5';
+    is $method_call->stringify,       'remove_inventory("book", 50)';
+    is $method_call->stringify_long,  'remove_inventory("book", 50) called at test.pl line 5';
 
 C<inspect()> returns a list of method calls matching the given method call
 specification. It can be useful for debugging failed C<called_ok()> calls.
-Or use it in place of a complex C<called_ok()> call to break it down into
+Or use it in place of a complex call to C<called_ok()> to break it down into
 smaller tests.
 
 The method call objects have the following accessor methods:
@@ -255,9 +259,17 @@ C<args> - The list of arguments passed to the method call.
 
 C<caller> - The file and line number from which the method was called.
 
+=item *
+
+C<stringify> - The name and arguments as a string.
+
+=item *
+
+C<stringify_long> - The name, arguments, file and line number as a string.`
+
 =back
 
-They are also C<string> overloaded to return the name.
+They are also string overloaded with the value from C<stringify>.
 
 =head2 inspect_all
 

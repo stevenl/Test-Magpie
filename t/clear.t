@@ -32,12 +32,12 @@ my $e;
 
 like(
     $e = exception { clear },
-    qr/^clear\(\) must be given one or more mock objects/,
+    qr/^clear\(\) must be given mock objects only/,
     'clear() must be given an argument'
 );
 like(
     $e = exception { clear 1 },
-    qr/^clear\(\) must be given one or more mock objects/,
+    qr/^clear\(\) must be given mock objects only/,
     '... and argument must be a mock'
 );
 like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
