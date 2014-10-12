@@ -62,18 +62,19 @@ my $ISA = Test::Mocha::MethodStub->new(
 
 sub new {
     # uncoverable pod
-    my ( $class, %args ) = @_;
+    my ($class) = @_;
 
-    # ArrayRef[ MethodCall ]
-    $args{calls} = [];
-
-    # $method_name => ArrayRef[ MethodStub ]
-    $args{stubs} = {
-        can  => [$CAN],
-        DOES => [$DOES_UC],
-        does => [$DOES_LC],
-        isa  => [$ISA],
-    };
+    my %args = (
+        # ArrayRef[ MethodCall ]
+        calls => [],
+        # $method_name => ArrayRef[ MethodStub ]
+        stubs => {
+            can  => [$CAN],
+            DOES => [$DOES_UC],
+            does => [$DOES_LC],
+            isa  => [$ISA],
+        },
+    );
     return bless \%args, $class;
 }
 
