@@ -1,12 +1,14 @@
-# NAME
+=pod
+
+=head1 NAME
 
 Test::Mocha - Test Spy/Stub Framework
 
-# VERSION
+=head1 VERSION
 
-version 0.60\_01
+version 0.60_01
 
-# SYNOPSIS
+=head1 SYNOPSIS
 
 Test::Mocha is a test spy framework for testing code that has dependencies on
 other objects.
@@ -32,10 +34,10 @@ other objects.
     # clear the invocation history
     clear $warehouse;
 
-# DESCRIPTION
+=head1 DESCRIPTION
 
-__The API may still be subject to change. I will try to keep it backwards
-compatible as much as possible.__
+B<The API may still be subject to change. I will try to keep it backwards
+compatible as much as possible.>
 
 We find all sorts of excuses to avoid writing tests for our code. Often it
 seems too hard to isolate the code we want to test from the objects it is
@@ -58,78 +60,82 @@ correctly with its dependent objects. Selectively verify the method calls that
 you are interested in only. As you verify behaviour, you focus on external
 interfaces rather than on internal state.
 
-# FUNCTIONS
+=head1 FUNCTIONS
 
-## mock
+=head2 mock
 
     my $mock = mock;
 
-`mock()` creates a new mock object. It's that quick and simple!
+C<mock()> creates a new mock object. It's that quick and simple!
 
 The mock object is ready, as-is, to pretend to be anything you want it to be.
-Calling `isa()` or `does()` on the object will always return true. This
+Calling C<isa()> or C<does()> on the object will always return true. This
 is particularly handy when dependent objects are required to satisfy type
-constraint checks with OO frameworks such as [Moose](https://metacpan.org/module/Moose).
+constraint checks with OO frameworks such as L<Moose>.
 
     ok( $mock->isa('AnyClass') );
     ok( $mock->does('AnyRole') );
     ok( $mock->DOES('AnyRole') );
 
 It will also accept any method call on it. By default, method calls will
-return `undef` (in scalar context) or an empty list (in list context).
+return C<undef> (in scalar context) or an empty list (in list context).
 
     ok( $mock->can('any_method') );
     is( $mock->any_method(@args), undef );
 
-You can stub `ref()` to specify the value it should return (see below for
+You can stub C<ref()> to specify the value it should return (see below for
 more info about stubbing).
 
     stub { $mock->ref } returns 'AnyClass';
     is( $mock->ref, 'AnyClass' );
     is( ref($mock), 'AnyClass' );
 
-## stub
+=head2 stub
 
     stub { $mock->method(@args) } returns(@values) | throws($exception) | executes($coderef)
 
 By default, the mock object already acts as a stub that accepts any method
-call and returns `undef`. However, you can use `stub()` to tell a method to
+call and returns C<undef>. However, you can use C<stub()> to tell a method to
 give an alternative response. You can specify 3 types of responses:
 
-- `returns(@values)`
+=over 4
 
-    Specifies that a stub should return 1 or more values.
+=item C<returns(@values)>
 
-        stub { $mock->method(@args) } ) returns 1, 2, 3;
-        is_deeply( [ $mock->method(@args) ], [ 1, 2, 3 ] );
+Specifies that a stub should return 1 or more values.
 
-- `throws($message)`
+    stub { $mock->method(@args) } ) returns 1, 2, 3;
+    is_deeply( [ $mock->method(@args) ], [ 1, 2, 3 ] );
 
-    Specifies that a stub should raise an exception.
+=item C<throws($message)>
 
-        stub { $mock->method(@args) } throws 'an error';
-        ok( exception { $mock->method(@args) } );
+Specifies that a stub should raise an exception.
 
-- `executes($coderef)`
+    stub { $mock->method(@args) } throws 'an error';
+    ok( exception { $mock->method(@args) } );
 
-    Specifies that a stub should execute the given callback. The arguments used
-    in the method call are passed on to the callback.
+=item C<executes($coderef)>
 
-        my @returns = qw( first second third );
+Specifies that a stub should execute the given callback. The arguments used
+in the method call are passed on to the callback.
 
-        stub { $list->get(Int) } executes {
-            my ( $self, $i ) = @_;
-            die "index out of bounds" if $i < 0;
-            return $returns[$i];
-        };
+    my @returns = qw( first second third );
 
-        is( $list->get(0), 'first'  );
-        is( $list->get(1), 'second' );
-        is( $list->get(5), undef    );
-        like( exception { $list->get(-1) }, qr/^index out of bounds/ ),
+    stub { $list->get(Int) } executes {
+        my ( $self, $i ) = @_;
+        die "index out of bounds" if $i < 0;
+        return $returns[$i];
+    };
+
+    is( $list->get(0), 'first'  );
+    is( $list->get(1), 'second' );
+    is( $list->get(5), undef    );
+    like( exception { $list->get(-1) }, qr/^index out of bounds/ ),
+
+=back
 
 A stub applies to the exact method and arguments specified (but see also
-["ARGUMENT MATCHING"](#ARGUMENT MATCHING) for a shortcut around this).
+L</"ARGUMENT MATCHING"> for a shortcut around this).
 
     stub { $list->get(0) } returns 'first';
     stub { $list->get(1) } returns 'second';
@@ -156,54 +162,58 @@ The last stubbed response will persist until it is overridden.
     stub { $warehouse->has_inventory($item, 10) } returns '';
     ok( !$warehouse->has_inventory($item, 10) ) for 1 .. 5;
 
-## called\_ok
+=head2 called_ok
 
     called_ok { $mock->method(@args) } [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
 
-`called_ok()` is used to test the interactions with the mock object. You can
+C<called_ok()> is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
-arguments, and the correct number of times. `called_ok()` plays nicely with
-[Test::Simple](https://metacpan.org/module/Test::Simple) and Co - it will print the test result along with your other
-tests and you must count calls to `called_ok()` in your test plans.
+arguments, and the correct number of times. C<called_ok()> plays nicely with
+L<Test::Simple> and Co - it will print the test result along with your other
+tests and you must count calls to C<called_ok()> in your test plans.
 
     called_ok { $warehouse->remove($item, 50) };
     # prints: ok 1 - remove("book", 50) was called 1 time(s)
 
 An option may be specified to constrain the test.
 
-- `times`
+=over 4
 
-    Specifies the number of times the given method is expected to be called.
-    The default is 1 if no other option is specified.
+=item C<times>
 
-        called_ok { $mock->method(@args) } times(3);
-        # prints: ok 1 - method(@args) was called 3 time(s)
+Specifies the number of times the given method is expected to be called.
+The default is 1 if no other option is specified.
 
-- `atleast`
+    called_ok { $mock->method(@args) } times(3);
+    # prints: ok 1 - method(@args) was called 3 time(s)
 
-    Specifies the minimum number of times the given method is expected to be
-    called.
+=item C<atleast>
 
-        called_ok { $mock->method(@args) } atleast(3);
-        # prints: ok 1 - method(@args) was called at least 3 time(s)
+Specifies the minimum number of times the given method is expected to be
+called.
 
-- `atmost`
+    called_ok { $mock->method(@args) } atleast(3);
+    # prints: ok 1 - method(@args) was called at least 3 time(s)
 
-    Specifies the maximum number of times the given method is expected to be
-    called.
+=item C<atmost>
 
-        called_ok { $mock->method(@args) } atmost(5);
-        # prints: ok 1 - method(@args) was called at most 5 time(s)
+Specifies the maximum number of times the given method is expected to be
+called.
 
-- `between`
+    called_ok { $mock->method(@args) } atmost(5);
+    # prints: ok 1 - method(@args) was called at most 5 time(s)
 
-    Specifies the minimum and maximum number of times the given method is
-    expected to be called.
+=item C<between>
 
-        called_ok { $mock->method(@args) } between(3, 5);
-        # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
+Specifies the minimum and maximum number of times the given method is
+expected to be called.
 
-An optional `$test_name` may be specified to be printed instead of the
+    called_ok { $mock->method(@args) } between(3, 5);
+    # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
+
+=back
+
+An optional C<$test_name> may be specified to be printed instead of the
 default.
 
     called_ok { $warehouse->remove_inventory($item, 50) } 'inventory removed';
@@ -212,7 +222,7 @@ default.
     called_ok { $warehouse->remove_inventory($item, 50) } times(0), 'inventory not removed';
     # prints: ok 2 - inventory not removed
 
-## inspect
+=head2 inspect
 
     @method_calls = inspect { $mock->method(@args) };
 
@@ -224,45 +234,59 @@ default.
     is $method_call->stringify_long,
         'remove_inventory("book", 50) called at test.pl line 5';
 
-`inspect()` returns a list of method calls matching the given method call
-specification. It can be useful for debugging failed `called_ok()` calls.
-Or use it in place of a complex `called_ok()` call to break it down into
+C<inspect()> returns a list of method calls matching the given method call
+specification. It can be useful for debugging failed C<called_ok()> calls.
+Or use it in place of a complex C<called_ok()> call to break it down into
 smaller tests.
 
 The method call objects have the following accessor methods:
 
-- `name` - The name of the method called.
-- `args` - The list of arguments passed to the method call.
-- `caller` - The file and line number from which the method was called.
+=over 4
 
-They are also `string` overloaded to return the name.
+=item *
 
-## inspect\_all
+C<name> - The name of the method called.
+
+=item *
+
+C<args> - The list of arguments passed to the method call.
+
+=item *
+
+C<caller> - The file and line number from which the method was called.
+
+=back
+
+They are also C<string> overloaded to return the name.
+
+=head2 inspect_all
 
     @all_method_calls = inspect_all $mock
 
-`inspect_all()` returns a list containing all methods called on the mock
+C<inspect_all()> returns a list containing all methods called on the mock
 object. This is mainly used for debugging.
 
-## clear
+=head2 clear
 
     clear $mock1, $mock2, ...
 
 Clears the method call history for one or more mocks so that they can be
 reused in another test. Note that this does not affect the stubbed methods.
 
-# ARGUMENT MATCHING
+=for Pod::Coverage verify
+
+=head1 ARGUMENT MATCHING
 
 Argument matchers may be used in place of specifying exact method arguments.
 They allow you to be more general and will save you much time in your
 method specifications to stubs and verifications. Argument matchers may be used
-with `stub()`, `called_ok()` and `inspect`.
+with C<stub()>, C<called_ok()> and C<inspect>.
 
-## Pre-defined types
+=head2 Pre-defined types
 
-You may use any of the ready-made types in [Types::Standard](https://metacpan.org/module/Types::Standard). (Alternatively,
-Moose types like those in [MooseX::Types::Moose](https://metacpan.org/module/MooseX::Types::Moose) and
-[MooseX::Types::Structured](https://metacpan.org/module/MooseX::Types::Structured) will also work.)
+You may use any of the ready-made types in L<Types::Standard>. (Alternatively,
+Moose types like those in L<MooseX::Types::Moose> and
+L<MooseX::Types::Structured> will also work.)
 
     use Types::Standard qw( Any );
 
@@ -289,9 +313,9 @@ use coercions).
     # prints: ok 1 - set(Int, StrMatch[(?^:^foo)]) was called 1 time(s)
     called_ok { $list->set( Int, StrMatch[qr/^foo/] ) };
 
-## Self-defined types
+=head2 Self-defined types
 
-You may also use your own types, defined using [Type::Utils](https://metacpan.org/module/Type::Utils).
+You may also use your own types, defined using L<Type::Utils>.
 
     use Type::Utils -all;
 
@@ -301,9 +325,9 @@ You may also use your own types, defined using [Type::Utils](https://metacpan.or
     # prints: ok 2 - set(PositiveInt, Any) was called 1 time(s)
     called_ok { $list->set($positive_int, Any) };
 
-## Argument slurping
+=head2 Argument slurping
 
-`SlurpyArray` and `SlurpyHash` are special argument matchers exported by
+C<SlurpyArray> and C<SlurpyHash> are special argument matchers exported by
 Test::Mocha that you can use when you don't care what arguments are used.
 They will just slurp up the remaining arguments as though they match.
 
@@ -314,43 +338,54 @@ Because they consume the remaining arguments, you can't use further argument
 validators after them. But you can, of course, use them before. Note also that
 they will match empty argument lists.
 
-# TO DO
+=for Pod::Coverage SlurpyArray SlurpyHash
 
-- Module functions and class methods
+=head1 TO DO
 
-# SUPPORT
+=over 4
 
-## Bugs / Feature Requests
+=item *
 
-Please report any bugs or feature requests by email to `bug-test-mocha at rt.cpan.org`, or through
-the web interface at [http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mocha](http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mocha). You will be automatically notified of any
+Module functions and class methods
+
+=back
+
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests by email to C<bug-test-mocha at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mocha>. You will be automatically notified of any
 progress on the request by the system.
 
-# AUTHOR
+=head1 AUTHOR
 
 Steven Lee <stevenwh.lee@gmail.com>
 
-# ACKNOWLEDGEMENTS
+=head1 ACKNOWLEDGEMENTS
 
-This module is a fork from [Test::Magpie](https://metacpan.org/module/Test::Magpie) originally written by Oliver
+This module is a fork from L<Test::Magpie> originally written by Oliver
 Charles (CYCLES).
 
-It is inspired by the popular [Mockito](http://code.google.com/p/mockito/)
+It is inspired by the popular L<Mockito|http://code.google.com/p/mockito/>
 for Java and Python by Szczepan Faber.
 
-# SEE ALSO
+=head1 SEE ALSO
 
-[Test::MockObject](https://metacpan.org/module/Test::MockObject)
+L<Test::MockObject>
 
-# COPYRIGHT AND LICENSE
+=head1 COPYRIGHT AND LICENSE
 
 This software is copyright (c) 2014 by Steven Lee.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
-# DISCLAIMER OF WARRANTY
+=head1 DISCLAIMER OF WARRANTY
 
 THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
