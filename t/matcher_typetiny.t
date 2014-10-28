@@ -38,16 +38,16 @@ SKIP: {
 
     test_out(
         qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\) was called 2 time\(s\)\s?/);
-    called_ok { $mock->set( StrMatch [qr/^foo/] ) } times(2);
+    called_ok { $mock->set( StrMatch [qr/^foo/] ) } &times(2);
     test_test('parameterized type works');
 }
 
 test_out('ok 1 - set(Int, ~Int) was called 2 time(s)');
-called_ok { $mock->set( Int, ~Int ) } times(2);
+called_ok { $mock->set( Int, ~Int ) } &times(2);
 test_test('type negation works');
 
 test_out('ok 1 - set(Int|Str) was called 2 time(s)');
-called_ok { $mock->set( Int | Str ) } times(2);
+called_ok { $mock->set( Int | Str ) } &times(2);
 test_test('type union works');
 
 SKIP: {
@@ -76,23 +76,23 @@ test_test('self-defined type constraint works');
 # slurpy type constraints
 
 test_out('ok 1 - set({ slurpy: ArrayRef }) was called 5 time(s)');
-called_ok { $mock->set( slurpy ArrayRef ) } times(5);
+called_ok { $mock->set( slurpy ArrayRef ) } &times(5);
 test_test('slurpy ArrayRef works');
 
 test_out('ok 1 - set({ slurpy: Tuple[Defined,Defined] }) was called 2 time(s)');
-called_ok { $mock->set( slurpy Tuple [ Defined, Defined ] ) } times(2);
+called_ok { $mock->set( slurpy Tuple [ Defined, Defined ] ) } &times(2);
 test_test('slurpy Tuple works');
 
 test_out('ok 1 - set({ slurpy: HashRef }) was called 2 time(s)');
-called_ok { $mock->set( slurpy HashRef ) } times(2);
+called_ok { $mock->set( slurpy HashRef ) } &times(2);
 test_test('slurpy HashRef works');
 
 test_out('ok 1 - set({ slurpy: Dict[-1=>Str] }) was called 1 time(s)');
-called_ok { $mock->set( slurpy Dict [ -1 => Str ] ) } times(1);
+called_ok { $mock->set( slurpy Dict [ -1 => Str ] ) } &times(1);
 test_test('slurpy Dict works');
 
 test_out('ok 1 - set({ slurpy: Map[PositiveInt,Str] }) was called 1 time(s)');
-called_ok { $mock->set( slurpy Map [ $positive_int, Str ] ) } times(1);
+called_ok { $mock->set( slurpy Map [ $positive_int, Str ] ) } &times(1);
 test_test('slurpy Map works');
 
 # slurpy matches with empty argument list
@@ -107,11 +107,11 @@ test_test('slurpy HashRef matches no arguments');
 
 # custom slurpy types
 test_out('ok 1 - set({ slurpy: ArrayRef }) was called 5 time(s)');
-called_ok { $mock->set(SlurpyArray) } times(5);
+called_ok { $mock->set(SlurpyArray) } &times(5);
 test_test('SlurpyArray works');
 
 test_out('ok 1 - set({ slurpy: HashRef }) was called 2 time(s)');
-called_ok { $mock->set(SlurpyHash) } times(2);
+called_ok { $mock->set(SlurpyHash) } &times(2);
 test_test('SlurpyHash works');
 
 test_out('ok 1 - bar({ slurpy: ArrayRef }) was called 1 time(s)');

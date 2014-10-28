@@ -35,7 +35,7 @@ my $CAN = Test::Mocha::MethodStub->new(
                 $AUTOLOAD = $method_name;
                 goto &AUTOLOAD;
             };
-          }
+        }
     ],
 );
 

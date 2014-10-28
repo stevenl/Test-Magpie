@@ -18,20 +18,21 @@ subtest 'X ~~ Array' => sub {
 
     $mock->array( [ 1, 2, 3 ] );
     called_ok { $mock->array( [ 1, 2, 3 ] ) } 'Array ~~ Array';
-    called_ok { $mock->array( [ 1, 2 ] ) } times(0), 'Array.size != Array.size';
+    called_ok { $mock->array( [ 1, 2 ] ) } &times(0),
+      'Array.size != Array.size';
 
     $mock->hash( { a => 1 } );
-    called_ok { $mock->hash( [qw/a b c/] ) } times(0), 'Hash ~~ Array';
+    called_ok { $mock->hash( [qw/a b c/] ) } &times(0), 'Hash ~~ Array';
 
     $mock->regexp(qr/^hell/);
-    called_ok { $mock->regexp( [qw/hello/] ) } times(0), 'Regexp ~~ Array';
+    called_ok { $mock->regexp( [qw/hello/] ) } &times(0), 'Regexp ~~ Array';
 
     $mock->undef(undef);
-    called_ok { $mock->undef( [ undef, 'anything' ] ) } times(0),
+    called_ok { $mock->undef( [ undef, 'anything' ] ) } &times(0),
       'Undef ~~ Array';
 
     $mock->any(1);
-    called_ok { $mock->any( [ 1, 2, 3 ] ) } times(0), 'Any ~~ Array';
+    called_ok { $mock->any( [ 1, 2, 3 ] ) } &times(0), 'Any ~~ Array';
 };
 
 subtest 'X ~~ Array (nested)' => sub {
@@ -46,10 +47,10 @@ subtest 'X ~~ Array (nested)' => sub {
     'Array[Hash] ~~ Array[Hash]';
 
     $mock->array( [ 1, 2, 3 ] );
-    called_ok { $mock->array( [ 1, 2, [ 3, 4 ] ] ) } times(0),
+    called_ok { $mock->array( [ 1, 2, [ 3, 4 ] ] ) } &times(0),
       'Array ~~ Array[Array]';
 
-    called_ok { $mock->array( [ 1, 2, { 3 => 4 } ] ) } times(0),
+    called_ok { $mock->array( [ 1, 2, { 3 => 4 } ] ) } &times(0),
       'Array ~~ Array[Hash]';
 };
 
@@ -59,20 +60,20 @@ subtest 'X ~~ Hash' => sub {
     $mock->hash( { a => 1, b => 2, c => 3 } );
     called_ok { $mock->hash( { c => 3, b => 2, a => 1 } ) } 'Hash ~~ Hash';
 
-    called_ok { $mock->hash( { a => 3, b => 2, d => 1 } ) } times(0),
+    called_ok { $mock->hash( { a => 3, b => 2, d => 1 } ) } &times(0),
       'Hash ~~ Hash - different keys';
 
-    called_ok { $mock->hash( { a => 3, b => 2, c => 1 } ) } times(0),
+    called_ok { $mock->hash( { a => 3, b => 2, c => 1 } ) } &times(0),
       'Hash ~~ Hash - same keys, different values';
 
     $mock->array( [qw/a b c/] );
-    called_ok { $mock->array( { a => 1 } ) } times(0), 'Array ~~ Hash';
+    called_ok { $mock->array( { a => 1 } ) } &times(0), 'Array ~~ Hash';
 
     $mock->regexp(qr/^hell/);
-    called_ok { $mock->regexp( { hello => 1 } ) } times(0), 'Regexp ~~ Hash';
+    called_ok { $mock->regexp( { hello => 1 } ) } &times(0), 'Regexp ~~ Hash';
 
     $mock->any('a');
-    called_ok { $mock->any( { a => 1, b => 2 } ) } times(0), 'Any ~~ Hash';
+    called_ok { $mock->any( { a => 1, b => 2 } ) } &times(0), 'Any ~~ Hash';
 };
 
 subtest 'X ~~ Code' => sub {
@@ -82,39 +83,39 @@ subtest 'X ~~ Code' => sub {
     called_ok {
         $mock->array( sub { 1 } );
     }
-    times(0), 'Array ~~ Code';
+    &times(0), 'Array ~~ Code';
 
     # empty arrays always match
     $mock->array( [] );
     called_ok {
         $mock->array( sub { 0 } );
     }
-    times(0), 'Array(empty) ~~ Code';
+    &times(0), 'Array(empty) ~~ Code';
 
     $mock->hash( { a => 1, b => 2 } );
     called_ok {
         $mock->hash( sub { 1 } );
     }
-    times(0), 'Hash ~~ Code';
+    &times(0), 'Hash ~~ Code';
 
     # empty hashes always match
     $mock->hash( {} );
     called_ok {
         $mock->hash( sub { 0 } );
     }
-    times(0), 'Hash(empty) ~~ Code';
+    &times(0), 'Hash(empty) ~~ Code';
 
     $mock->code('anything');
     called_ok {
         $mock->code( sub { 1 } );
     }
-    times(0), 'Any ~~ Code';
+    &times(0), 'Any ~~ Code';
 
     $mock->code( sub { 0 } );
     called_ok {
         $mock->code( sub { 1 } );
     }
-    times(0), 'Code ~~ Code';
+    &times(0), 'Code ~~ Code';
 
     # same coderef should match
     $mock = mock;
@@ -127,13 +128,13 @@ subtest 'X ~~ Regexp' => sub {
     my $mock = mock;
 
     $mock->array( [qw/hello bye/] );
-    called_ok { $mock->array(qr/^hell/) } times(0), 'Array ~~ Regexp';
+    called_ok { $mock->array(qr/^hell/) } &times(0), 'Array ~~ Regexp';
 
     $mock->hash( { hello => 1 } );
-    called_ok { $mock->hash(qr/^hell/) } times(0), 'Array ~~ Regexp';
+    called_ok { $mock->hash(qr/^hell/) } &times(0), 'Array ~~ Regexp';
 
     $mock->any('hello');
-    called_ok { $mock->any(qr/^hell/) } times(0), 'Any ~~ Regexp';
+    called_ok { $mock->any(qr/^hell/) } &times(0), 'Any ~~ Regexp';
 };
 
 subtest 'X ~~ Undef' => sub {
@@ -143,9 +144,9 @@ subtest 'X ~~ Undef' => sub {
     called_ok { $mock->undef(undef) } 'Undef ~~ Undef';
 
     $mock->any(1);
-    called_ok { $mock->any(undef) } times(0), 'Any ~~ Undef';
+    called_ok { $mock->any(undef) } &times(0), 'Any ~~ Undef';
 
-    called_ok { $mock->undef(1) } times(0), 'Undef ~~ Any';
+    called_ok { $mock->undef(1) } &times(0), 'Undef ~~ Any';
 };
 
 {
@@ -177,7 +178,7 @@ subtest 'X ~~ Object (overloaded)' => sub {
     my $overloaded = My::Overloaded->new( value => 5 );
 
     $mock->any( [ 1, 3, 5 ] );
-    called_ok { $mock->any($overloaded) } times(0), 'Any ~~ Object';
+    called_ok { $mock->any($overloaded) } &times(0), 'Any ~~ Object';
 
     $mock->object($overloaded);
     called_ok { $mock->object($overloaded) } 'Object == Object';
@@ -197,7 +198,7 @@ subtest 'X ~~ Object (non-overloaded)' => sub {
     # rules take precedence over overloading. The comparison is meant to be
     # `$obj eq 'My::Object` but this doesn't seem to be happening
     $mock->object($obj);
-    called_ok { $mock->object('My::Object') } times(0), 'Object ~~ Any';
+    called_ok { $mock->object('My::Object') } &times(0), 'Object ~~ Any';
 };
 
 subtest 'X ~~ Num' => sub {
@@ -208,7 +209,7 @@ subtest 'X ~~ Num' => sub {
     called_ok { $mock->int(5.0) } 'Int == Num';
 
     $mock->str('42x');
-    called_ok { $mock->str(42) } times(0), 'Str ~~ Num (42x == 42)';
+    called_ok { $mock->str(42) } &times(0), 'Str ~~ Num (42x == 42)';
 };
 
 subtest 'X ~~ Str' => sub {
@@ -216,15 +217,16 @@ subtest 'X ~~ Str' => sub {
 
     $mock->str('foo');
     called_ok { $mock->str('foo') } 'Str eq Str';
-    called_ok { $mock->str('Foo') } times(0), 'Str ne Str';
-    called_ok { $mock->str('bar') } times(0), 'Str ne Str';
+    called_ok { $mock->str('Foo') } &times(0), 'Str ne Str';
+    called_ok { $mock->str('bar') } &times(0), 'Str ne Str';
 
     $mock->int(5);
     called_ok { $mock->int("5.0") } 'Int ~~ Num-like';
-    called_ok { $mock->int("5x") } times(0), 'Int !~ Num-like (5 eq 5x)';
+    called_ok { $mock->int("5x") } &times(0), 'Int !~ Num-like (5 eq 5x)';
 
   TODO: {
         local $TODO = "string still looks_like_number in spite of whitespace";
-        called_ok { $mock->int("5\n") } times(0), 'Int !~ Num-like (5 eq 5\\n)';
+        called_ok { $mock->int("5\n") } &times(0),
+          'Int !~ Num-like (5 eq 5\\n)';
     }
 };

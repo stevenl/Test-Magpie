@@ -86,7 +86,7 @@ test_test('diagnostics with no method call history');
 # called_ok() with times()
 
 test_out('ok 1 - twice() was called 2 time(s)');
-called_ok { $mock->twice } times(2);
+called_ok { $mock->twice } &times(2);
 test_test("called_ok() with times() that passes");
 
 $test_name = 'twice() was called 1 time(s)';
@@ -102,13 +102,13 @@ $diag_call_history
 ERR
 test_err($err);
 {
-    called_ok { $mock->twice } times(1);
+    called_ok { $mock->twice } &times(1);
 }
 test_test("called_ok() with times() that fails");
 
 like(
     $e = exception {
-        called_ok { $mock->once } times('string');
+        called_ok { $mock->once } &times('string');
     },
     qr/^times\(\) must be given a number/,
     "called_ok with invalid times() value"
@@ -248,7 +248,7 @@ like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
 
 $test_name = 'name for my test';
 test_out("ok 1 - $test_name");
-called_ok { $mock->once } times(1), $test_name;
+called_ok { $mock->once } &times(1), $test_name;
 test_test("called_ok() with times() and a name");
 
 test_out("ok 1 - $test_name");
@@ -267,7 +267,7 @@ test_test("called_ok() with between() and a name");
 # called_ok() with type constraint arguments
 
 test_out('ok 1 - thrice(Any) was called 3 time(s)');
-called_ok { $mock->thrice(Any) } times(3);
+called_ok { $mock->thrice(Any) } &times(3);
 test_test('called_ok() accepts type constraints');
 
 like(
