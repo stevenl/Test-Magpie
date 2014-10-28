@@ -10,7 +10,7 @@ Test::Mocha - Test Spy/Stub Framework
 
 =head1 VERSION
 
-version 0.60_01
+version 0.60_02
 
 =head1 SYNOPSIS
 
