@@ -4,6 +4,11 @@ use warnings;
 package Test::Mocha;
 # ABSTRACT: Test Spy/Stub Framework
 
+=for :badge
+=for html
+<a href="https://travis-ci.org/stevenl/Test-Mocha"><img src="https://travis-ci.org/stevenl/Test-Mocha.svg?branch=master" alt="Build Status"></a>
+<a href='https://coveralls.io/r/stevenl/Test-Mocha?branch=master'><img src='https://coveralls.io/repos/stevenl/Test-Mocha/badge.png?branch=master' alt='Coverage Status' /></a>
+
 =head1 SYNOPSIS
 
 Test::Mocha is a test spy framework for testing code that has dependencies on
