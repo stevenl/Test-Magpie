@@ -72,11 +72,12 @@ use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( getattr get_method_call is_called );
+use Test::Mocha::Util qw( getattr get_method_call is_called extract_method_name );
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
   mock
+  class_mock
   stub
   returns
   throws
@@ -656,10 +657,44 @@ sub SlurpyHash () {
 }
 ## use critic
 
-=head1 TO DO
+=head1 MOCKING CLASS METHODS
 
-=for :list
-* Module functions and class methods
+=func class_mock
+
+C<class_mock()> creates a mock for stubbing class methods and module functions.
+
+    my $mock = class_mock 'Some::Class';
+
+To stub a class method or module function:
+
+    stub { Some::Class->some_class_method() } returns 'something';
+    is( Some::Class->some_class_method(), 'something' );
+
+    stub { Some::Class::some_module_function() } returns 'something';
+    is( Some::Class::some_module_function(), "something" );
+
+Validation is handled similarly.
+
+    called_ok { Some::Class->some_class_method() } "some_class_method called";
+    called_ok { Some::Class::some_module_function() } "some_module_function called";
+
+=cut
+
+sub class_mock {
+    my ($mocked_class) = @_;
+
+    no strict 'refs';
+    no warnings;
+
+    my $mock = mock($mocked_class);
+    *{ $mocked_class . '::AUTOLOAD' } = sub {
+        my ($method) = extract_method_name (our $AUTOLOAD);
+        $mock->$method(@_);
+    };
+    return $mock;
+}
+
+=head1 TO DO
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -668,6 +703,8 @@ Charles (CYCLES).
 
 It is inspired by the popular L<Mockito|http://code.google.com/p/mockito/>
 for Java and Python by Szczepan Faber.
+
+The class_mock method was contributed by Scott Davis.
 
 =head1 SEE ALSO
 
