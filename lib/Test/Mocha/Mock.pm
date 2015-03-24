@@ -62,12 +62,13 @@ my $ISA = Test::Mocha::MethodStub->new(
 
 sub new {
     # uncoverable pod
-    my ($class) = @_;
+    my ($class, $mocked_class) = @_;
 
     my %args = (
         # ArrayRef[ MethodCall ]
         calls => [],
         # $method_name => ArrayRef[ MethodStub ]
+        mocked_class => $mocked_class,
         stubs => {
             can  => [$CAN],
             DOES => [$DOES_UC],
@@ -81,6 +82,17 @@ sub new {
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
     my $method_name = extract_method_name($AUTOLOAD);
+
+    # If a class method or module function, then transform method name
+    my $mocked_class = getattr ( $self, 'mocked_class' );
+    if ($mocked_class) {
+        if ($args[0] eq $mocked_class) {
+            shift @args;
+            $method_name = "${mocked_class}->${method_name}";
+        } else {
+            $method_name = "${mocked_class}::${method_name}";
+        }
+    }
 
     undef $last_method_call;
     undef $last_execution;
