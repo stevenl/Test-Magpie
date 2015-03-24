@@ -72,7 +72,8 @@ use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( getattr get_method_call is_called extract_method_name );
+use Test::Mocha::Util
+  qw( getattr get_method_call is_called extract_method_name );
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
@@ -683,18 +684,15 @@ Validation is handled similarly.
 sub class_mock {
     my ($mocked_class) = @_;
 
-    no strict 'refs';
-    no warnings;
-
     my $mock = mock($mocked_class);
+
+    no strict 'refs'; ## no critic (TestingAndDebugging::ProhibitNoStrict)
     *{ $mocked_class . '::AUTOLOAD' } = sub {
-        my ($method) = extract_method_name (our $AUTOLOAD);
+        my ($method) = extract_method_name( our $AUTOLOAD );
         $mock->$method(@_);
     };
     return $mock;
 }
-
-=head1 TO DO
 
 =head1 ACKNOWLEDGEMENTS
 

@@ -71,7 +71,7 @@ sub can {
     goto &AUTOLOAD;
 }
 
-# Don't let AUTOLOAD() handle DESTROY()
+# Don't let AUTOLOAD() handle DESTROY() so that object can be destroyed
 sub DESTROY { }
 
 1;

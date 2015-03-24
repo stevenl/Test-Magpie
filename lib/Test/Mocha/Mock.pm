@@ -62,14 +62,14 @@ my $ISA = Test::Mocha::MethodStub->new(
 
 sub new {
     # uncoverable pod
-    my ($class, $mocked_class) = @_;
+    my ( $class, $mocked_class ) = @_;
 
     my %args = (
         # ArrayRef[ MethodCall ]
         calls => [],
         # $method_name => ArrayRef[ MethodStub ]
         mocked_class => $mocked_class,
-        stubs => {
+        stubs        => {
             can  => [$CAN],
             DOES => [$DOES_UC],
             does => [$DOES_LC],
@@ -84,12 +84,13 @@ sub AUTOLOAD {
     my $method_name = extract_method_name($AUTOLOAD);
 
     # If a class method or module function, then transform method name
-    my $mocked_class = getattr ( $self, 'mocked_class' );
+    my $mocked_class = getattr( $self, 'mocked_class' );
     if ($mocked_class) {
-        if ($args[0] eq $mocked_class) {
+        if ( $args[0] eq $mocked_class ) {
             shift @args;
             $method_name = "${mocked_class}->${method_name}";
-        } else {
+        }
+        else {
             $method_name = "${mocked_class}::${method_name}";
         }
     }
@@ -195,7 +196,7 @@ sub ref {  ## no critic (ProhibitBuiltinHomonyms)
     goto &AUTOLOAD;
 }
 
-# Don't let AUTOLOAD() handle DESTROY()
+# Don't let AUTOLOAD() handle DESTROY() so that object can be destroyed
 sub DESTROY { }
 
 1;
