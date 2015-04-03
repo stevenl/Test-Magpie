@@ -679,6 +679,11 @@ Validation is handled similarly.
     called_ok { Some::Class->some_class_method() } "some_class_method called";
     called_ok { Some::Class::some_module_function() } "some_module_function called";
 
+Note: The original class that you mock must not be imported before you have
+finished stubbing the class. This means that if your module under test C<use>s
+it, then you must C<use_ok> or C<require> the test module after stubbing the
+mock class.
+
 =cut
 
 sub class_mock {
