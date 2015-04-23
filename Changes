@@ -2,7 +2,13 @@ Revision history for Test-Mocha
 
 {{$NEXT}}
 
+0.61    2015-04-23
+
+    - Added class_mock() for mocking class methods and module functions
+      (Scott Davis)
+
 0.60_02 2014-10-28
+
     - Fix travis-ci configuration.
 
 0.60_01 2014-10-04
