@@ -3,21 +3,29 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 14;
 use Test::Fatal;
 use Test::Builder::Tester;
-use Types::Standard qw( Any slurpy );
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Util qw( getattr );
-use Types::Standard qw( Any Int slurpy );
-
-# setup
-my $file  = __FILE__;
-my $mock  = class_mock 'Some::Class';
-my $stubs = getattr( $mock, 'stubs' );
 my $e;
+
+isa_ok( class_mock('Some::Class'), 'Test::Mocha::Mock' );
+
+ok( exception { class_mock 'Test::Builder::Tester' },
+    'class_mock() throws if real module is already loaded' );
+
+ok( exception { class_mock('Some::Class') },
+    'class_mock() throws if module is already mocked' );
+
+TODO: {
+    todo_skip
+      'stub() error should give better feedback when trying to stub a non-mock',
+      1;
+    stub { Test::Builder::Test->dummy } returns 1;
+    ok( Test::Builder::Test->dummy, 'dummy' );
+}
 
 # Class method - stubs
 test_out('ok 1');
@@ -47,6 +55,14 @@ stub { Some::Class->class_method( 2, 3 ) }
 executes { my $self = shift; return join( ",", @_ ) };
 is( Some::Class->class_method( 2, 3 ), "2,3" );
 test_test("class method executes alternate method");
+
+# stub Class->new
+TODO: {
+    todo_skip 'new() is a method of Test::Mocha::Mock that cannot be stubbed',
+      1;
+    stub { Some::Class->new } returns mock();
+    new_ok('Some::Class');
+}
 
 # Executes - module function method
 test_out('ok 1');

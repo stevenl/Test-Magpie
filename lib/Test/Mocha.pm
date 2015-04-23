@@ -658,13 +658,13 @@ sub SlurpyHash () {
 }
 ## use critic
 
-=head1 MOCKING CLASS METHODS
+=head1 MOCKING CLASS METHODS (experimental)
 
-=func class_mock
+=head2 class_mock
 
 C<class_mock()> creates a mock for stubbing class methods and module functions.
 
-    my $mock = class_mock 'Some::Class';
+    class_mock 'Some::Class';
 
 To stub a class method or module function:
 
@@ -684,14 +684,27 @@ finished stubbing the class. This means that if your module under test C<use>s
 it, then you must C<use_ok> or C<require> the test module after stubbing the
 mock class.
 
+Also note: Currently you cannot stub new().
+
 =cut
 
 sub class_mock {
     my ($mocked_class) = @_;
 
+    my $module_file = join( q{/}, split q{::}, $mocked_class ) . '.pm';
+    my $caller_pkg  = caller;
+    no strict 'refs';  ## no critic (TestingAndDebugging::ProhibitNoStrict)
+
+    # make sure the real module is not already loaded
+    croak "Package '$mocked_class' is already loaded so it cannot be mocked"
+        if defined ${ $caller_pkg . '::INC' }{$module_file};
+
+    # check if package has already been mocked
+    croak "Package '$mocked_class' is already mocked"
+        if defined *{ $mocked_class . '::AUTOLOAD' }{CODE};
+
     my $mock = mock($mocked_class);
 
-    no strict 'refs'; ## no critic (TestingAndDebugging::ProhibitNoStrict)
     *{ $mocked_class . '::AUTOLOAD' } = sub {
         my ($method) = extract_method_name( our $AUTOLOAD );
         $mock->$method(@_);
