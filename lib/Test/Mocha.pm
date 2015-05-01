@@ -138,7 +138,7 @@ more info about stubbing).
 =cut
 
 sub mock {
-    return Test::Mocha::Mock->new(@_);
+    return Test::Mocha::Mock->__new(@_);
 }
 
 =func stub
@@ -455,7 +455,7 @@ sub verify ($;@) {
       if !MockType->check($mock);
 
     require Test::Mocha::Verify;
-    return Test::Mocha::Verify->new( mock => $mock, %options );
+    return Test::Mocha::Verify->__new( mock => $mock, %options );
 }
 
 ## no critic (RequireArgUnpacking)

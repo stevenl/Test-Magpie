@@ -57,12 +57,8 @@ is( Some::Class->class_method( 2, 3 ), "2,3" );
 test_test("class method executes alternate method");
 
 # stub Class->new
-TODO: {
-    todo_skip 'new() is a method of Test::Mocha::Mock that cannot be stubbed',
-      1;
-    stub { Some::Class->new } returns mock();
-    new_ok('Some::Class');
-}
+stub { Some::Class->new } returns mock;
+new_ok('Some::Class');
 
 # Executes - module function method
 test_out('ok 1');

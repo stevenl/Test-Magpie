@@ -10,7 +10,7 @@ use Test::Mocha::Util qw( extract_method_name getattr );
 
 our $AUTOLOAD;
 
-sub new {
+sub __new {
     # uncoverable pod
     my ( $class, %args ) = @_;
     ### assert: defined $args{mock} && Mock->check( $args{mock} )

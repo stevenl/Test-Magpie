@@ -11,7 +11,7 @@ use Types::Standard qw( Num Str );
 
 our $AUTOLOAD;
 
-sub new {
+sub __new {
     # uncoverable pod
     my ( $class, %args ) = @_;
 

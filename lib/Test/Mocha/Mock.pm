@@ -60,7 +60,7 @@ my $ISA = Test::Mocha::MethodStub->new(
     executions => [ sub { 1 } ],
 );
 
-sub new {
+sub __new {
     # uncoverable pod
     my ( $class, $mocked_class ) = @_;
 
