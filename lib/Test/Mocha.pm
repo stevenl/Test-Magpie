@@ -72,8 +72,7 @@ use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util
-  qw( getattr get_method_call is_called extract_method_name );
+use Test::Mocha::Util qw( get_method_call is_called extract_method_name );
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
@@ -226,11 +225,11 @@ sub stub (&@) {
 
     $Test::Mocha::Mock::num_method_calls = 0;
     my $method_call = get_method_call($arg);
-    my $stubs = getattr( $method_call->invocant, 'stubs' );
+    my $stubs       = $method_call->invocant->__stubs;
     unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
     Test::Mocha::MethodStub->cast($method_call);
-    push @{ getattr( $method_call, 'executions' ) }, @executions;
+    push @{ $method_call->__executions }, @executions;
     return $method_call;  # for backwards compatibility
 }
 
@@ -535,9 +534,9 @@ sub inspect (&) {
 
     $Test::Mocha::Mock::num_method_calls = 0;
     my $method_call = get_method_call($arg);
-    my $mock        = $method_call->invocant;
-    my $calls       = getattr( $mock, 'calls' );
-    return grep { $method_call->satisfied_by($_) } @{$calls};
+    return
+      grep { $method_call->satisfied_by($_) }
+      @{ $method_call->invocant->__calls };
 }
 
 =func inspect_all
@@ -575,7 +574,7 @@ sub clear (@) {
       if !@mocks || grep { !MockType->check($_) } @mocks;
     ## use critic
 
-    @{ getattr( $_, 'calls' ) } = () foreach @mocks;
+    @{ $_->__calls } = () foreach @mocks;
 
     return;
 }
@@ -692,16 +691,16 @@ sub class_mock {
     my ($mocked_class) = @_;
 
     my $module_file = join( q{/}, split q{::}, $mocked_class ) . '.pm';
-    my $caller_pkg  = caller;
+    my $caller_pkg = caller;
     no strict 'refs';  ## no critic (TestingAndDebugging::ProhibitNoStrict)
 
     # make sure the real module is not already loaded
     croak "Package '$mocked_class' is already loaded so it cannot be mocked"
-        if defined ${ $caller_pkg . '::INC' }{$module_file};
+      if defined ${ $caller_pkg . '::INC' }{$module_file};
 
     # check if package has already been mocked
     croak "Package '$mocked_class' is already mocked"
-        if defined *{ $mocked_class . '::AUTOLOAD' }{CODE};
+      if defined *{ $mocked_class . '::AUTOLOAD' }{CODE};
 
     my $mock = mock($mocked_class);
 

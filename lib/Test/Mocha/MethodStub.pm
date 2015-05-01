@@ -18,6 +18,11 @@ sub new {
     return $self;
 }
 
+sub __executions {
+    my ($self) = @_;
+    return $self->{executions};
+}
+
 sub cast {
     # """Convert the type of the given object to this class"""
     # uncoverable pod

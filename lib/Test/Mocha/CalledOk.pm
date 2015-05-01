@@ -6,7 +6,6 @@ use strict;
 use warnings;
 
 use Test::Builder;
-use Test::Mocha::Util qw( getattr );
 
 my $TB = Test::Builder->new;
 
@@ -14,8 +13,7 @@ sub test {
     # uncoverable pod
     my ( $class, $method_call, $exp, $test_name ) = @_;
 
-    my $mock    = $method_call->invocant;
-    my $calls   = getattr( $mock, 'calls' );
+    my $calls   = $method_call->invocant->__calls;
     my $got     = grep { $method_call->satisfied_by($_) } @{$calls};
     my $test_ok = $class->is( $got, $exp );
 
@@ -28,7 +26,6 @@ sub test {
 
     # output diagnostics to aid with debugging
     unless ( $test_ok || $TB->in_todo ) {
-
         my $call_history;
         if ( @{$calls} ) {
             $call_history .= "\n    " . $_->stringify_long foreach @{$calls};

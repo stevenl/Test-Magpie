@@ -13,11 +13,15 @@ my $e;
 
 isa_ok( class_mock('Some::Class'), 'Test::Mocha::Mock' );
 
-ok( exception { class_mock 'Test::Builder::Tester' },
-    'class_mock() throws if real module is already loaded' );
+ok(
+    exception { class_mock 'Test::Builder::Tester' },
+    'class_mock() throws if real module is already loaded'
+);
 
-ok( exception { class_mock('Some::Class') },
-    'class_mock() throws if module is already mocked' );
+ok(
+    exception { class_mock('Some::Class') },
+    'class_mock() throws if module is already mocked'
+);
 
 TODO: {
     todo_skip

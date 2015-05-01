@@ -7,7 +7,7 @@ use warnings;
 use Carp qw( croak );
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Mock Slurpy );
-use Test::Mocha::Util qw( extract_method_name getattr has_caller_package );
+use Test::Mocha::Util qw( extract_method_name has_caller_package );
 use Types::Standard qw( ArrayRef HashRef );
 
 our $AUTOLOAD;
@@ -17,6 +17,11 @@ sub new {
     my ( $class, %args ) = @_;
     ### assert: defined $args{mock} && Mock->check( $args{mock} )
     return bless \%args, $class;
+}
+
+sub __mock {
+    my ($self) = @_;
+    return $self->{mock};
 }
 
 sub AUTOLOAD {
@@ -47,12 +52,9 @@ sub AUTOLOAD {
         args => \@args,
     );
 
-    my $mock  = getattr( $self, 'mock' );
-    my $stubs = getattr( $mock, 'stubs' );
-
     # add new stub to front of queue so that it takes precedence
     # over existing stubs that would satisfy the same invocations
-    unshift @{ $stubs->{$method_name} }, $stub;
+    unshift @{ $self->__mock->__stubs->{$method_name} }, $stub;
 
     return $stub;
 }

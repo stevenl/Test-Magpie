@@ -8,13 +8,12 @@ use Test::Fatal;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Util qw( getattr );
 use Types::Standard qw( Any Int slurpy );
 
 # setup
 my $file  = __FILE__;
 my $mock  = mock;
-my $stubs = getattr( $mock, 'stubs' );
+my $stubs = $mock->__stubs;
 my $e;
 
 # stub() argument checks

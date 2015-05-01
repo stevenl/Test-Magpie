@@ -18,7 +18,6 @@ our @EXPORT_OK = qw(
   extract_method_name
   find_caller
   find_stub
-  getattr
   get_method_call
   has_caller_package
   is_called
@@ -52,27 +51,13 @@ sub find_stub {
     # uncoverable pod
     my ( $mock, $method_call ) = @_;
 
-    my $stubs = getattr( $mock, 'stubs' );
+    my $stubs = $mock->__stubs;
     return if !defined $stubs->{ $method_call->name };
 
     foreach my $stub ( @{ $stubs->{ $method_call->name } } ) {
         return $stub if $stub->satisfied_by($method_call);
     }
     return;
-}
-
-sub getattr {
-    # """Safely get the attribute value of an object."""
-    # uncoverable pod
-    my ( $object, $attribute ) = @_;
-
-    # uncoverable branch true
-    confess 'getattr() must be given an object'
-      if not ref $object;
-    confess "Attribute '$attribute' does not exist for object '$object'"
-      if not exists $object->{$attribute};
-
-    return $object->{$attribute};
 }
 
 sub get_method_call {
@@ -108,7 +93,7 @@ sub get_method_call {
     }
 
     # remove the last method call from the invocation history
-    pop @{ getattr( $mock, 'calls' ) };
+    pop @{ $mock->__calls };
 
     return $method_call;
 }
@@ -136,7 +121,7 @@ sub has_caller_package {
 #    my ( $method_call, %options ) = @_;
 #
 #    my $mock = $method_call->invocant;
-#    my $calls = getattr( $mock, 'calls' );
+#    my $calls = $mock->__calls;
 #
 #    my $got = grep { $method_call->satisfied_by($_) } @{$calls};
 #    my $exp;

@@ -9,7 +9,7 @@ use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util qw( extract_method_name find_caller find_stub
-  getattr has_caller_package );
+  has_caller_package );
 use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
@@ -53,7 +53,7 @@ my $DOES_LC = Test::Mocha::MethodStub->new(
     executions => [ sub { 1 } ],
 );
 
-# isa() should always returns true
+# isa() should always return true
 my $ISA = Test::Mocha::MethodStub->new(
     name       => 'isa',
     args       => [Str],
@@ -79,12 +79,27 @@ sub __new {
     return bless \%args, $class;
 }
 
+sub __calls {
+    my ($self) = @_;
+    return $self->{calls};
+}
+
+sub __mocked_class {
+    my ($self) = @_;
+    return $self->{mocked_class};
+}
+
+sub __stubs {
+    my ($self) = @_;
+    return $self->{stubs};
+}
+
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
     my $method_name = extract_method_name($AUTOLOAD);
 
     # If a class method or module function, then transform method name
-    my $mocked_class = getattr( $self, 'mocked_class' );
+    my $mocked_class = $self->__mocked_class;
     if ($mocked_class) {
         if ( $args[0] eq $mocked_class ) {
             shift @args;
@@ -122,9 +137,6 @@ sub AUTOLOAD {
 
     $num_method_calls++;
 
-    my $calls = getattr( $self, 'calls' );
-    my $stubs = getattr( $self, 'stubs' );
-
     # record the method call for verification
     $last_method_call = Test::Mocha::MethodCall->new(
         invocant => $self,
@@ -132,13 +144,13 @@ sub AUTOLOAD {
         args     => \@args,
         caller   => [find_caller],
     );
-    push @{$calls}, $last_method_call;
+    push @{ $self->__calls }, $last_method_call;
 
     # find a stub to return a response
     my $stub = find_stub( $self, $last_method_call );
     if ( defined $stub ) {
         # save reference to stub execution so it can be restored
-        my $executions = getattr( $stub, 'executions' );
+        my $executions = $stub->__executions;
         $last_execution = $executions->[0] if @{$executions} > 1;
 
         return $stub->do_next_execution( $self, @args );

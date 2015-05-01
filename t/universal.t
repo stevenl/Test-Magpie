@@ -7,8 +7,6 @@ use Test::More tests => 18;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Util qw( getattr );
-
 my $mock = mock;
 
 ok( ( stub { $mock->isa('Foo') } returns 0 ), 'isa() can be stubbed' );

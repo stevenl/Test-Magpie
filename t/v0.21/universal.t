@@ -8,8 +8,6 @@ use Test::More tests => 18;
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Test::Mocha::Util qw( getattr );
-
 my $mock = mock;
 
 ok( ( stub { $mock->isa('Foo') } )->returns(0), 'isa() can be stubbed' );
@@ -34,7 +32,6 @@ is( ref($mock), 'Foo', '... or as a function' );
 verify( $mock, times => 2, '... and verified' )->ref;
 
 # Ensure UNIVERSAL::ref is not recorded as caller when it intercepts the call
-my $calls = getattr( $mock, 'calls' );
-is( ( $calls->[-1]->caller )[0],
+is( ( $mock->__calls->[-1]->caller )[0],
     __FILE__, '... and caller is not UNIVERSAL::ref' );
 

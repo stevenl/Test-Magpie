@@ -6,7 +6,7 @@ use warnings;
 
 use Test::Mocha::Method;
 use Test::Mocha::Types qw( Mock );
-use Test::Mocha::Util qw( extract_method_name getattr );
+use Test::Mocha::Util qw( extract_method_name );
 
 our $AUTOLOAD;
 
@@ -17,6 +17,11 @@ sub __new {
     return bless \%args, $class;
 }
 
+sub __mock {
+    my ($self) = @_;
+    return $self->{mock};
+}
+
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
 
@@ -24,11 +29,7 @@ sub AUTOLOAD {
         name => extract_method_name($AUTOLOAD),
         args => \@args,
     );
-
-    my $mock  = getattr( $self, 'mock' );
-    my $calls = getattr( $mock, 'calls' );
-
-    return grep { $inspect->satisfied_by($_) } @{$calls};
+    return grep { $inspect->satisfied_by($_) } @{ $self->__mock->__calls };
 }
 
 # Don't let AUTOLOAD() handle DESTROY() so that object can be destroyed
