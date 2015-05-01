@@ -3,10 +3,10 @@ package Test::Mocha::MethodStub;
 
 use strict;
 use warnings;
-use parent qw( Test::Mocha::Method );
+use parent 'Test::Mocha::Method';
 
-use Carp qw( croak );
-use Scalar::Util qw( blessed );
+use Carp 'croak';
+use Scalar::Util 'blessed';
 
 sub new {
     # uncoverable pod

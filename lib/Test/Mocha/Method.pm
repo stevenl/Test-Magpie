@@ -4,7 +4,7 @@ package Test::Mocha::Method;
 use strict;
 use warnings;
 
-use Carp qw( croak );
+use Carp 'croak';
 use Test::Mocha::PartialDump;
 use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util qw( match );

@@ -63,9 +63,9 @@ interfaces rather than on internal state.
 
 =cut
 
-use Carp qw( croak );
-use Exporter qw( import );
-use Scalar::Util qw( blessed );
+use Carp 'croak';
+use Exporter 'import';
+use Scalar::Util 'blessed';
 use Test::Mocha::CalledOk::Times;
 use Test::Mocha::CalledOk::AtLeast;
 use Test::Mocha::CalledOk::AtMost;

@@ -6,10 +6,10 @@ use warnings;
 
 # smartmatch dependencies
 use 5.010001;
-use experimental qw( smartmatch );
+use experimental 'smartmatch';
 
 use Carp qw( confess croak );
-use Exporter qw( import );
+use Exporter 'import';
 use Scalar::Util qw( blessed looks_like_number refaddr );
 use Test::Builder;
 use Try::Tiny;

@@ -3,7 +3,7 @@ package Test::Mocha::MethodCall;
 
 use strict;
 use warnings;
-use parent qw( Test::Mocha::Method );
+use parent 'Test::Mocha::Method';
 
 sub new {
     # uncoverable pod

@@ -4,7 +4,7 @@ package Test::Mocha::Stub;
 use strict;
 use warnings;
 
-use Carp qw( croak );
+use Carp 'croak';
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Mock Slurpy );
 use Test::Mocha::Util qw( extract_method_name has_caller_package );

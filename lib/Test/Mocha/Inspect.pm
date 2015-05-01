@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Test::Mocha::Method;
-use Test::Mocha::Types qw( Mock );
+use Test::Mocha::Types 'Mock';
 use Test::Mocha::Util qw( extract_method_name );
 
 our $AUTOLOAD;

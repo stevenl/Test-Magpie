@@ -4,7 +4,7 @@ package Test::Mocha::Mock;
 use strict;
 use warnings;
 
-use Carp 1.22 qw( croak );
+use Carp 1.22 'croak';
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
