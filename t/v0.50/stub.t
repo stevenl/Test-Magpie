@@ -21,7 +21,7 @@ like(
     $e = exception {
         stub( sub { } );
     },
-    qr/Coderef must have a single method invocation on a mock object/,
+    qr/Coderef must have a method invoked on a mock object/,
     'stub() coderef must contain a method call specification'
 );
 like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
@@ -30,7 +30,7 @@ like(
     $e = exception {
         stub( sub { $mock->first; $mock->second } );
     },
-    qr/Coderef must have a single method invocation on a mock object/,
+    qr/Coderef must not have multiple methods invoked on a mock object/,
     'stub() coderef may not contain multiple method call specifications'
 );
 like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );

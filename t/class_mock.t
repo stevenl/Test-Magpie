@@ -24,11 +24,13 @@ ok(
 );
 
 TODO: {
-    todo_skip
-      'stub() error should give better feedback when trying to stub a non-mock',
-      1;
-    stub { Test::Builder::Test->dummy } returns 1;
-    ok( Test::Builder::Test->dummy, 'dummy' );
+    local $TODO = 'Give better feedback when trying to stub a non-mock';
+    like(
+        exception {
+            stub { Test::Builder::Test->dummy } returns 1;
+        },
+        qr/better error message/,
+    );
 }
 
 # Class method - stubs

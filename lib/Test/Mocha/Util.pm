@@ -80,8 +80,10 @@ sub get_method_call {
         ## use critic
     };
 
-    croak 'Coderef must have a single method invocation on a mock object'
-      if $Test::Mocha::Mock::num_method_calls != 1;
+    croak 'Coderef must have a method invoked on a mock object'
+      if $Test::Mocha::Mock::num_method_calls == 0;
+    croak 'Coderef must not have multiple methods invoked on a mock object'
+      if $Test::Mocha::Mock::num_method_calls > 1;
 
     my $method_call = $Test::Mocha::Mock::last_method_call;
     my $mock        = $method_call->invocant;
