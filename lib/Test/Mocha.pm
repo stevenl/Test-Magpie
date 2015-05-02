@@ -72,7 +72,7 @@ use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( get_method_call is_called extract_method_name );
+use Test::Mocha::Util qw( get_method_call extract_method_name );
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
@@ -99,7 +99,6 @@ our @EXPORT = qw(
 $Carp::Internal{$_}++ foreach qw(
   Test::Mocha
   Test::Mocha::CalledOk
-  Test::Mocha::Inspect
   Test::Mocha::Mock
   Test::Mocha::Util
   Test::Mocha::MethodStub

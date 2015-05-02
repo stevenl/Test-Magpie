@@ -6,7 +6,7 @@ use warnings;
 
 use Test::Mocha::MethodCall;
 use Test::Mocha::Types qw( Mock NumRange );
-use Test::Mocha::Util qw( extract_method_name has_caller_package is_called );
+use Test::Mocha::Util qw( extract_method_name has_caller_package );
 use Types::Standard qw( Num Str );
 
 our $AUTOLOAD;
