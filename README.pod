@@ -287,8 +287,6 @@ Clears the method call history for one or more mocks so that they can be
 reused in another test. Note that this does not clear the methods that have
 been stubbed.
 
-=for Pod::Coverage verify
-
 =head1 ARGUMENT MATCHING
 
 Argument matchers may be used in place of specifying exact method arguments.

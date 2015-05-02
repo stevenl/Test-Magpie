@@ -435,66 +435,6 @@ sub between ($$) {
     };
 }
 
-# verify() has been retained for backwards compatibility only
-
-=for Pod::Coverage verify
-=cut
-
-sub verify ($;@) {
-    # uncoverable pod
-    my ( $mock, %options ) = _get_called_ok_args(@_);
-
-    warnings::warnif( 'deprecated',
-        'verify() is deprecated; use called_ok() instead' );
-    croak 'verify() must be given a mock object'
-      if !MockType->check($mock);
-
-    require Test::Mocha::Verify;
-    return Test::Mocha::Verify->__new( mock => $mock, %options );
-}
-
-## no critic (RequireArgUnpacking)
-sub _get_called_ok_args {
-    my $coderef = shift;
-    my $test_name;
-    $test_name = pop if ( @_ % 2 == 1 );
-    my %options = @_;
-
-    # set default option if none given
-    $options{times} = 1 if keys %options == 0;
-
-    croak 'You can set only one of these options: ' . join ', ',
-      map { "'$_'" } keys %options
-      unless keys %options == 1;
-
-    ## no critic (ProhibitCascadingIfElse)
-    if ( defined $options{times} ) {
-        croak "'times' option must be a number"
-          unless Num->check( $options{times} );
-    }
-    elsif ( defined $options{at_least} ) {
-        croak "'at_least' option must be a number"
-          unless Num->check( $options{at_least} );
-    }
-    elsif ( defined $options{at_most} ) {
-        croak "'at_most' option must be a number"
-          unless Num->check( $options{at_most} );
-    }
-    elsif ( defined $options{between} ) {
-        croak "'between' option must be an arrayref "
-          . 'with 2 numbers in ascending order'
-          unless NumRange->check( $options{between} );
-    }
-    else {
-        my ($option) = keys %options;
-        croak "called_ok() was given an invalid option: '$option'";
-    }
-    $options{test_name} = $test_name if defined $test_name;
-
-    return ( $coderef, %options );
-}
-## use critic
-
 =func inspect
 
     @method_calls = inspect { $mock->method(@args) };
