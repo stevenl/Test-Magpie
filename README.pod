@@ -77,26 +77,18 @@ Calling C<isa()> or C<does()> on the object will always return true. This
 is particularly handy when dependent objects are required to satisfy type
 constraint checks with OO frameworks such as L<Moose>.
 
-    ok( $mock->isa('AnyClass') );
-    ok( $mock->does('AnyRole') );
-    ok( $mock->DOES('AnyRole') );
-
-It will also accept any method call on it. By default, method calls will
-return C<undef> (in scalar context) or an empty list (in list context).
-
-    ok( $mock->can('any_method') );
-    is( $mock->any_method(@args), undef );
-
 You can stub C<ref()> to specify the value it should return (see below for
 more info about stubbing).
 
     stub { $mock->ref } returns 'AnyClass';
-    is( $mock->ref, 'AnyClass' );
-    is( ref($mock), 'AnyClass' );
+    print $mock->ref;  # prints 'AnyClass'
+    print ref($mock);  # prints 'AnyClass'
 
 =head2 stub
 
-    stub { $mock->method(@args) } returns(@values) | throws($exception) | executes($coderef)
+    stub { $mock->method(@args) } returns(@values)
+    stub { $mock->method(@args) } throws($exception)
+    stub { $mock->method(@args) } executes($coderef)
 
 By default, the mock object already acts as a stub that accepts any method
 call and returns C<undef>. However, you can use C<stub()> to tell a method to
@@ -108,15 +100,15 @@ give an alternative response. You can specify 3 types of responses:
 
 Specifies that a stub should return 1 or more values.
 
-    stub { $mock->method(@args) } ) returns 1, 2, 3;
-    is_deeply( [ $mock->method(@args) ], [ 1, 2, 3 ] );
+    stub { $mock->method(@args) } returns 1, 2, 3;
+    print $mock->method(@args);  # prints "123"
 
 =item C<throws($message)>
 
 Specifies that a stub should raise an exception.
 
     stub { $mock->method(@args) } throws 'an error';
-    ok( exception { $mock->method(@args) } );
+    $mock->method(@args);  # croaks with "an error at test.t line 10."
 
 =item C<executes($coderef)>
 
@@ -131,44 +123,49 @@ in the method call are passed on to the callback.
         return $returns[$i];
     };
 
-    is( $list->get(0), 'first'  );
-    is( $list->get(1), 'second' );
-    is( $list->get(5), undef    );
-    like( exception { $list->get(-1) }, qr/^index out of bounds/ ),
+    print $list->get(0);   # prints "first"
+    print $list->get(1);   # prints "second"
+    print $list->get(5);   # warns "Use of uninitialized value in print at test.t line 16."
+    print $list->get(-1);  # dies with "Index out of bounds at test.t line 10."
 
 =back
 
-A stub applies to the exact method and arguments specified (but see also
+A stub applies to the exact mock, method and arguments specified (but see also
 L</"ARGUMENT MATCHING"> for a shortcut around this).
 
     stub { $list->get(0) } returns 'first';
     stub { $list->get(1) } returns 'second';
 
-    is( $list->get(0), 'first'  );
-    is( $list->get(1), 'second' );
-    is( $list->get(2),  undef   );
+    print $list->get(0);  # prints "first"
+    print $list->get(1);  # prints "second"
+    print $list->get(2);  # nothing printed (since default stub returns an empty list)
 
 Chain responses together to provide a consecutive series.
 
     stub { $iterator->next }
       returns(1), returns(2), returns(3), throws('exhausted');
 
-    ok( $iterator->next == 1 );
-    ok( $iterator->next == 2 );
-    ok( $iterator->next == 3 );
-    ok( exception { $iterator->next } );
+    print $iterator->next;  # prints "1" 
+    print $iterator->next;  # prints "2"
+    print $iterator->next;  # prints "3"
+    print $iterator->next;  # croaks with "exhausted at test.t line 13."
 
 The last stubbed response will persist until it is overridden.
 
     stub { $warehouse->has_inventory($item, 10) } returns 1;
-    ok( $warehouse->has_inventory($item, 10) ) for 1 .. 5;
+    print( $warehouse->has_inventory($item, 10) ) for 1 .. 5; # prints "11111"
 
     stub { $warehouse->has_inventory($item, 10) } returns '';
-    ok( !$warehouse->has_inventory($item, 10) ) for 1 .. 5;
+    print( $warehouse->has_inventory($item, 10) ) for 1 .. 5; # nothing printed
 
 =head2 called_ok
 
-    called_ok { $mock->method(@args) } [ times($n) | atleast($n) | atmost($n) | between($m, $n) ], [$test_name]
+    called_ok { $mock->method(@args) }
+    called_ok { $mock->method(@args) } times($n)
+    called_ok { $mock->method(@args) } atleast($n)
+    called_ok { $mock->method(@args) } atmost($n)
+    called_ok { $mock->method(@args) } between($m, $n)
+    called_ok { $mock->method(@args) } $test_name
 
 C<called_ok()> is used to test the interactions with the mock object. You can
 use it to verify that the correct method was called, with the correct set of
@@ -177,7 +174,7 @@ L<Test::Simple> and Co - it will print the test result along with your other
 tests and you must count calls to C<called_ok()> in your test plans.
 
     called_ok { $warehouse->remove($item, 50) };
-    # prints: ok 1 - remove("book", 50) was called 1 time(s)
+    # prints "ok 1 - remove("book", 50) was called 1 time(s)"
 
 The following functions are available to verify the number of calls:
 
@@ -189,7 +186,7 @@ Specifies the number of times the given method is expected to be called.
 C<times(1)> is the default if no option is specified.
 
     called_ok { $mock->method(@args) } times(3);
-    # prints: ok 1 - method(@args) was called 3 time(s)
+    # prints "ok 1 - method(@args) was called 3 time(s)"
 
 Note: C<times()> may clash with the built-in function with the same name.
 You may explicitly specify which one you want by qualifying it as
@@ -201,7 +198,7 @@ Specifies the minimum number of times the given method is expected to be
 called.
 
     called_ok { $mock->method(@args) } atleast(3);
-    # prints: ok 1 - method(@args) was called at least 3 time(s)
+    # prints "ok 1 - method(@args) was called at least 3 time(s)"
 
 =item C<atmost>
 
@@ -209,7 +206,7 @@ Specifies the maximum number of times the given method is expected to be
 called.
 
     called_ok { $mock->method(@args) } atmost(5);
-    # prints: ok 1 - method(@args) was called at most 5 time(s)
+    # prints "ok 1 - method(@args) was called at most 5 time(s)"
 
 =item C<between>
 
@@ -217,34 +214,34 @@ Specifies the minimum and maximum number of times the given method is
 expected to be called.
 
     called_ok { $mock->method(@args) } between(3, 5);
-    # prints: ok 1 - method(@args) was called between 3 and 5 time(s)
+    # prints "ok 1 - method(@args) was called between 3 and 5 time(s)"
 
 =back
 
-An optional C<$test_name> may be specified to be printed instead of the
-default.
+An optional last argument C<$test_name> may be specified to be printed instead
+of the default.
 
     called_ok { $warehouse->remove_inventory($item, 50) } 'inventory removed';
-    # prints: ok 1 - inventory removed
+    # prints "ok 1 - inventory removed"
 
     called_ok { $warehouse->remove_inventory($item, 50) } times(0), 'inventory not removed';
-    # prints: ok 2 - inventory not removed
+    # prints "ok 2 - inventory not removed"
 
 =head2 inspect
 
     @method_calls = inspect { $mock->method(@args) };
 
     ($method_call) = inspect { $warehouse->remove_inventory(Str, Int) };
+    $method_call->name;           # "remove_inventory"
+    $method_call->args;           # ("book", 50)
+    $method_call->caller;         # ("test.pl", 5)
+    $method_call->stringify;      # 'remove_inventory("book", 50)'
+    $method_call->stringify_long; # 'remove_inventory("book", 50) called at test.pl line 5'
 
-    is $method_call->name,            'remove_inventory';
-    is_deeply [$method_call->args],   ['book', 50];
-    is_deeply [$method_call->caller], ['test.pl', 5];
-    is $method_call->stringify,       'remove_inventory("book", 50)';
-    is $method_call->stringify_long,  'remove_inventory("book", 50) called at test.pl line 5';
-
-C<inspect()> returns a list of method calls matching the given method call
-specification. It can be useful for debugging failed C<called_ok()> calls.
-Or use it in place of a complex call to C<called_ok()> to break it down into
+C<inspect()> returns a list of method call objects that match the given method
+call specification. It is used to inspect the methods that have been called on
+the mock object. It can be useful for debugging failed C<called_ok()> calls.
+Or use it in place of a complex call to C<called_ok()> to break it down in
 smaller tests.
 
 The method call objects have the following accessor methods:
@@ -279,15 +276,16 @@ They are also string overloaded with the value from C<stringify>.
 
     @all_method_calls = inspect_all $mock
 
-C<inspect_all()> returns a list containing all methods called on the mock
-object. This is mainly used for debugging.
+C<inspect_all()> returns a list of all methods called on the mock object.
+This is mainly used for debugging.
 
 =head2 clear
 
     clear $mock1, $mock2, ...
 
 Clears the method call history for one or more mocks so that they can be
-reused in another test. Note that this does not affect the stubbed methods.
+reused in another test. Note that this does not clear the methods that have
+been stubbed.
 
 =for Pod::Coverage verify
 
