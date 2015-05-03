@@ -220,10 +220,18 @@ is( $mock->set(1), 'any', 'stub() accepts type constraints' );
 # ----------------------
 # stub() with slurpy type constraint
 
-my $stub = stub { $mock->set(SlurpyArray) };
-is( $stub, 'set({ slurpy: ArrayRef })', 'stub() accepts slurpy ArrayRef' );
-$stub = stub { $mock->set(SlurpyHash) };
-is( $stub, 'set({ slurpy: HashRef })', 'stub() accepts slurpy HashRef' );
+stub { $mock->set(SlurpyArray) };
+is(
+    $mock->__stubs->{set}[0],
+    'set({ slurpy: ArrayRef })',
+    'stub() accepts slurpy ArrayRef'
+);
+stub { $mock->set(SlurpyHash) };
+is(
+    $mock->__stubs->{set}[0],
+    'set({ slurpy: HashRef })',
+    'stub() accepts slurpy HashRef'
+);
 
 like(
     $e = exception {

@@ -37,8 +37,7 @@ other objects.
 
 =head1 DESCRIPTION
 
-B<The API may still be subject to change. I will try to keep it backwards
-compatible as much as possible.>
+B<The API may still be subject to change.>
 
 We find all sorts of excuses to avoid writing tests for our code. Often it
 seems too hard to isolate the code we want to test from the objects it is
@@ -221,7 +220,7 @@ sub stub (&@) {
 
     Test::Mocha::MethodStub->cast($method_call);
     push @{ $method_call->__executions }, @executions;
-    return $method_call;  # for backwards compatibility
+    return;
 }
 
 sub returns (@) {
@@ -230,7 +229,7 @@ sub returns (@) {
       if @return_values == 1;
     return sub { @return_values }
       if @return_values > 1;
-    return sub { };       # if @return_values == 0
+    return sub { };  # if @return_values == 0
 }
 
 sub throws (@) {
@@ -324,62 +323,19 @@ of the default.
 sub called_ok (&;@) {
     my $coderef = shift;
     my $called_ok;
-    my $class;
-    my $value;
     my $test_name;
 
-    # unpack the args - different possibilities due to backwards compatibility
-    if ( @_ == 1 ) {
-        if ( ref $_[0] eq 'CODE' ) {
-            $called_ok = $_[0];
-        }
-        else {
-            $test_name = $_[0];
-        }
+    # unpack the args
+    if ( @_ > 0 && ref $_[0] eq 'CODE' ) {
+        $called_ok = shift;
     }
-    elsif ( @_ == 2 ) {
-        if ( ref $_[0] eq 'CODE' ) {
-            ( $called_ok, $test_name ) = @_;
-        }
-        else {
-            ( $class, $value ) = @_;
-        }
-    }
-    elsif ( @_ == 3 ) {
-        ( $class, $value, $test_name ) = @_;
+    if ( @_ > 0 ) {
+        $test_name = shift;
     }
 
     $Test::Mocha::Mock::num_method_calls = 0;
     my $method_call = get_method_call($coderef);
 
-    # v0.50 behaviour
-    if ( defined $class ) {
-        my %options = (
-            times    => 'Test::Mocha::CalledOk::Times',
-            atleast  => 'Test::Mocha::CalledOk::AtLeast',
-            atmost   => 'Test::Mocha::CalledOk::AtMost',
-            at_least => 'Test::Mocha::CalledOk::AtLeast',
-            at_most  => 'Test::Mocha::CalledOk::AtMost',
-            between  => 'Test::Mocha::CalledOk::Between',
-        );
-        croak "called_ok() was given an invalid option: '$class'"
-          unless defined $options{$class};
-
-        if ( $class ne 'between' ) {
-            croak "'$class' option must be a number"
-              unless Num->check($value);
-        }
-        else {
-            croak "'$class' option must be an arrayref "
-              . 'with 2 numbers in ascending order'
-              unless NumRange->check($value);
-        }
-
-        $options{$class}->test( $method_call, $value, $test_name );
-        return;
-    }
-
-    # current behaviour
     ## no critic (ProhibitAmpersandSigils)
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     $called_ok ||= &times(1);  # default if no times() is specified
