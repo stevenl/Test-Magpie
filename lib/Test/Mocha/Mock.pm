@@ -8,8 +8,7 @@ use Carp 1.22 'croak';
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
-use Test::Mocha::Util qw( extract_method_name find_caller find_stub
-  has_caller_package );
+use Test::Mocha::Util qw( extract_method_name find_caller find_stub );
 use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
@@ -18,46 +17,43 @@ our $num_method_calls = 0;
 our $last_method_call;
 our $last_execution;
 
-# Classes for which mock isa() should return false
-my %Isnota = (
-    'Type::Tiny'                  => undef,
-    'Moose::Meta::TypeConstraint' => undef,
+# Lookup table of classes for which mock isa() should return false
+my %NOT_ISA = map { $_ => undef } (
+    'Type::Tiny',
+    'Moose::Meta::TypeConstraint',
 );
 
-# can() should always return a reference to the C<AUTOLOAD()> method
-my $CAN = Test::Mocha::MethodStub->new(
-    name       => 'can',
-    args       => [Str],
-    executions => [
-        sub {
-            my ( $self, $method_name ) = @_;
-            return sub {
-                $AUTOLOAD = $method_name;
-                goto &AUTOLOAD;
-            };
-        }
-    ],
-);
-
-# DOES() should always return true
-my $DOES_UC = Test::Mocha::MethodStub->new(
-    name       => 'DOES',
-    args       => [Str],
-    executions => [ sub { 1 } ],
-);
-
-# does() should always return true
-my $DOES_LC = Test::Mocha::MethodStub->new(
-    name       => 'does',
-    args       => [Str],
-    executions => [ sub { 1 } ],
-);
-
-# isa() should always return true
-my $ISA = Test::Mocha::MethodStub->new(
-    name       => 'isa',
-    args       => [Str],
-    executions => [ sub { 1 } ],
+# By default, isa(), DOES() and does() should return true for everything, and
+# can() should return a reference to C<AUTOLOAD()> for all methods
+my %DEFAULT_STUBS = (
+    isa => Test::Mocha::MethodStub->new(
+        name       => 'isa',
+        args       => [Str],
+        executions => [ sub { 1 } ],
+    ),
+    DOES => Test::Mocha::MethodStub->new(
+        name       => 'DOES',
+        args       => [Str],
+        executions => [ sub { 1 } ],
+    ),
+    does => Test::Mocha::MethodStub->new(
+        name       => 'does',
+        args       => [Str],
+        executions => [ sub { 1 } ],
+    ),
+    can => Test::Mocha::MethodStub->new(
+        name       => 'can',
+        args       => [Str],
+        executions => [
+            sub {
+                my ( $self, $method_name ) = @_;
+                return sub {
+                    $AUTOLOAD = $method_name;
+                    goto &AUTOLOAD;
+                };
+            }
+        ],
+    ),
 );
 
 sub __new {
@@ -65,15 +61,11 @@ sub __new {
     my ( $class, $mocked_class ) = @_;
 
     my %args = (
-        # ArrayRef[ MethodCall ]
-        calls => [],
-        # $method_name => ArrayRef[ MethodStub ]
         mocked_class => $mocked_class,
-        stubs        => {
-            can  => [$CAN],
-            DOES => [$DOES_UC],
-            does => [$DOES_LC],
-            isa  => [$ISA],
+        calls        => [],            # ArrayRef[ MethodCall ]
+        stubs        => {              # $method_name => ArrayRef[ MethodStub ]
+            map { $_ => [ $DEFAULT_STUBS{$_} ] }
+              keys %DEFAULT_STUBS
         },
     );
     return bless \%args, $class;
@@ -171,7 +163,7 @@ sub isa {
     # In order to allow mock methods to be called with other mocks as
     # arguments, mocks cannot have isa() called with type constraints,
     # which are not allowed as arguments.
-    return if exists $Isnota{$class};
+    return if exists $NOT_ISA{$class};
 
     $AUTOLOAD = 'isa';
     goto &AUTOLOAD;
