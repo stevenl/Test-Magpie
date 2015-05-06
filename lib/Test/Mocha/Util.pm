@@ -63,7 +63,7 @@ sub get_method_call {
     # """
     # Get the last method called on a mock object,
     # removes it from the invocation history,
-    # and restores the last method stub execution.
+    # and restores the last method stub response.
     # """
     # uncoverable pod
     my ($coderef) = @_;
@@ -87,10 +87,10 @@ sub get_method_call {
     my $method_call = $Test::Mocha::Mock::last_method_call;
     my $mock        = $method_call->invocant;
 
-    # restore the last method stub execution
-    if ( defined $Test::Mocha::Mock::last_execution ) {
+    # restore the last method stub response
+    if ( defined $Test::Mocha::Mock::last_response ) {
         my $stub = find_stub( $mock, $method_call );
-        unshift @{ $stub->{executions} }, $Test::Mocha::Mock::last_execution;
+        unshift @{ $stub->{responses} }, $Test::Mocha::Mock::last_response;
     }
 
     # remove the last method call from the invocation history

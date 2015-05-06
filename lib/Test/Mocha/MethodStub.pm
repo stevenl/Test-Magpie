@@ -13,39 +13,38 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new(@_);
 
-    $self->{executions} ||= [];  # ArrayRef[ CodeRef ]
+    $self->{responses} ||= [];  # ArrayRef[ CodeRef ]
 
     return $self;
 }
 
-sub __executions {
+sub __responses {
     my ($self) = @_;
-    return $self->{executions};
+    return $self->{responses};
 }
 
 sub cast {
     # """Convert the type of the given object to this class"""
     # uncoverable pod
     my ( $class, $obj ) = @_;
-    $obj->{executions} ||= [];
+    $obj->{responses} ||= [];
     return bless $obj, $class;
 }
 
-sub do_next_execution {
-    # """Executes the next response."""
+sub execute_next_response {
     # uncoverable pod
     my ( $self, @args ) = @_;
-    my $executions = $self->{executions};
+    my $responses = $self->__responses;
 
     # return undef by default
-    return if @{$executions} == 0;
+    return if @{$responses} == 0;
 
-    # shift the next execution off the front of the queue
+    # shift the next response off the front of the queue
     # ... except for the last one
-    my $execution =
-      @{$executions} > 1 ? shift( @{$executions} ) : $executions->[0];
+    my $response =
+      @{$responses} > 1 ? shift( @{$responses} ) : $responses->[0];
 
-    return $execution->(@args);
+    return $response->(@args);
 }
 
 1;

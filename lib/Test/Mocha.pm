@@ -205,9 +205,9 @@ The last stubbed response will persist until it is overridden.
 =cut
 
 sub stub (&@) {
-    my ( $arg, @executions ) = @_;
+    my ( $arg, @responses ) = @_;
 
-    foreach (@executions) {
+    foreach (@responses) {
         croak 'stub() responses should be supplied using ',
           'returns(), throws() or executes()'
           if ref ne 'CODE';
@@ -219,7 +219,7 @@ sub stub (&@) {
     unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
     Test::Mocha::MethodStub->cast($method_call);
-    push @{ $method_call->__executions }, @executions;
+    push @{ $method_call->__responses }, @responses;
     return;
 }
 

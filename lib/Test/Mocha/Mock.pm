@@ -15,7 +15,7 @@ use UNIVERSAL::ref;
 our $AUTOLOAD;
 our $num_method_calls = 0;
 our $last_method_call;
-our $last_execution;
+our $last_response;
 
 # Lookup table of classes for which mock isa() should return false
 my %NOT_ISA = map { $_ => undef } (
@@ -27,24 +27,24 @@ my %NOT_ISA = map { $_ => undef } (
 # can() should return a reference to C<AUTOLOAD()> for all methods
 my %DEFAULT_STUBS = (
     isa => Test::Mocha::MethodStub->new(
-        name       => 'isa',
-        args       => [Str],
-        executions => [ sub { 1 } ],
+        name      => 'isa',
+        args      => [Str],
+        responses => [ sub { 1 } ],
     ),
     DOES => Test::Mocha::MethodStub->new(
-        name       => 'DOES',
-        args       => [Str],
-        executions => [ sub { 1 } ],
+        name      => 'DOES',
+        args      => [Str],
+        responses => [ sub { 1 } ],
     ),
     does => Test::Mocha::MethodStub->new(
-        name       => 'does',
-        args       => [Str],
-        executions => [ sub { 1 } ],
+        name      => 'does',
+        args      => [Str],
+        responses => [ sub { 1 } ],
     ),
     can => Test::Mocha::MethodStub->new(
-        name       => 'can',
-        args       => [Str],
-        executions => [
+        name      => 'can',
+        args      => [Str],
+        responses => [
             sub {
                 my ( $self, $method_name ) = @_;
                 return sub {
@@ -103,7 +103,7 @@ sub AUTOLOAD {
     }
 
     undef $last_method_call;
-    undef $last_execution;
+    undef $last_response;
 
     # check slurpy type constraint
     {
@@ -141,11 +141,11 @@ sub AUTOLOAD {
     # find a stub to return a response
     my $stub = find_stub( $self, $last_method_call );
     if ( defined $stub ) {
-        # save reference to stub execution so it can be restored
-        my $executions = $stub->__executions;
-        $last_execution = $executions->[0] if @{$executions} > 1;
+        # save reference to stub response so it can be restored
+        my $responses = $stub->__responses;
+        $last_response = $responses->[0] if @{$responses} > 1;
 
-        return $stub->do_next_execution( $self, @args );
+        return $stub->execute_next_response( $self, @args );
     }
     return;
 }
