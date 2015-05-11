@@ -8,10 +8,9 @@ use warnings;
 use 5.010001;
 use experimental 'smartmatch';
 
-use Carp qw( confess croak );
+use Carp 'croak';
 use Exporter 'import';
 use Scalar::Util qw( blessed looks_like_number refaddr );
-use Test::Builder;
 use Try::Tiny;
 
 our @EXPORT_OK = qw(
@@ -19,11 +18,8 @@ our @EXPORT_OK = qw(
   find_caller
   find_stub
   get_method_call
-  has_caller_package
   match
 );
-
-my $TB = Test::Builder->new;
 
 sub extract_method_name {
     # """Extracts the method name from its fully qualified name."""
@@ -97,20 +93,6 @@ sub get_method_call {
     pop @{ $mock->__calls };
 
     return $method_call;
-}
-
-sub has_caller_package {
-    # """
-    # Returns whether the given C<$package> is in the current call stack.
-    # """
-    # uncoverable pod
-    my ($package) = @_;
-
-    my $level = 1;
-    while ( my ($caller) = caller $level++ ) {
-        return 1 if $caller eq $package;
-    }
-    return;
 }
 
 sub match {

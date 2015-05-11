@@ -5,9 +5,6 @@ use strict;
 use warnings;
 use parent 'Test::Mocha::Method';
 
-use Carp 'croak';
-use Scalar::Util 'blessed';
-
 sub new {
     # uncoverable pod
     my $class = shift;
