@@ -8,7 +8,8 @@ use Carp 1.22 'croak';
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
-use Test::Mocha::Util qw( extract_method_name find_caller find_stub );
+use Test::Mocha::Util
+  qw( check_slurpy_args extract_method_name find_caller find_stub );
 use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
@@ -18,10 +19,8 @@ our $last_method_call;
 our $last_response;
 
 # Lookup table of classes for which mock isa() should return false
-my %NOT_ISA = map { $_ => undef } (
-    'Type::Tiny',
-    'Moose::Meta::TypeConstraint',
-);
+my %NOT_ISA =
+  map { $_ => undef } ( 'Type::Tiny', 'Moose::Meta::TypeConstraint', );
 
 # By default, isa(), DOES() and does() should return true for everything, and
 # can() should return a reference to C<AUTOLOAD()> for all methods
@@ -88,6 +87,8 @@ sub __stubs {
 
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
+    check_slurpy_args(@args);
+
     my $method_name = extract_method_name($AUTOLOAD);
 
     # If a class method or module function, then transform method name
@@ -104,28 +105,6 @@ sub AUTOLOAD {
 
     undef $last_method_call;
     undef $last_response;
-
-    # check slurpy type constraint
-    {
-        my $i = 0;
-        my $seen_slurpy;
-        foreach (@args) {
-            if ( Slurpy->check($_) ) {
-                $seen_slurpy = 1;
-                last;
-            }
-            $i++;
-        }
-        croak 'No arguments allowed after a slurpy type constraint'
-          if $i < $#args;
-
-        if ($seen_slurpy) {
-            my $slurpy = $args[$i]->{slurpy};
-            croak 'Slurpy argument must be a type of ArrayRef or HashRef'
-              unless $slurpy->is_a_type_of(ArrayRef)
-              || $slurpy->is_a_type_of(HashRef);
-        }
-    }
 
     $num_method_calls++;
 

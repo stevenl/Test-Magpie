@@ -11,15 +11,43 @@ use experimental 'smartmatch';
 use Carp 'croak';
 use Exporter 'import';
 use Scalar::Util qw( blessed looks_like_number refaddr );
+use Test::Mocha::Types qw( Matcher Slurpy );
 use Try::Tiny;
+use Types::Standard qw( ArrayRef HashRef );
 
 our @EXPORT_OK = qw(
+  check_slurpy_args
   extract_method_name
   find_caller
   find_stub
   get_method_call
   match
 );
+
+sub check_slurpy_args {
+    # """
+    # Checks the arguments list for the presence of a slurpy argument matcher.
+    # It will throw an error if it is used incorrectly.
+    # Otherwise it will just return silently.
+    # """
+    # uncoverable pod
+    my @args = @_;
+
+    my $i = 0;
+    foreach (@args) {
+        if ( Slurpy->check($_) ) {
+            croak 'No arguments allowed after a slurpy type constraint'
+              if $i < $#args;
+
+            my $slurpy = $_->{slurpy};
+            croak 'Slurpy argument must be a type of ArrayRef or HashRef'
+              unless $slurpy->is_a_type_of(ArrayRef)
+              || $slurpy->is_a_type_of(HashRef);
+        }
+        $i++;
+    }
+    return;
+}
 
 sub extract_method_name {
     # """Extracts the method name from its fully qualified name."""

@@ -7,7 +7,7 @@ use warnings;
 use Carp 'croak';
 use Test::Mocha::PartialDump;
 use Test::Mocha::Types qw( Matcher Slurpy );
-use Test::Mocha::Util qw( match );
+use Test::Mocha::Util qw( check_slurpy_args match );
 use Types::Standard qw( ArrayRef HashRef Str );
 
 use overload '""' => \&stringify, fallback => 1;
@@ -43,28 +43,6 @@ sub stringify {
     return $self->name . '(' . $Dumper->dump( $self->args ) . ')';
 }
 
-my $Slurp = sub {
-    # """check slurpy arguments"""
-    my ( $slurpy_matcher, @to_match ) = @_;
-
-    ### assert: Slurpy->check($slurpy_matcher)
-    my $matcher = $slurpy_matcher->{slurpy};
-
-    my $value;
-    if ( $matcher->is_a_type_of(ArrayRef) ) {
-        $value = [@to_match];
-    }
-    elsif ( $matcher->is_a_type_of(HashRef) ) {
-        return unless scalar(@to_match) % 2 == 0;
-        $value = {@to_match};
-    }
-    else {
-        croak 'Slurpy argument must be a type of ArrayRef or HashRef';
-    }
-
-    return $matcher->check($value);
-};
-
 sub satisfied_by {
     # """
     # Returns true if the given C<$invocation> satisfies this method call.
@@ -78,21 +56,35 @@ sub satisfied_by {
     my @input    = $invocation->args;
     # invocation arguments can't be argument matchers
     ### assert: ! grep { Matcher->check($_) } @input
+    check_slurpy_args(@expected);
 
+    # match @input against @expected which may include argument matchers
     while ( @input && @expected ) {
         my $matcher = shift @expected;
 
+        # slurpy argument matcher
         if ( Slurpy->check($matcher) ) {
-            croak 'No arguments allowed after a slurpy type constraint'
-              unless @expected == 0;
+            $matcher = $matcher->{slurpy};
+            ### assert: $matcher->is_a_type_of(ArrayRef) || $matcher->is_a_type_of(HashRef)
 
-            return unless $Slurp->( $matcher, @input );
+            my $value;
+            if ( $matcher->is_a_type_of(ArrayRef) ) {
+                $value = [@input];
+            }
+            elsif ( $matcher->is_a_type_of(HashRef) ) {
+                return unless scalar(@input) % 2 == 0;
+                $value = {@input};
+            }
+            # else { invalid matcher type }
+            return unless $matcher->check($value);
 
             @input = ();
         }
+        # argument matcher
         elsif ( Matcher->check($matcher) ) {
             return unless $matcher->check( shift @input );
         }
+        # literal match
         else {
             return unless match( shift(@input), $matcher );
         }
@@ -100,13 +92,18 @@ sub satisfied_by {
 
     # slurpy matcher should handle empty argument lists
     if ( @expected > 0 && Slurpy->check( $expected[0] ) ) {
-        my $matcher = shift @expected;
+        my $matcher = shift(@expected)->{slurpy};
 
-        croak 'No arguments allowed after a slurpy type constraint'
-          unless @expected == 0;
-
-        # uncoverable branch true
-        return unless $Slurp->( $matcher, @input );
+        my $value;
+        if ( $matcher->is_a_type_of(ArrayRef) ) {
+            $value = [@input];
+        }
+        elsif ( $matcher->is_a_type_of(HashRef) ) {
+            return unless scalar(@input) % 2 == 0;
+            $value = {@input};
+        }
+        # else { invalid matcher type }
+        return unless $matcher->check($value);
     }
 
     return @input == 0 && @expected == 0;
