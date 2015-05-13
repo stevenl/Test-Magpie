@@ -1,9 +1,9 @@
 package Test::Mocha::MethodStub;
 # ABSTRACT: Objects to represent stubbed methods with arguments and responses
 
+use parent 'Test::Mocha::Method';
 use strict;
 use warnings;
-use parent 'Test::Mocha::Method';
 
 sub new {
     # uncoverable pod

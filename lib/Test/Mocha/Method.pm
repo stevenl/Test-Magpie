@@ -7,7 +7,7 @@ use warnings;
 use Carp 'croak';
 use Test::Mocha::PartialDump;
 use Test::Mocha::Types qw( Matcher Slurpy );
-use Test::Mocha::Util qw( check_slurpy_args match );
+use Test::Mocha::Util qw( check_slurpy_arg match );
 use Types::Standard qw( ArrayRef HashRef Str );
 
 use overload '""' => \&stringify, fallback => 1;
@@ -56,7 +56,7 @@ sub satisfied_by {
     my @input    = $invocation->args;
     # invocation arguments can't be argument matchers
     ### assert: ! grep { Matcher->check($_) } @input
-    check_slurpy_args(@expected);
+    check_slurpy_arg(@expected);
 
     # match @input against @expected which may include argument matchers
     while ( @input && @expected ) {

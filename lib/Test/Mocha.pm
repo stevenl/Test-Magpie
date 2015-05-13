@@ -205,7 +205,7 @@ The last stubbed response will persist until it is overridden.
 =cut
 
 sub stub (&@) {
-    my ( $arg, @responses ) = @_;
+    my ( $coderef, @responses ) = @_;
 
     foreach (@responses) {
         croak 'stub() responses should be supplied using ',
@@ -214,7 +214,7 @@ sub stub (&@) {
     }
 
     $Test::Mocha::Mock::num_method_calls = 0;
-    my $method_call = get_method_call($arg);
+    my $method_call = get_method_call($coderef);
     my $stubs       = $method_call->invocant->__stubs;
     unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
@@ -422,10 +422,10 @@ They are also string overloaded with the value from C<stringify>.
 =cut
 
 sub inspect (&) {
-    my ($arg) = @_;
+    my ($coderef) = @_;
 
     $Test::Mocha::Mock::num_method_calls = 0;
-    my $method_call = get_method_call($arg);
+    my $method_call = get_method_call($coderef);
     return
       grep { $method_call->satisfied_by($_) }
       @{ $method_call->invocant->__calls };

@@ -9,7 +9,7 @@ use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util
-  qw( check_slurpy_args extract_method_name find_caller find_stub );
+  qw( check_slurpy_arg extract_method_name find_caller find_stub );
 use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
@@ -87,7 +87,7 @@ sub __stubs {
 
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
-    check_slurpy_args(@args);
+    check_slurpy_arg(@args);
 
     my $method_name = extract_method_name($AUTOLOAD);
 

@@ -1,9 +1,9 @@
 package Test::Mocha::CalledOk::Between;
 # ABSTRACT: Concrete subclass of CalledOk for verifying methods called 'between' a min and max number of times
 
+use parent 'Test::Mocha::CalledOk';
 use strict;
 use warnings;
-use parent 'Test::Mocha::CalledOk';
 
 sub is {
     # uncoverable pod

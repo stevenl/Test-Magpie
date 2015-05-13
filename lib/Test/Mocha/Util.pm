@@ -16,7 +16,7 @@ use Try::Tiny;
 use Types::Standard qw( ArrayRef HashRef );
 
 our @EXPORT_OK = qw(
-  check_slurpy_args
+  check_slurpy_arg
   extract_method_name
   find_caller
   find_stub
@@ -24,7 +24,7 @@ our @EXPORT_OK = qw(
   match
 );
 
-sub check_slurpy_args {
+sub check_slurpy_arg {
     # """
     # Checks the arguments list for the presence of a slurpy argument matcher.
     # It will throw an error if it is used incorrectly.
