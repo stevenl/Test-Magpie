@@ -8,8 +8,7 @@ use Carp 1.22 'croak';
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
-use Test::Mocha::Util
-  qw( check_slurpy_arg extract_method_name find_caller find_stub );
+use Test::Mocha::Util qw( check_slurpy_arg extract_method_name find_caller );
 use Try::Tiny;
 use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
@@ -122,8 +121,25 @@ sub AUTOLOAD {
     push @{ $self->__calls }, $method_call;
 
     # find a stub to return a response
-    if ( my $stub = find_stub( $self, $method_call ) ) {
+    if ( my $stub = $self->__find_stub($method_call) ) {
         return $stub->execute_next_response( $self, @args );
+    }
+    return;
+}
+
+sub __find_stub {
+    # """
+    # Returns the first stub that satisfies the given method call.
+    # Returns undef if no stub is found.
+    # """
+    # uncoverable pod
+    my ( $self, $method_call ) = @_;
+    my $stubs = $self->__stubs;
+
+    return if !defined $stubs->{ $method_call->name };
+
+    foreach my $stub ( @{ $stubs->{ $method_call->name } } ) {
+        return $stub if $stub->__satisfied_by($method_call);
     }
     return;
 }

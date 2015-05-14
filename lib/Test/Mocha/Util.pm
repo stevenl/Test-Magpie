@@ -13,7 +13,6 @@ our @EXPORT_OK = qw(
   check_slurpy_arg
   extract_method_name
   find_caller
-  find_stub
 );
 
 sub check_slurpy_arg {
@@ -60,19 +59,6 @@ sub find_caller {
         last if $package ne 'UNIVERSAL::ref';
     }
     return ( $file, $line );
-}
-
-sub find_stub {
-    # uncoverable pod
-    my ( $mock, $method_call ) = @_;
-
-    my $stubs = $mock->__stubs;
-    return if !defined $stubs->{ $method_call->name };
-
-    foreach my $stub ( @{ $stubs->{ $method_call->name } } ) {
-        return $stub if $stub->__satisfied_by($method_call);
-    }
-    return;
 }
 
 # sub print_call_stack {
