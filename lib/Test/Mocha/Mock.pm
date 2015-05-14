@@ -16,9 +16,9 @@ use UNIVERSAL::ref;
 
 our $AUTOLOAD;
 
-my $capture_mode     = 0;
-my $num_method_calls = 0;
-my $last_method_call;
+my $CaptureMode    = 0;
+my $NumMethodCalls = 0;
+my $LastMethodCall;
 
 # Lookup table of classes for which mock isa() should return false
 my %NOT_ISA =
@@ -112,9 +112,9 @@ sub AUTOLOAD {
         caller   => [find_caller],
     );
 
-    if ($capture_mode) {
-        $num_method_calls++;
-        $last_method_call = $method_call;
+    if ($CaptureMode) {
+        $NumMethodCalls++;
+        $LastMethodCall = $method_call;
         return;
     }
 
@@ -137,10 +137,10 @@ sub __capture_method_call {
     # uncoverable pod
     my ( $class, $coderef ) = @_;
 
-    ### assert: !$capture_mode
-    $capture_mode     = 1;
-    $num_method_calls = 0;
-    $last_method_call = undef;
+    ### assert: !$CaptureMode
+    $CaptureMode    = 1;
+    $NumMethodCalls = 0;
+    $LastMethodCall = undef;
 
     try {
         # coderef should include a method call on mock
@@ -148,7 +148,7 @@ sub __capture_method_call {
         $coderef->();
     }
     catch {
-        $capture_mode = 0;
+        $CaptureMode = 0;
         ## no critic (RequireCarping,RequireExtendedFormatting)
         # die() instead of croak() since $_ already includes the caller
         die $_
@@ -156,14 +156,14 @@ sub __capture_method_call {
             || m{^Slurpy argument must be a type of ArrayRef or HashRef}sm );
         ## use critic
     };
-    $capture_mode = 0;
+    $CaptureMode = 0;
 
     croak 'Coderef must have a method invoked on a mock object'
-      if $num_method_calls == 0;
+      if $NumMethodCalls == 0;
     croak 'Coderef must not have multiple methods invoked on a mock object'
-      if $num_method_calls > 1;
+      if $NumMethodCalls > 1;
 
-    return $last_method_call;
+    return $LastMethodCall;
 }
 
 # Let AUTOLOAD() handle the UNIVERSAL methods
