@@ -4,14 +4,9 @@ package Test::Mocha::Util;
 use strict;
 use warnings;
 
-# smartmatch dependencies
-use 5.010001;
-use experimental 'smartmatch';
-
 use Carp 'croak';
 use Exporter 'import';
-use Scalar::Util qw( blessed looks_like_number refaddr );
-use Test::Mocha::Types qw( Matcher Slurpy );
+use Test::Mocha::Types 'Slurpy';
 use Try::Tiny;
 use Types::Standard qw( ArrayRef HashRef );
 
@@ -21,7 +16,6 @@ our @EXPORT_OK = qw(
   find_caller
   find_stub
   get_method_call
-  match
 );
 
 sub check_slurpy_arg {
@@ -121,52 +115,6 @@ sub get_method_call {
     pop @{ $mock->__calls };
 
     return $method_call;
-}
-
-sub match {
-    # """Match 2 values for equality."""
-    # uncoverable pod
-    my ( $x, $y ) = @_;
-
-    # This function uses smart matching, but we need to limit the scenarios
-    # in which it is used because of its quirks.
-
-    # ref types must match
-    return if ref $x ne ref $y;
-
-    # objects match only if they are the same object
-    if ( blessed($x) || ref($x) eq 'CODE' ) {
-        return refaddr($x) == refaddr($y);
-    }
-
-    # don't smartmatch on arrays because it recurses
-    # which leads to the same quirks that we want to avoid
-    if ( ref($x) eq 'ARRAY' ) {
-        return if $#{$x} != $#{$y};
-
-        # recurse to handle nested structures
-        foreach ( 0 .. $#{$x} ) {
-            return if !match( $x->[$_], $y->[$_] );
-        }
-        return 1;
-    }
-
-    if ( ref($x) eq 'HASH' ) {
-        # smartmatch only matches the hash keys
-        return if not $x ~~ $y;
-
-        # ... but we want to match the hash values too
-        foreach ( keys %{$x} ) {
-            return if !match( $x->{$_}, $y->{$_} );
-        }
-        return 1;
-    }
-
-    # avoid smartmatch doing number matches on strings
-    # e.g. '5x' ~~ 5 is true
-    return if looks_like_number($x) xor looks_like_number($y);
-
-    return $x ~~ $y;
 }
 
 # sub print_call_stack {

@@ -4,10 +4,15 @@ package Test::Mocha::Method;
 use strict;
 use warnings;
 
+# smartmatch dependencies
+use 5.010001;
+use experimental 'smartmatch';
+
 use Carp 'croak';
+use Scalar::Util qw( blessed looks_like_number refaddr );
 use Test::Mocha::PartialDump;
 use Test::Mocha::Types qw( Matcher Slurpy );
-use Test::Mocha::Util qw( check_slurpy_arg match );
+use Test::Mocha::Util 'check_slurpy_arg';
 use Types::Standard qw( ArrayRef HashRef Str );
 
 use overload '""' => \&stringify, fallback => 1;
@@ -86,7 +91,7 @@ sub __satisfied_by {
         }
         # literal match
         else {
-            return unless match( shift(@input), $matcher );
+            return unless _match( shift(@input), $matcher );
         }
     }
 
@@ -107,6 +112,52 @@ sub __satisfied_by {
     }
 
     return @input == 0 && @expected == 0;
+}
+
+sub _match {
+    # """Match 2 values for equality."""
+    # uncoverable pod
+    my ( $x, $y ) = @_;
+
+    # This function uses smart matching, but we need to limit the scenarios
+    # in which it is used because of its quirks.
+
+    # ref types must match
+    return if ref $x ne ref $y;
+
+    # objects match only if they are the same object
+    if ( blessed($x) || ref($x) eq 'CODE' ) {
+        return refaddr($x) == refaddr($y);
+    }
+
+    # don't smartmatch on arrays because it recurses
+    # which leads to the same quirks that we want to avoid
+    if ( ref($x) eq 'ARRAY' ) {
+        return if $#{$x} != $#{$y};
+
+        # recurse to handle nested structures
+        foreach ( 0 .. $#{$x} ) {
+            return if !_match( $x->[$_], $y->[$_] );
+        }
+        return 1;
+    }
+
+    if ( ref($x) eq 'HASH' ) {
+        # smartmatch only matches the hash keys
+        return if not $x ~~ $y;
+
+        # ... but we want to match the hash values too
+        foreach ( keys %{$x} ) {
+            return if !_match( $x->{$_}, $y->{$_} );
+        }
+        return 1;
+    }
+
+    # avoid smartmatch doing number matches on strings
+    # e.g. '5x' ~~ 5 is true
+    return if looks_like_number($x) xor looks_like_number($y);
+
+    return $x ~~ $y;
 }
 
 1;
