@@ -10,13 +10,15 @@ use Test::Mocha::MethodStub;
 use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util
   qw( check_slurpy_arg extract_method_name find_caller find_stub );
+use Try::Tiny;
 use Types::Standard qw( ArrayRef HashRef Str );
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
-our $num_method_calls = 0;
-our $last_method_call;
-our $last_response;
+
+my $capture_mode     = 0;
+my $num_method_calls = 0;
+my $last_method_call;
 
 # Lookup table of classes for which mock isa() should return false
 my %NOT_ISA =
@@ -103,30 +105,65 @@ sub AUTOLOAD {
         }
     }
 
-    undef $last_method_call;
-    undef $last_response;
-
-    $num_method_calls++;
-
-    # record the method call for verification
-    $last_method_call = Test::Mocha::MethodCall->new(
+    my $method_call = Test::Mocha::MethodCall->new(
         invocant => $self,
         name     => $method_name,
         args     => \@args,
         caller   => [find_caller],
     );
-    push @{ $self->__calls }, $last_method_call;
+
+    if ($capture_mode) {
+        $num_method_calls++;
+        $last_method_call = $method_call;
+        return;
+    }
+
+    # record the method call to allow for verification
+    push @{ $self->__calls }, $method_call;
 
     # find a stub to return a response
-    my $stub = find_stub( $self, $last_method_call );
-    if ( defined $stub ) {
-        # save reference to stub response so it can be restored
-        my $responses = $stub->__responses;
-        $last_response = $responses->[0] if @{$responses} > 1;
-
+    if ( my $stub = find_stub( $self, $method_call ) ) {
         return $stub->execute_next_response( $self, @args );
     }
     return;
+}
+
+sub __capture_method_call {
+    # """
+    # Get the last method called on a mock object,
+    # removes it from the invocation history,
+    # and restores the last method stub response.
+    # """
+    # uncoverable pod
+    my ( $class, $coderef ) = @_;
+
+    ### assert: !$capture_mode
+    $capture_mode     = 1;
+    $num_method_calls = 0;
+    $last_method_call = undef;
+
+    try {
+        # coderef should include a method call on mock
+        # which should be executed by AUTOLOAD
+        $coderef->();
+    }
+    catch {
+        $capture_mode = 0;
+        ## no critic (RequireCarping,RequireExtendedFormatting)
+        # die() instead of croak() since $_ already includes the caller
+        die $_
+          if ( m{^No arguments allowed after a slurpy type constraint}sm
+            || m{^Slurpy argument must be a type of ArrayRef or HashRef}sm );
+        ## use critic
+    };
+    $capture_mode = 0;
+
+    croak 'Coderef must have a method invoked on a mock object'
+      if $num_method_calls == 0;
+    croak 'Coderef must not have multiple methods invoked on a mock object'
+      if $num_method_calls > 1;
+
+    return $last_method_call;
 }
 
 # Let AUTOLOAD() handle the UNIVERSAL methods

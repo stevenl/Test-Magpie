@@ -7,7 +7,6 @@ use warnings;
 use Carp 'croak';
 use Exporter 'import';
 use Test::Mocha::Types 'Slurpy';
-use Try::Tiny;
 use Types::Standard qw( ArrayRef HashRef );
 
 our @EXPORT_OK = qw(
@@ -15,7 +14,6 @@ our @EXPORT_OK = qw(
   extract_method_name
   find_caller
   find_stub
-  get_method_call
 );
 
 sub check_slurpy_arg {
@@ -75,46 +73,6 @@ sub find_stub {
         return $stub if $stub->__satisfied_by($method_call);
     }
     return;
-}
-
-sub get_method_call {
-    # """
-    # Get the last method called on a mock object,
-    # removes it from the invocation history,
-    # and restores the last method stub response.
-    # """
-    # uncoverable pod
-    my ($coderef) = @_;
-
-    try {
-        $coderef->();
-    }
-    catch {
-        ## no critic (RequireCarping,RequireExtendedFormatting)
-        die $_
-          if ( m{^No arguments allowed after a slurpy type constraint}sm
-            || m{^Slurpy argument must be a type of ArrayRef or HashRef}sm );
-        ## use critic
-    };
-
-    croak 'Coderef must have a method invoked on a mock object'
-      if $Test::Mocha::Mock::num_method_calls == 0;
-    croak 'Coderef must not have multiple methods invoked on a mock object'
-      if $Test::Mocha::Mock::num_method_calls > 1;
-
-    my $method_call = $Test::Mocha::Mock::last_method_call;
-    my $mock        = $method_call->invocant;
-
-    # restore the last method stub response
-    if ( defined $Test::Mocha::Mock::last_response ) {
-        my $stub = find_stub( $mock, $method_call );
-        unshift @{ $stub->{responses} }, $Test::Mocha::Mock::last_response;
-    }
-
-    # remove the last method call from the invocation history
-    pop @{ $mock->__calls };
-
-    return $method_call;
 }
 
 # sub print_call_stack {

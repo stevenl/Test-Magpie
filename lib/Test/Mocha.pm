@@ -71,7 +71,7 @@ use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( get_method_call extract_method_name );
+use Test::Mocha::Util qw( extract_method_name );
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
@@ -213,11 +213,12 @@ sub stub (&@) {
           if ref ne 'CODE';
     }
 
-    $Test::Mocha::Mock::num_method_calls = 0;
-    my $method_call = get_method_call($coderef);
+    # add stub to mock
+    my $method_call = Test::Mocha::Mock->__capture_method_call($coderef);
     my $stubs       = $method_call->invocant->__stubs;
     unshift @{ $stubs->{ $method_call->name } }, $method_call;
 
+    # add response to stub
     Test::Mocha::MethodStub->cast($method_call);
     push @{ $method_call->__responses }, @responses;
     return;
@@ -322,10 +323,9 @@ of the default.
 ## no critic (RequireArgUnpacking,ProhibitMagicNumbers)
 sub called_ok (&;@) {
     my $coderef = shift;
+
     my $called_ok;
     my $test_name;
-
-    # unpack the args
     if ( @_ > 0 && ref $_[0] eq 'CODE' ) {
         $called_ok = shift;
     }
@@ -333,8 +333,7 @@ sub called_ok (&;@) {
         $test_name = shift;
     }
 
-    $Test::Mocha::Mock::num_method_calls = 0;
-    my $method_call = get_method_call($coderef);
+    my $method_call = Test::Mocha::Mock->__capture_method_call($coderef);
 
     ## no critic (ProhibitAmpersandSigils)
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -423,9 +422,8 @@ They are also string overloaded with the value from C<stringify>.
 
 sub inspect (&) {
     my ($coderef) = @_;
+    my $method_call = Test::Mocha::Mock->__capture_method_call($coderef);
 
-    $Test::Mocha::Mock::num_method_calls = 0;
-    my $method_call = get_method_call($coderef);
     return
       grep { $method_call->__satisfied_by($_) }
       @{ $method_call->invocant->__calls };
