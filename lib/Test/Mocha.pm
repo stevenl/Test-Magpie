@@ -1,6 +1,3 @@
-use strict;
-use warnings;
-
 package Test::Mocha;
 # ABSTRACT: Test Spy/Stub Framework
 
@@ -61,6 +58,9 @@ you are interested in only. As you verify behaviour, you focus on external
 interfaces rather than on internal state.
 
 =cut
+
+use strict;
+use warnings;
 
 use Carp 'croak';
 use Exporter 'import';
