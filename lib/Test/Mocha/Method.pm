@@ -43,7 +43,7 @@ sub stringify {
     return $self->name . '(' . $Dumper->dump( $self->args ) . ')';
 }
 
-sub satisfied_by {
+sub __satisfied_by {
     # """
     # Returns true if the given C<$invocation> satisfies this method call.
     # """

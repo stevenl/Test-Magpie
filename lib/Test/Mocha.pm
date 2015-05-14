@@ -427,7 +427,7 @@ sub inspect (&) {
     $Test::Mocha::Mock::num_method_calls = 0;
     my $method_call = get_method_call($coderef);
     return
-      grep { $method_call->satisfied_by($_) }
+      grep { $method_call->__satisfied_by($_) }
       @{ $method_call->invocant->__calls };
 }
 

@@ -14,7 +14,7 @@ sub test {
     my ( $class, $method_call, $exp, $test_name ) = @_;
 
     my $calls   = $method_call->invocant->__calls;
-    my $got     = grep { $method_call->satisfied_by($_) } @{$calls};
+    my $got     = grep { $method_call->__satisfied_by($_) } @{$calls};
     my $test_ok = $class->is( $got, $exp );
 
     my $exp_times = $class->stringify($exp);

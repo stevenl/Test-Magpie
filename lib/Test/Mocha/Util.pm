@@ -78,7 +78,7 @@ sub find_stub {
     return if !defined $stubs->{ $method_call->name };
 
     foreach my $stub ( @{ $stubs->{ $method_call->name } } ) {
-        return $stub if $stub->satisfied_by($method_call);
+        return $stub if $stub->__satisfied_by($method_call);
     }
     return;
 }
