@@ -1,23 +1,17 @@
 package Test::Mocha::Mock;
 # ABSTRACT: Mock objects
 
+use parent 'Test::Mocha::SpyBase';
 use strict;
 use warnings;
 
-use Carp 1.22 'croak';
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
-use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util qw( check_slurpy_arg extract_method_name find_caller );
-use Try::Tiny;
-use Types::Standard qw( ArrayRef HashRef Str );
+use Types::Standard 'Str';
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
-
-my $CaptureMode    = 0;
-my $NumMethodCalls = 0;
-my $LastMethodCall;
 
 # Lookup table of classes for which mock isa() should return false
 my %NOT_ISA =
@@ -60,30 +54,19 @@ sub __new {
     # uncoverable pod
     my ( $class, $mocked_class ) = @_;
 
-    my %args = (
-        mocked_class => $mocked_class,
-        calls        => [],            # ArrayRef[ MethodCall ]
-        stubs        => {              # $method_name => ArrayRef[ MethodStub ]
-            map { $_ => [ $DEFAULT_STUBS{$_} ] }
-              keys %DEFAULT_STUBS
-        },
-    );
-    return bless \%args, $class;
-}
+    my $args = $class->SUPER::__new;
 
-sub __calls {
-    my ($self) = @_;
-    return $self->{calls};
+    $args->{mocked_class} = $mocked_class;
+    $args->{stubs}        = {
+        map { $_ => [ $DEFAULT_STUBS{$_} ] }
+          keys %DEFAULT_STUBS
+    };
+    return bless $args, $class;
 }
 
 sub __mocked_class {
     my ($self) = @_;
     return $self->{mocked_class};
-}
-
-sub __stubs {
-    my ($self) = @_;
-    return $self->{stubs};
 }
 
 sub AUTOLOAD {
@@ -111,9 +94,9 @@ sub AUTOLOAD {
         caller   => [find_caller],
     );
 
-    if ($CaptureMode) {
-        $NumMethodCalls++;
-        $LastMethodCall = $method_call;
+    if ( $self->CaptureMode ) {
+        $self->NumMethodCalls( $self->NumMethodCalls + 1 );
+        $self->LastMethodCall($method_call);
         return;
     }
 
@@ -125,61 +108,6 @@ sub AUTOLOAD {
         return $stub->execute_next_response( $self, @args );
     }
     return;
-}
-
-sub __find_stub {
-    # """
-    # Returns the first stub that satisfies the given method call.
-    # Returns undef if no stub is found.
-    # """
-    # uncoverable pod
-    my ( $self, $method_call ) = @_;
-    my $stubs = $self->__stubs;
-
-    return if !defined $stubs->{ $method_call->name };
-
-    foreach my $stub ( @{ $stubs->{ $method_call->name } } ) {
-        return $stub if $stub->__satisfied_by($method_call);
-    }
-    return;
-}
-
-sub __capture_method_call {
-    # """
-    # Get the last method called on a mock object,
-    # removes it from the invocation history,
-    # and restores the last method stub response.
-    # """
-    # uncoverable pod
-    my ( $class, $coderef ) = @_;
-
-    ### assert: !$CaptureMode
-    $CaptureMode    = 1;
-    $NumMethodCalls = 0;
-    $LastMethodCall = undef;
-
-    try {
-        # coderef should include a method call on mock
-        # which should be executed by AUTOLOAD
-        $coderef->();
-    }
-    catch {
-        $CaptureMode = 0;
-        ## no critic (RequireCarping,RequireExtendedFormatting)
-        # die() instead of croak() since $_ already includes the caller
-        die $_
-          if ( m{^No arguments allowed after a slurpy type constraint}sm
-            || m{^Slurpy argument must be a type of ArrayRef or HashRef}sm );
-        ## use critic
-    };
-    $CaptureMode = 0;
-
-    croak 'Coderef must have a method invoked on a mock object'
-      if $NumMethodCalls == 0;
-    croak 'Coderef must not have multiple methods invoked on a mock object'
-      if $NumMethodCalls > 1;
-
-    return $LastMethodCall;
 }
 
 # Let AUTOLOAD() handle the UNIVERSAL methods
