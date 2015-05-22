@@ -70,12 +70,14 @@ use Test::Mocha::CalledOk::AtLeast;
 use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
+use Test::Mocha::Spy;
 use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
 use Test::Mocha::Util qw( extract_method_name );
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
   mock
+  spy
   class_mock
   stub
   returns
@@ -126,6 +128,16 @@ more info about stubbing).
 
 sub mock {
     return Test::Mocha::Mock->__new(@_);
+}
+
+=func spy
+
+    my $spy = spy($object);
+
+=cut
+
+sub spy ($) {
+    return Test::Mocha::Spy->__new(@_);
 }
 
 =func stub

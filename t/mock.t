@@ -18,9 +18,9 @@ ok( $mock, 'mock() creates a simple mock' );
 # ----------------------
 # mocks pretend to be anything you want
 
-ok( $mock->isa('Bar'),  'mock can isa(anything)' );
-ok( $mock->does('Baz'), 'mock can does(anything)' );
-ok( $mock->DOES('Baz'), 'mock can DOES(anything)' );
+ok( $mock->isa('Bar'),  'mock can isa(Anything)' );
+ok( $mock->does('Baz'), 'mock can does(Anything)' );
+ok( $mock->DOES('Baz'), 'mock can DOES(Anything)' );
 
 # ----------------------
 # mocks accept any method calls
