@@ -5,22 +5,16 @@ use strict;
 use warnings;
 
 use Carp 1.22 'croak';
-use Try::Tiny;
 use Types::Standard qw( ArrayRef HashRef );
 
 # class attributes
-my $CaptureMode    = 0;
+our $CaptureMode = 0;
 my $NumMethodCalls = 0;
 my $LastMethodCall;
 
 ## no critic (NamingConventions::Capitalization)
 sub CaptureMode {
     my ( $class, $value ) = @_;
-
-    if ( defined $value ) {
-        $CaptureMode = $value;
-        return;
-    }
     return $CaptureMode;
 }
 
@@ -89,25 +83,14 @@ sub __capture_method_call {
     my ( $class, $coderef ) = @_;
 
     ### assert: !$CaptureMode
-    $CaptureMode    = 1;
     $NumMethodCalls = 0;
     $LastMethodCall = undef;
-
-    try {
-        # coderef should include a method call on mock
-        # which should be executed by AUTOLOAD
+    {
+        # Execute the coderef. This should in turn include a method call on
+        # mock, which should be handled by its AUTOLOAD method.
+        local $CaptureMode = 1;
         $coderef->();
     }
-    catch {
-        $CaptureMode = 0;
-        ## no critic (RequireCarping,RequireExtendedFormatting)
-        # die() instead of croak() since $_ already includes the caller
-        die $_
-          if ( m{^No arguments allowed after a slurpy type constraint}sm
-            || m{^Slurpy argument must be a type of ArrayRef or HashRef}sm );
-        ## use critic
-    };
-    $CaptureMode = 0;
 
     croak 'Coderef must have a method invoked on a mock object'
       if $NumMethodCalls == 0;
