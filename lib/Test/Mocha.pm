@@ -100,10 +100,10 @@ our @EXPORT = qw(
 $Carp::Internal{$_}++ foreach qw(
   Test::Mocha
   Test::Mocha::CalledOk
-  Test::Mocha::Mock
-  Test::Mocha::Util
   Test::Mocha::MethodStub
-  Test::Mocha::Verify
+  Test::Mocha::Mock
+  Test::Mocha::Spy
+  Test::Mocha::Util
 );
 
 =func mock

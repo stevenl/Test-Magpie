@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -21,6 +21,15 @@ my $obj = TestClass->new;
 my $spy = spy($obj);
 ok( $spy, 'spy($obj) creates a simple spy' );
 is( $spy->__object, $obj, 'spy wraps object' );
+
+subtest 'spy() must be given a blessed object' => sub {
+    like(
+        my $e = exception { spy(1) },
+        qr{^Can't spy on an unblessed reference},
+        'error is thrown'
+    );
+    like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );
+};
 
 # ----------------------
 # spy acts as a wrapper to the real object

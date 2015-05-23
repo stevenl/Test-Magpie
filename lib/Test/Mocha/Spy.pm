@@ -5,6 +5,8 @@ use parent 'Test::Mocha::SpyBase';
 use strict;
 use warnings;
 
+use Carp 1.22 'croak';
+use Scalar::Util 'blessed';
 use Test::Mocha::MethodCall;
 use Test::Mocha::Util qw( check_slurpy_arg extract_method_name find_caller );
 use Types::Standard 'Str';
@@ -43,6 +45,7 @@ my %DEFAULT_STUBS = (
 sub __new {
     # uncoverable pod
     my ( $class, $object ) = @_;
+    croak "Can't spy on an unblessed reference" if !blessed $object;
 
     my $args = $class->SUPER::__new;
 
