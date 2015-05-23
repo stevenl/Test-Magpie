@@ -77,6 +77,13 @@ sub AUTOLOAD {
     );
 
     if ( $self->CaptureMode ) {
+        croak(
+            sprintf
+              qq{Can't stub object method "%s" because it can't be located via package "%s"},
+            $method_name,
+            ref( $self->__object )
+        ) if !$self->__object->can($method_name);
+
         $self->NumMethodCalls( $self->NumMethodCalls + 1 );
         $self->LastMethodCall($method_call);
         return;
@@ -89,7 +96,15 @@ sub AUTOLOAD {
     if ( my $stub = $self->__find_stub($method_call) ) {
         return $stub->execute_next_response( $self, @args );
     }
+
     # delegate the method call to the real object
+    croak(
+        sprintf
+          qq{Can't call object method "%s" because it can't be located via package "%s"},
+        $method_name,
+        ref( $self->__object )
+    ) if !$self->__object->can($method_name);
+
     return $self->__object->$method_name(@args);
 }
 

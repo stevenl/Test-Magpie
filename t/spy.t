@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -72,6 +72,29 @@ subtest 'spy does not can(any_method)' => sub {
         qq{can("foo") called at $FILE line $line},
         '... and method call is recorded'
     );
+};
+
+# ----------------------
+# spy doesn't handle method calls it can't handle
+
+subtest 'spy does not accept calls to methods it cannot delegate' => sub {
+    like(
+        my $e = exception { $spy->foo( bar => 1 ) },
+        qr{^Can't call object method "foo" because it can't be located via package "TestClass"},
+        'error is thrown'
+    );
+    like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );
+};
+
+subtest 'spy does not accept stubs to methods it cannot delegate' => sub {
+    like(
+        my $e = exception {
+            stub { $spy->foo( bar => 1 ) } returns 1
+        },
+        qr{^Can't stub object method "foo" because it can't be located via package "TestClass"},
+        'error is thrown'
+    );
+    like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );
 };
 
 $spy->DESTROY;
