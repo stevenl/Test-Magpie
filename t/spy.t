@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 15;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -38,11 +38,8 @@ ok( $spy->isa('TestClass'),  'spy isa(TestClass)' );
 ok( $spy->does('TestClass'), 'spy does(TestClass)' );
 ok( $spy->DOES('TestClass'), 'spy DOES(TestClass)' );
 
-#is( ref($spy), 'TestClass',  'ref(spy)' );
-#is( $obj->ref, 'TestClass' );
-#is( blessed($spy), 'TestClass' );
-#is( $obj->ref, 'TestClass' );
-#is( blessed($obj), 'TestClass' );
+is( ref($spy), 'TestClass', 'ref(spy)' );
+#iis( blessed($spy), 'TestClass' );
 
 ok( !$spy->isa('Foo'),  'spy does not isa(Anything)' );
 ok( !$spy->does('Bar'), 'spy does not does(Anything)' );

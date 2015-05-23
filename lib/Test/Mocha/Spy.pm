@@ -30,16 +30,16 @@ my %DEFAULT_STUBS = (
             }
         ],
     ),
-    #ref => Test::Mocha::MethodStub->new(
-    #    name      => 'ref',
-    #    args      => [],
-    #    responses => [
-    #        sub {
-    #            my ($self) = @_;
-    #            return ref($self);
-    #        }
-    #    ],
-    #),
+    ref => Test::Mocha::MethodStub->new(
+        name      => 'ref',
+        args      => [],
+        responses => [
+            sub {
+                my ($self) = @_;
+                return ref( $self->__object );
+            }
+        ],
+    ),
 );
 
 sub __new {
@@ -97,9 +97,9 @@ sub isa {
     # uncoverable pod
     my ( $self, $class ) = @_;
 
-    # Handle internal calls from UNIVERSAL::ref::_hook() 
+    # Handle internal calls from UNIVERSAL::ref::_hook()
     # when ref($spy) is called
-    #return 1 if $class eq __PACKAGE__;
+    return 1 if $class eq __PACKAGE__;
 
     $AUTOLOAD = 'isa';
     goto &AUTOLOAD;
