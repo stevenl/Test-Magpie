@@ -76,7 +76,7 @@ sub AUTOLOAD {
         caller   => [find_caller],
     );
 
-    if ( $self->CaptureMode ) {
+    if ( $self->__CaptureMode ) {
         croak(
             sprintf
               qq{Can't stub object method "%s" because it can't be located via package "%s"},
@@ -84,8 +84,8 @@ sub AUTOLOAD {
             ref( $self->__object )
         ) if !$self->__object->can($method_name);
 
-        $self->NumMethodCalls( $self->NumMethodCalls + 1 );
-        $self->LastMethodCall($method_call);
+        $self->__NumMethodCalls( $self->__NumMethodCalls + 1 );
+        $self->__LastMethodCall($method_call);
         return;
     }
 

@@ -94,9 +94,9 @@ sub AUTOLOAD {
         caller   => [find_caller],
     );
 
-    if ( $self->CaptureMode ) {
-        $self->NumMethodCalls( $self->NumMethodCalls + 1 );
-        $self->LastMethodCall($method_call);
+    if ( $self->__CaptureMode ) {
+        $self->__NumMethodCalls( $self->__NumMethodCalls + 1 );
+        $self->__LastMethodCall($method_call);
         return;
     }
 

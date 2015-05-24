@@ -13,12 +13,12 @@ my $NumMethodCalls = 0;
 my $LastMethodCall;
 
 ## no critic (NamingConventions::Capitalization)
-sub CaptureMode {
+sub __CaptureMode {
     my ( $class, $value ) = @_;
     return $CaptureMode;
 }
 
-sub NumMethodCalls {
+sub __NumMethodCalls {
     my ( $class, $value ) = @_;
 
     if ( defined $value ) {
@@ -27,7 +27,7 @@ sub NumMethodCalls {
     return $NumMethodCalls;
 }
 
-sub LastMethodCall {
+sub __LastMethodCall {
     my ( $class, $value ) = @_;
 
     if ( defined $value ) {
@@ -38,7 +38,6 @@ sub LastMethodCall {
 ## use critic
 
 sub __new {
-    # uncoverable pod
     my %args = (
         calls => [],  # ArrayRef[ MethodCall ]
         stubs => {},  # $method_name => ArrayRef[ MethodStub ]
@@ -61,7 +60,6 @@ sub __find_stub {
     # Returns the first stub that satisfies the given method call.
     # Returns undef if no stub is found.
     # """
-    # uncoverable pod
     my ( $self, $method_call ) = @_;
     my $stubs = $self->__stubs;
 
@@ -79,7 +77,6 @@ sub __capture_method_call {
     # removes it from the invocation history,
     # and restores the last method stub response.
     # """
-    # uncoverable pod
     my ( $class, $coderef ) = @_;
 
     ### assert: !$CaptureMode
