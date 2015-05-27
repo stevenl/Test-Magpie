@@ -3,48 +3,53 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More tests => 23;
 use Test::Fatal;
+use Types::Standard qw( Any Int slurpy );
 
 BEGIN { use_ok 'Test::Mocha' }
 
-use Types::Standard qw( Any Int slurpy );
-
 # setup
-my $file  = __FILE__;
-my $mock  = mock;
-my $stubs = $mock->__stubs;
-my $e;
+my $FILE = __FILE__;
+my $mock = mock;
 
 # stub() argument checks
-like(
-    $e = exception {
-        stub { $mock->any } 1, 2, 3;
-    },
-    qr/^stub\(\) responses should be supplied using returns\(\), throws\(\) or executes\(\)/,
-    'stub() responses must be coderefs'
-);
+subtest 'stub() responses must be coderefs' => sub {
+    like(
+        my $e = exception {
+            stub { $mock->any } 1, 2, 3;
+        },
+        qr/^stub\(\) responses should be supplied using returns\(\), throws\(\) or executes\(\)/,
+        'error is thrown'
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+};
 
-like(
-    $e = exception { stub {} },
-    qr/Coderef must have a method invoked on a mock object/,
-    'stub() coderef must contain a method call specification'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
+subtest 'stub() coderef must contain a method call specification' => sub {
+    like(
+        my $e = exception { stub {} },
+        qr/Coderef must have a method invoked on a mock object/,
+        'error is thrown'
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+};
 
-like(
-    $e = exception {
-        stub { $mock->first; $mock->second };
-    },
-    qr/Coderef must not have multiple methods invoked on a mock object/,
-    'stub() coderef may not contain multiple method call specifications'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
+subtest 'stub() coderef may not contain multiple method call specifications' =>
+  sub {
+    like(
+        my $e = exception {
+            stub { $mock->first; $mock->second };
+        },
+        qr/Coderef must not have multiple methods invoked on a mock object/,
+        'error is thrown'
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+  };
 
 subtest 'create stub that returns a scalar' => sub {
     stub { $mock->foo(1) } returns 4;
 
-    is( $stubs->{foo}[0]->stringify, 'foo(1)' );
+    is( $mock->__stubs->{foo}[0]->stringify, 'foo(1)' );
     is( $mock->foo(1), 4, '... and stub returns the scalar' );
     is_deeply( [ $mock->foo(1) ], [4], '...or the single-element in a list' );
 };
@@ -52,7 +57,7 @@ subtest 'create stub that returns a scalar' => sub {
 subtest 'create stub that returns an array' => sub {
     stub { $mock->foo(2) } returns 1, 2, 3;
 
-    is( $stubs->{foo}[0]->stringify, 'foo(2)' );
+    is( $mock->__stubs->{foo}[0]->stringify, 'foo(2)' );
     is_deeply(
         [ $mock->foo(2) ],
         [ 1, 2, 3 ],
@@ -64,7 +69,7 @@ subtest 'create stub that returns an array' => sub {
 subtest 'create stub that returns nothing' => sub {
     stub { $mock->foo(3) } returns;
 
-    is( $stubs->{foo}[0]->stringify, 'foo(3)' );
+    is( $mock->__stubs->{foo}[0]->stringify, 'foo(3)' );
     is( $mock->foo(3), undef, '... and stub returns undef' );
     is_deeply( [ $mock->foo(3) ], [], '... or an empty list' );
 };
@@ -72,17 +77,17 @@ subtest 'create stub that returns nothing' => sub {
 subtest 'create stub that throws' => sub {
     stub { $mock->foo(4) } throws 'error, ', 'stopped';
 
-    is( $stubs->{foo}[0]->stringify, 'foo(4)' );
+    is( $mock->__stubs->{foo}[0]->stringify, 'foo(4)' );
 
-    $e = exception { $mock->foo(4) };
+    my $e = exception { $mock->foo(4) };
     like( $e, qr/^error, stopped at /, '... and stub does die' );
-    like( $e, qr/\Q$file\E/, '... and error traces back to this script' );
+    like( $e, qr/\Q$FILE\E/, '... and error traces back to this script' );
 };
 
 subtest 'create stub that throws with no arguments' => sub {
     stub { $mock->foo('4a') } throws;
 
-    is( $stubs->{foo}[0]->stringify, 'foo("4a")' );
+    is( $mock->__stubs->{foo}[0]->stringify, 'foo("4a")' );
 
     my $e = exception { $mock->foo('4a') };
     like( $e, qr/^ at /, '... and stub does die' );
@@ -104,11 +109,11 @@ subtest 'create stub that throws with an exception object' => sub {
         qw( remaining args are ignored ),
     );
     like(
-        $e = exception { $mock->foo(5) },
+        my $e = exception { $mock->foo(5) },
         qr/^my exception/,
         '... and the exception is thrown'
     );
-    like( $e, qr/\Q$file\E/, '... and error traces back to this script' );
+    like( $e, qr/\Q$FILE\E/, '... and error traces back to this script' );
 };
 
 {
@@ -120,7 +125,7 @@ subtest 'create stub that throws with an exception object' => sub {
 }
 subtest 'create stub throws with a non-exception object' => sub {
     stub { $mock->foo(6) } throws( My::NonThrowable->new );
-    like( $e = exception { $mock->foo(6) },
+    like( my $e = exception { $mock->foo(6) },
         qr/^died/, '... and stub does throw' );
   TODO: {
         # Carp BUGS section:
@@ -128,14 +133,14 @@ subtest 'create stub throws with a non-exception object' => sub {
         # If called with a first argument that is a reference,
         # they simply call die() or warn(), as appropriate.
         local $TODO = 'Carp does not handle objects';
-        like( $e, qr/at \Q$file\E/,
+        like( $e, qr/at \Q$FILE\E/,
             '... and error traces back to this script' );
     }
 };
 
 subtest 'create stub with no specified response' => sub {
     stub { $mock->foo(7) };
-    is( $stubs->{foo}[0]->stringify, 'foo(7)' );
+    is( $mock->__stubs->{foo}[0]->stringify, 'foo(7)' );
     is( $mock->foo(7), undef, '... and stub returns undef' );
     is_deeply( [ $mock->foo(7) ], [], '... or an empty list' );
 };
@@ -226,6 +231,7 @@ is(
     'set({ slurpy: ArrayRef })',
     'stub() accepts slurpy ArrayRef'
 );
+
 stub { $mock->set(SlurpyHash) };
 is(
     $mock->__stubs->{set}[0],
@@ -233,20 +239,24 @@ is(
     'stub() accepts slurpy HashRef'
 );
 
-like(
-    $e = exception {
-        stub { $mock->set( SlurpyArray, 1 ) };
-    },
-    qr/^No arguments allowed after a slurpy type constraint/,
-    'Arguments after a slurpy type constraint are not allowed'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
+subtest 'Arguments after a slurpy type constraint are not allowed' => sub {
+    like(
+        my $e = exception {
+            stub { $mock->set( SlurpyArray, 1 ) };
+        },
+        qr/^No arguments allowed after a slurpy type constraint/,
+        'error is thrown'
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+};
 
-like(
-    $e = exception {
-        stub { $mock->set( slurpy Any ) };
-    },
-    qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
-    'Slurpy argument must be an arrayref of hashref'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
+subtest 'Slurpy argument must be an arrayref of hashref' => sub {
+    like(
+        my $e = exception {
+            stub { $mock->set( slurpy Any ) };
+        },
+        qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+        'error is thrown'
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+};
