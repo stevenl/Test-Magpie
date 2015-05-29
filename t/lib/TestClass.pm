@@ -18,4 +18,8 @@ sub does {
     return $class->DOES($role);
 }
 
+sub get  { }
+sub set  { }
+sub next { }
+
 1;
