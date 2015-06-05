@@ -22,4 +22,8 @@ sub get  { }
 sub set  { }
 sub next { }
 
+sub once   { }
+sub twice  { }
+sub thrice { }
+
 1;
