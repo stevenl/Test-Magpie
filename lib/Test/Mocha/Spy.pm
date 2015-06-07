@@ -79,7 +79,8 @@ sub AUTOLOAD {
     if ( $self->__CaptureMode ) {
         croak(
             sprintf
-              qq{Can't stub object method "%s" because it can't be located via package "%s"},
+              qq{Can't %s object method "%s" because it can't be located via package "%s"},
+            $self->__CaptureMode,
             $method_name,
             ref( $self->__object )
         ) if !$self->__object->can($method_name);

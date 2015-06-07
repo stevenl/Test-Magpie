@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -92,6 +92,28 @@ subtest 'spy does not accept stubs to methods it cannot delegate' => sub {
             stub { $spy->foo( bar => 1 ) } returns 1
         },
         qr{^Can't stub object method "foo" because it can't be located via package "TestClass"},
+        'error is thrown'
+    );
+    like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );
+};
+
+subtest 'spy does not verify methods it cannot delegate' => sub {
+    like(
+        my $e = exception {
+            called_ok { $spy->foo( bar => 1 ) };
+        },
+        qr{^Can't verify object method "foo" because it can't be located via package "TestClass"},
+        'error is thrown'
+    );
+    like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );
+};
+
+subtest 'spy does not inspect methods it cannot delegate' => sub {
+    like(
+        my $e = exception {
+            inspect { $spy->foo( bar => 1 ) };
+        },
+        qr{^Can't inspect object method "foo" because it can't be located via package "TestClass"},
         'error is thrown'
     );
     like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );

@@ -8,7 +8,7 @@ use Carp 1.22 'croak';
 use Types::Standard qw( ArrayRef HashRef );
 
 # class attributes
-our $CaptureMode = 0;
+our $CaptureMode = q{};
 my $NumMethodCalls = 0;
 my $LastMethodCall;
 
@@ -77,7 +77,7 @@ sub __capture_method_call {
     # removes it from the invocation history,
     # and restores the last method stub response.
     # """
-    my ( $class, $coderef ) = @_;
+    my ( $class, $coderef, $action ) = @_;
 
     ### assert: !$CaptureMode
     $NumMethodCalls = 0;
@@ -85,7 +85,7 @@ sub __capture_method_call {
     {
         # Execute the coderef. This should in turn include a method call on
         # mock, which should be handled by its AUTOLOAD method.
-        local $CaptureMode = 1;
+        local $CaptureMode = $action;
         $coderef->();
     }
 

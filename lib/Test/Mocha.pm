@@ -201,7 +201,7 @@ Chain responses together to provide a consecutive series.
     stub { $iterator->next }
       returns(1), returns(2), returns(3), throws('exhausted');
 
-    print $iterator->next;  # prints "1" 
+    print $iterator->next;  # prints "1"
     print $iterator->next;  # prints "2"
     print $iterator->next;  # prints "3"
     print $iterator->next;  # croaks with "exhausted at test.t line 13."
@@ -226,9 +226,10 @@ sub stub (&@) {
     }
 
     # add stub to mock
-    my $method_call = Test::Mocha::Mock->__capture_method_call($coderef);
-    my $stubs       = $method_call->invocant->__stubs;
-    unshift @{ $stubs->{ $method_call->name } }, $method_call;
+    my $method_call =
+      Test::Mocha::Mock->__capture_method_call( $coderef, 'stub' );
+    unshift @{ $method_call->invocant->__stubs->{ $method_call->name } },
+      $method_call;
 
     # add response to stub
     Test::Mocha::MethodStub->cast($method_call);
@@ -345,7 +346,8 @@ sub called_ok (&;@) {
         $test_name = shift;
     }
 
-    my $method_call = Test::Mocha::Mock->__capture_method_call($coderef);
+    my $method_call =
+      Test::Mocha::Mock->__capture_method_call( $coderef, 'verify' );
 
     ## no critic (ProhibitAmpersandSigils)
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -434,7 +436,8 @@ They are also string overloaded with the value from C<stringify>.
 
 sub inspect (&) {
     my ($coderef) = @_;
-    my $method_call = Test::Mocha::Mock->__capture_method_call($coderef);
+    my $method_call =
+      Test::Mocha::Mock->__capture_method_call( $coderef, 'inspect' );
 
     return
       grep { $method_call->__satisfied_by($_) }
