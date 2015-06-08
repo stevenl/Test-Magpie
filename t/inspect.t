@@ -3,71 +3,59 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 6;
 use Test::Fatal;
 use Types::Standard qw( Int slurpy );
 
 BEGIN { use_ok 'Test::Mocha' }
 
-my $file = __FILE__;
+my $FILE = __FILE__;
 my $mock = mock;
+
 $mock->once;
 $mock->twice(1)   for 1 .. 2;
 $mock->thrice($_) for 1 .. 3;
 
-my ($once) = inspect { $mock->once };
-isa_ok( $once, 'Test::Mocha::MethodCall' );
-is(
-    $once->stringify_long,
-    "once() called at $file line 14",
-    'inspect() returns method call'
-);
+subtest 'inspect() returns method call' => sub {
+    my @once = inspect { $mock->once };
+    is( @once, 1 );
+    isa_ok( $once[0], 'Test::Mocha::MethodCall' );
+    is(
+        $once[0]->stringify_long,
+        "once() called at $FILE line 15",
+        '... and method call stringifies'
+    );
+};
 
-my @twice = inspect { $mock->twice(1) };
-is( @twice, 2, 'inspect() with argument returns method call' );
-isa_ok( $twice[0], 'Test::Mocha::MethodCall' );
-is(
-    $twice[0]->stringify_long,
-    "twice(1) called at $file line 15",
-    '... and method call stringifies'
-);
+is_deeply( [ inspect { $mock->twice(1) } ],
+    [qw( twice(1) twice(1) )],
+    'inspect() with argument, returns the right method calls' );
 
-my @thrice = inspect { $mock->thrice(Int) };
-is( @thrice, 3, 'inspect() works with argument matcher' );
-isa_ok( $thrice[0], 'Test::Mocha::MethodCall' );
 is_deeply(
-    \@thrice,
-    [
-        qw(
-          thrice(1)
-          thrice(2)
-          thrice(3)
-          )
-    ],
-    '... and returns calls in the right order'
+    [ inspect { $mock->thrice(Int) } ],
+    [qw( thrice(1) thrice(2) thrice(3) )],
+    'inspect() with argument matcher, returns calls the right method calls, in the right order'
 );
 
 # ----------------------
-# inspect() with type constraint arguments
+# inspect() with slurpy type constraint arguments
 
-@thrice = inspect { $mock->thrice(SlurpyArray) };
-is( @thrice, 3, 'inspect() works with slurpy argument matcher' );
+subtest 'Disallow arguments after a slurpy type constraint' => sub {
+    like(
+        my $e = exception {
+            inspect { $mock->twice( SlurpyArray, 1 ) };
+        },
+        qr/^No arguments allowed after a slurpy type constraint/,
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+};
 
-my $e;
-like(
-    $e = exception {
-        inspect { $mock->twice( SlurpyArray, 1 ) };
-    },
-    qr/^No arguments allowed after a slurpy type constraint/,
-    'Disallow arguments after a slurpy type constraint'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
-
-like(
-    $e = exception {
-        inspect { $mock->twice( slurpy Int ) };
-    },
-    qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
-    'Invalid Slurpy argument'
-);
-like( $e, qr/at \Q$file\E/, '... and error traces back to this script' );
+subtest 'Invalid Slurpy argument' => sub {
+    like(
+        my $e = exception {
+            inspect { $mock->twice( slurpy Int ) };
+        },
+        qr/^Slurpy argument must be a type of ArrayRef or HashRef/,
+    );
+    like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
+};
