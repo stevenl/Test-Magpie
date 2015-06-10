@@ -116,9 +116,8 @@ sub isa {
     # uncoverable pod
     my ( $self, $class ) = @_;
 
-    # Handle internal calls from UNIVERSAL::ref::_hook()
-    # when ref($mock) is called
-    return 1 if $class eq __PACKAGE__;
+    # Don't let AUTOLOAD handle internal isa() calls
+    return 1 if $self->SUPER::isa($class);
 
     # In order to allow mock methods to be called with other mocks as
     # arguments, mocks cannot have isa() called with type constraints,

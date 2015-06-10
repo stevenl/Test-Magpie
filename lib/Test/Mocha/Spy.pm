@@ -113,9 +113,8 @@ sub isa {
     # uncoverable pod
     my ( $self, $class ) = @_;
 
-    # Handle internal calls from UNIVERSAL::ref::_hook()
-    # when ref($spy) is called
-    return 1 if $class eq __PACKAGE__;
+    # Don't let AUTOLOAD handle internal isa() calls
+    return 1 if $self->SUPER::isa($class);
 
     $AUTOLOAD = 'isa';
     goto &AUTOLOAD;

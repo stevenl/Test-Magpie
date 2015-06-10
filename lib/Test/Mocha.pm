@@ -71,8 +71,8 @@ use Test::Mocha::CalledOk::AtMost;
 use Test::Mocha::CalledOk::Between;
 use Test::Mocha::Mock;
 use Test::Mocha::Spy;
-use Test::Mocha::Types 'NumRange', Mock => { -as => 'MockType' };
-use Test::Mocha::Util qw( extract_method_name );
+use Test::Mocha::Types 'NumRange';
+use Test::Mocha::Util 'extract_method_name';
 use Types::Standard qw( ArrayRef HashRef Num slurpy );
 
 our @EXPORT = qw(
@@ -457,7 +457,7 @@ sub inspect_all ($) {
     my ($mock) = @_;
 
     croak 'inspect_all() must be given a mock object'
-      if !MockType->check($mock);
+      if !$mock->isa('Test::Mocha::SpyBase');
 
     return @{ $mock->{calls} };
 }
@@ -477,7 +477,7 @@ sub clear (@) {
 
     ## no critic (ProhibitBooleanGrep)
     croak 'clear() must be given mock objects only'
-      if !@mocks || grep { !MockType->check($_) } @mocks;
+      if !@mocks || grep { !$_->isa('Test::Mocha::SpyBase') } @mocks;
     ## use critic
 
     @{ $_->__calls } = () foreach @mocks;

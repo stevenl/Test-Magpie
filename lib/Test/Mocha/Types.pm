@@ -5,7 +5,6 @@ use Type::Library
   -base,
   -declare => qw(
   Matcher
-  Mock
   NumRange
   Slurpy
 );
@@ -18,8 +17,6 @@ union Matcher,
     class_type( { class => 'Type::Tiny' } ),
     class_type( { class => 'Moose::Meta::TypeConstraint' } ),
   ];
-
-class_type Mock, { class => 'Test::Mocha::Mock' };
 
 declare NumRange, as Tuple [ Num, Num ], where { $_->[0] < $_->[1] };
 
