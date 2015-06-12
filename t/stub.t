@@ -36,7 +36,7 @@ foreach my $subj ( $mock, $spy ) {
     subtest 'stub() coderef must contain a method call specification' => sub {
         like(
             my $e = exception { stub {} },
-            qr/Coderef must have a method invoked on a mock object/,
+            qr/Coderef must have a method invoked on a mock or spy object/,
             'error is thrown'
         );
         like( $e, qr/at \Q$FILE\E/,
@@ -50,7 +50,7 @@ foreach my $subj ( $mock, $spy ) {
             my $e = exception {
                 stub { $subj->get; $subj->set };
             },
-            qr/Coderef must not have multiple methods invoked on a mock object/,
+            qr/Coderef must not have multiple methods invoked on a mock or spy object/,
             'error is thrown'
         );
         like( $e, qr/at \Q$FILE\E/,

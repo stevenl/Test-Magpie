@@ -89,9 +89,10 @@ sub __capture_method_call {
         $coderef->();
     }
 
-    croak 'Coderef must have a method invoked on a mock object'
+    croak 'Coderef must have a method invoked on a mock or spy object'
       if $NumMethodCalls == 0;
-    croak 'Coderef must not have multiple methods invoked on a mock object'
+    croak
+      'Coderef must not have multiple methods invoked on a mock or spy object'
       if $NumMethodCalls > 1;
 
     return $LastMethodCall;

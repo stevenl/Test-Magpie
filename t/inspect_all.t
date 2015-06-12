@@ -39,10 +39,10 @@ foreach my $subj ( $mock, $spy ) {
     is( @got, scalar(@expect), 'inspect_all() returns all method calls' );
     is_deeply( \@got, \@expect, '... in the right order' );
 
-    subtest 'argument must be a mock object' => sub {
+    subtest 'argument must be a mock/spy object' => sub {
         like(
             my $e = exception { inspect_all 'string' },
-            qr/^inspect_all\(\) must be given a mock object/,
+            qr/^inspect_all\(\) must be given a mock or spy object/,
         );
         like( $e, qr/at \Q$FILE\E/,
             '... and error traces back to this script' );

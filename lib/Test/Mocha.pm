@@ -456,7 +456,7 @@ This is mainly used for debugging.
 sub inspect_all ($) {
     my ($mock) = @_;
 
-    croak 'inspect_all() must be given a mock object'
+    croak 'inspect_all() must be given a mock or spy object'
       if !$mock->isa('Test::Mocha::SpyBase');
 
     return @{ $mock->{calls} };
@@ -475,10 +475,10 @@ been stubbed.
 sub clear (@) {
     my @mocks = @_;
 
-    ## no critic (ProhibitBooleanGrep)
-    croak 'clear() must be given mock objects only'
-      if !@mocks || grep { !$_->isa('Test::Mocha::SpyBase') } @mocks;
-    ## use critic
+    croak 'clear() must be given mock or spy objects'
+      if @mocks == 0;
+    croak 'clear() accepts mock and spy objects only'
+      if 0 < ( grep { !$_->isa('Test::Mocha::SpyBase') } @mocks );
 
     @{ $_->__calls } = () foreach @mocks;
 

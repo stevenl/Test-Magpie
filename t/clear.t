@@ -37,7 +37,7 @@ foreach my $subj ( \@mocks, \@spies ) {
 subtest 'throws if no arguments' => sub {
     like(
         my $e = exception { clear },
-        qr/^clear\(\) must be given mock objects only/,
+        qr/^clear\(\) must be given mock or spy objects/,
     );
     like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
 };
@@ -45,7 +45,7 @@ subtest 'throws if no arguments' => sub {
 subtest 'throws with invalid arguments' => sub {
     like(
         my $e = exception { clear 1 },
-        qr/^clear\(\) must be given mock objects only/,
+        qr/^clear\(\) accepts mock and spy objects only/,
     );
     like( $e, qr/at \Q$FILE\E/, '... and error traces back to this script' );
 };
