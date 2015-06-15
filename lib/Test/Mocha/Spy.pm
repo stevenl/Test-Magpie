@@ -14,9 +14,9 @@ use UNIVERSAL::ref;
 
 our $AUTOLOAD;
 
-# can() should return a reference to C<AUTOLOAD()> for all methods
 my %DEFAULT_STUBS = (
     can => Test::Mocha::MethodStub->new(
+        # can() should return a reference to AUTOLOAD() for all methods
         name      => 'can',
         args      => [Str],
         responses => [
@@ -31,6 +31,9 @@ my %DEFAULT_STUBS = (
         ],
     ),
     ref => Test::Mocha::MethodStub->new(
+        # ref() is a special stub because we use UNIVERSAL::ref which
+        # allows us to call it as a method even though it's not a method
+        # in the wrapped object.
         name      => 'ref',
         args      => [],
         responses => [
@@ -77,13 +80,18 @@ sub AUTOLOAD {
     );
 
     if ( $self->__CaptureMode ) {
-        croak(
-            sprintf
-              qq{Can't %s object method "%s" because it can't be located via package "%s"},
-            $self->__CaptureMode,
-            $method_name,
-            ref( $self->__object )
-        ) if !$self->__object->can($method_name);
+        if (
+            !$self->__object->can($method_name)
+            # allow ref() to be recorded and verified
+            && $method_name ne 'ref'
+          )
+        {
+            croak(
+                sprintf
+                  qq{Can't %s object method "%s" because it can't be located via package "%s"},
+                $self->__CaptureMode, $method_name, ref( $self->__object )
+            );
+        }
 
         $self->__NumMethodCalls( $self->__NumMethodCalls + 1 );
         $self->__LastMethodCall($method_call);
