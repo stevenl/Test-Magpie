@@ -145,12 +145,6 @@ sub can {
     goto &AUTOLOAD;
 }
 
-sub ref {  ## no critic (ProhibitBuiltinHomonyms)
-           # uncoverable pod
-    $AUTOLOAD = 'ref';
-    goto &AUTOLOAD;
-}
-
 # Don't let AUTOLOAD() handle DESTROY() so that object can be destroyed
 sub DESTROY { }
 
