@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 4;
 use Test::Fatal;
 
 use lib 't/lib';
@@ -13,23 +13,21 @@ BEGIN { use_ok 'Test::Mocha' }
 
 my $FILE = __FILE__;
 
-my @mocks = ( mock, mock );
-my @spies = ( spy( TestClass->new ), spy( TestClass->new ) );
+my $mock = mock;
+my $spy  = spy( TestClass->new );
 
-foreach my $subj ( \@mocks, \@spies ) {
-    subtest 'calls are cleared' => sub {
-        my $calls1 = $subj->[0]->__calls;
-        my $calls2 = $subj->[1]->__calls;
+subtest 'calls are cleared' => sub {
+    my $mock_calls = $mock->__calls;
+    my $spy_calls  = $spy->__calls;
 
-        $subj->[0]->set;
-        $subj->[1]->get;
-        is( ( @{$calls1} + @{$calls2} ),
-            2, 'mock and spy have calls before clear()' );
+    $mock->set;
+    $spy->get;
+    is( ( @$mock_calls + @$spy_calls ),
+        2, 'mock and spy have calls before clear()' );
 
-        clear @$subj;
-        is( ( @{$calls1} + @{$calls2} ), 0, '... and no calls after clear()' );
-    };
-}
+    clear $mock, $spy;
+    is( ( @$mock_calls + @$spy_calls ), 0, '... and no calls after clear()' );
+};
 
 # ----------------------
 # exceptions
