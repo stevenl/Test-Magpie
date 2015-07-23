@@ -1,5 +1,5 @@
 package Test::Mocha;
-# ABSTRACT: Test Spy/Stub Framework
+# ABSTRACT: Test double framework with method stubs and behaviour verification
 
 =for :badge
 =for html
@@ -8,8 +8,8 @@ package Test::Mocha;
 
 =head1 SYNOPSIS
 
-Test::Mocha is a test spy framework for testing code that has dependencies on
-other objects.
+Test::Mocha is a test double framework for testing code that has dependencies
+on other objects.
 
     use Test::More tests => 2;
     use Test::Mocha;
@@ -34,19 +34,13 @@ other objects.
 
 =head1 DESCRIPTION
 
-B<The API may still be subject to change.>
-
-We find all sorts of excuses to avoid writing tests for our code. Often it
-seems too hard to isolate the code we want to test from the objects it is
-dependent on. I'm too lazy and impatient to code my own mocks. Mocking
-frameworks can help with this but they still take too long to set up the mock
-objects. Enough setting up! I just want to get on with the actual testing.
-
-Test::Mocha offers a simpler and more intuitive approach. Rather than setting
-up the expected interactions beforehand, you ask questions about interactions
-after the execution. The mocks can be created in almost no time. Yet they're
-ready to be used out-of-the-box by pretending to be any type you want them to
-be and accepting any method call on them.
+Test::Mocha is a test double framework inspired by Java's Mockito. 
+It offers a different approach to other mocking frameworks in that instead
+of setting up the expected behaviour beforehand you ask questions about
+interactions after execution of the system-under-test. This approach means
+there is less setup needed to use your test double which means you can
+focus more on testing, and it minimises the coupling of the tests to the
+implementation which means less maintenance of your test code.
 
 Explicit stubbing is only required when the dependent object is expected to
 return a specific response. And you can even use argument matchers to skip
@@ -108,21 +102,34 @@ $Carp::Internal{$_}++ foreach qw(
 
 =func mock
 
-    my $mock = mock;
+    $mock = mock;
 
 C<mock()> creates a new mock object. It's that quick and simple!
+It is ready out-of-the-box to pretend to be any object you want it to be
+and to accept any method calls on it.
 
-The mock object is ready, as-is, to pretend to be anything you want it to be.
-Calling C<isa()> or C<does()> on the object will always return true. This
-is particularly handy when dependent objects are required to satisfy type
-constraint checks with OO frameworks such as L<Moose>.
+Any public method may be called on mocks. By default the methods will return
+C<undef> or C<()> depending on the context. See L</"stub"> below for how to
+change this behaviour.
 
-You can stub C<ref()> to specify the value it should return (see below for
-more info about stubbing).
+    $result = $mock->method(@args); # returns undef
+    @result = $mock->method(@args); # returns ()
 
-    stub { $mock->ref } returns 'AnyClass';
-    print $mock->ref;  # prints 'AnyClass'
-    print ref($mock);  # prints 'AnyClass'
+C<isa()>, C<does()> or C<DOES()> returns true for any class or role name.
+C<can()> returns a reference to the default public method. This is
+particularly handy when the dependent object needs to satisfy attribute
+type constraint checks with OO frameworks such as L<Moose>.
+
+    $mock->isa('AnyClass');     # returns 1
+    $mock->does('AnyRole');     # returns 1
+    $mock->DOES('AnyRole');     # returns 1
+    $mock->can('any_method');   # returns a coderef
+
+C<ref()> is a special method that you can stub to specify the value you would
+like returned when you use the C<ref()> function with a mock object.
+
+    stub { $mock->ref } returns 'SomeClass';
+    print ref($mock); # prints 'SomeClass'
 
 =cut
 
@@ -132,7 +139,18 @@ sub mock {
 
 =func spy
 
-    my $spy = spy($object);
+    $spy = spy($object);
+
+Don't want to abstract away the behaviour of an entire class? Use a spy.
+Spies act as wrappers to real objects. Rather than giving pretend responses
+as mocks do, they delegate the method calls to the real objects (including
+the UNIVERSAL methods like C<isa()> and C<DOES>) and return their actual
+responses. But the method calls can also be verified using L</"called_ok">
+or overridden using L</"stub">.
+
+This means you can use the existing behaviour of the object and fake only
+parts of it, such as a call to a server that's not available in your dev
+environment or that returns non-deterministic results.
 
 =cut
 
@@ -147,8 +165,8 @@ sub spy ($) {
     stub { $mock->method(@args) } executes($coderef)
 
 By default, the mock object already acts as a stub that accepts any method
-call and returns C<undef>. However, you can use C<stub()> to tell a method to
-give an alternative response. You can specify 3 types of responses:
+call and returns C<undef> or C<()>. However, you can use C<stub()> to tell a
+method to give an alternative response. You can specify 3 types of responses:
 
 =begin :list
 
@@ -625,7 +643,10 @@ Charles (CYCLES).
 It is inspired by the popular L<Mockito|http://code.google.com/p/mockito/>
 for Java and Python by Szczepan Faber.
 
-The class_mock method was contributed by Scott Davis.
+It is not associated with the Javascript test framework for node.js called
+Mocha. I named Test::Mocha before that came about.
+
+The C<class_mock()> function was contributed by Scott Davis.
 
 =head1 SEE ALSO
 
