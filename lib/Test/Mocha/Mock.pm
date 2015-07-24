@@ -35,6 +35,13 @@ my %DEFAULT_STUBS = (
         args      => [Str],
         responses => [ sub { 1 } ],
     ),
+    ref => Test::Mocha::MethodStub->new(
+        # ref() is a special stub because we use UNIVERSAL::ref which
+        # allows us to call it as a method.
+        name      => 'ref',
+        args      => [],
+        responses => [ sub { __PACKAGE__ } ],
+    ),
     can => Test::Mocha::MethodStub->new(
         name      => 'can',
         args      => [Str],

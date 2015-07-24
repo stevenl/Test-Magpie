@@ -34,7 +34,7 @@ on other objects.
 
 =head1 DESCRIPTION
 
-Test::Mocha is a test double framework inspired by Java's Mockito. 
+Test::Mocha is a test double framework inspired by Java's Mockito.
 It offers a different approach to other mocking frameworks in that instead
 of setting up the expected behaviour beforehand you ask questions about
 interactions after execution of the system-under-test. This approach means
@@ -496,7 +496,7 @@ sub clear (@) {
     croak 'clear() must be given mock or spy objects'
       if @mocks == 0;
     croak 'clear() accepts mock and spy objects only'
-      if 0 < ( grep { !$_->isa('Test::Mocha::SpyBase') } @mocks );
+      if 0 < ( grep { !ref $_ || !$_->isa('Test::Mocha::SpyBase') } @mocks );
 
     @{ $_->__calls } = () foreach @mocks;
 
