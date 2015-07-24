@@ -2,6 +2,12 @@ Revision history for Test-Mocha
 
 {{$NEXT}}
 
+0.62    2015-07-24
+
+    - Added spy() for creating spies.
+    - Restructured internals to use proper methods instead of avoiding
+      polluting the namespace of mock objects.
+
 0.61    2015-04-23
 
     - Added class_mock() for mocking class methods and module functions

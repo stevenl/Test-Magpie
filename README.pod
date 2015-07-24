@@ -10,7 +10,7 @@ Test::Mocha - Test double framework with method stubs and behaviour verification
 
 =head1 VERSION
 
-version 0.61
+version 0.62
 
 =head1 SYNOPSIS
 
@@ -40,7 +40,7 @@ on other objects.
 
 =head1 DESCRIPTION
 
-Test::Mocha is a test double framework inspired by Java's Mockito. 
+Test::Mocha is a test double framework inspired by Java's Mockito.
 It offers a different approach to other mocking frameworks in that instead
 of setting up the expected behaviour beforehand you ask questions about
 interactions after execution of the system-under-test. This approach means
