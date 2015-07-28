@@ -7,8 +7,8 @@ use warnings;
 
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
-use Test::Mocha::Util qw( check_slurpy_arg extract_method_name find_caller );
-use Types::Standard 'Str';
+use Test::Mocha::Util ();
+use Types::Standard   ();
 use UNIVERSAL::ref;
 
 our $AUTOLOAD;
@@ -22,17 +22,17 @@ my %NOT_ISA =
 my %DEFAULT_STUBS = (
     isa => Test::Mocha::MethodStub->new(
         name      => 'isa',
-        args      => [Str],
+        args      => [Types::Standard::Str],
         responses => [ sub { 1 } ],
     ),
     DOES => Test::Mocha::MethodStub->new(
         name      => 'DOES',
-        args      => [Str],
+        args      => [Types::Standard::Str],
         responses => [ sub { 1 } ],
     ),
     does => Test::Mocha::MethodStub->new(
         name      => 'does',
-        args      => [Str],
+        args      => [Types::Standard::Str],
         responses => [ sub { 1 } ],
     ),
     ref => Test::Mocha::MethodStub->new(
@@ -44,7 +44,7 @@ my %DEFAULT_STUBS = (
     ),
     can => Test::Mocha::MethodStub->new(
         name      => 'can',
-        args      => [Str],
+        args      => [Types::Standard::Str],
         responses => [
             sub {
                 my ( $self, $method_name ) = @_;
@@ -78,9 +78,9 @@ sub __mocked_class {
 
 sub AUTOLOAD {
     my ( $self, @args ) = @_;
-    check_slurpy_arg(@args);
+    Test::Mocha::Util::check_slurpy_arg(@args);
 
-    my $method_name = extract_method_name($AUTOLOAD);
+    my $method_name = Test::Mocha::Util::extract_method_name($AUTOLOAD);
 
     # If a class method or module function, then transform method name
     my $mocked_class = $self->__mocked_class;
@@ -98,7 +98,7 @@ sub AUTOLOAD {
         invocant => $self,
         name     => $method_name,
         args     => \@args,
-        caller   => [find_caller],
+        caller   => [Test::Mocha::Util::find_caller],
     );
 
     if ( $self->__CaptureMode ) {

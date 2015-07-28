@@ -4,18 +4,17 @@ package Test::Mocha::SpyBase;
 use strict;
 use warnings;
 
-use Carp 1.22 'croak';
-use Types::Standard qw( ArrayRef HashRef );
+use Carp 1.22 ();
 
 # class attributes
-our $CaptureMode = q{};
+our $__CaptureMode = q{};
 my $NumMethodCalls = 0;
 my $LastMethodCall;
 
 ## no critic (NamingConventions::Capitalization)
 sub __CaptureMode {
     my ( $class, $value ) = @_;
-    return $CaptureMode;
+    return $__CaptureMode;
 }
 
 sub __NumMethodCalls {
@@ -79,19 +78,19 @@ sub __capture_method_call {
     # """
     my ( $class, $coderef, $action ) = @_;
 
-    ### assert: !$CaptureMode
+    ### assert: !$__CaptureMode
     $NumMethodCalls = 0;
     $LastMethodCall = undef;
     {
         # Execute the coderef. This should in turn include a method call on
         # mock, which should be handled by its AUTOLOAD method.
-        local $CaptureMode = $action;
+        local $__CaptureMode = $action;
         $coderef->();
     }
 
-    croak 'Coderef must have a method invoked on a mock or spy object'
+    Carp::croak 'Coderef must have a method invoked on a mock or spy object'
       if $NumMethodCalls == 0;
-    croak
+    Carp::croak
       'Coderef must not have multiple methods invoked on a mock or spy object'
       if $NumMethodCalls > 1;
 
