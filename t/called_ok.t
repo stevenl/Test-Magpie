@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 61;
+use Test::More 0.99 tests => 61;
 use Test::Fatal;
 use Test::Builder::Tester;
 use Types::Standard qw( Any slurpy );
