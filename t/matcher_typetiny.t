@@ -2,16 +2,12 @@
 
 use strict;
 use warnings;
-use version 0.77;
 
-use Test::More tests => 20;
+use Test::More 1.001002 tests => 20;
 use Test::Builder::Tester;
 
 use Type::Utils -all;
 use Types::Standard -all;
-
-use constant TBT_IS_VALID => ( version->parse($Test::Builder::Tester::VERSION) <
-      version->parse('1.23_002') );
 
 BEGIN { use_ok 'Test::Mocha' }
 
@@ -32,15 +28,10 @@ is( $mock->foo( 1, Int ),
 is( $mock->foo( 1, mock ),
     undef, 'mocks can be passed as method arguments to mock methods' );
 
-SKIP: {
-    skip( "test_out(qr//) does not work for Test::Builder::Tester 1.23_002", 1 )
-      unless TBT_IS_VALID;
-
-    test_out(
-        qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\) was called 2 time\(s\)\s?/);
-    called_ok { $mock->set( StrMatch [qr/^foo/] ) } &times(2);
-    test_test('parameterized type works');
-}
+test_out(
+    qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\) was called 2 time\(s\)\s?/);
+called_ok { $mock->set( StrMatch [qr/^foo/] ) } &times(2);
+test_test('parameterized type works');
 
 test_out('ok 1 - set(Int, ~Int) was called 2 time(s)');
 called_ok { $mock->set( Int, ~Int ) } &times(2);
@@ -50,18 +41,13 @@ test_out('ok 1 - set(Int|Str) was called 2 time(s)');
 called_ok { $mock->set( Int | Str ) } &times(2);
 test_test('type union works');
 
-SKIP: {
-    skip( "test_out(qr//) does not work for Test::Builder::Tester 1.23_002", 1 )
-      unless TBT_IS_VALID;
-
-    test_out(
-        qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\&StrMatch\[\(\?.*:bar\$\)\]\) was called 1 time\(s\)\s?/
-    );
-    called_ok {
-        $mock->set( ( StrMatch [qr/^foo/] ) & ( StrMatch [qr/bar$/] ) );
-    };
-    test_test('type intersection works');
-}
+test_out(
+    qr/ok 1 - set\(StrMatch\[\(\?.*:\^foo\)\]\&StrMatch\[\(\?.*:bar\$\)\]\) was called 1 time\(s\)\s?/
+);
+called_ok {
+    $mock->set( ( StrMatch [qr/^foo/] ) & ( StrMatch [qr/bar$/] ) );
+};
+test_test('type intersection works');
 
 test_out('ok 1 - set(Tuple[Str,Str]) was called 1 time(s)');
 called_ok { $mock->set( Tuple [ Str, Str ] ) };
