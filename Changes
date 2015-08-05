@@ -2,11 +2,22 @@ Revision history for Test-Mocha
 
 {{$NEXT}}
 
+0.62_01 2015-08-05
+
+    - Cleared out the namespaces of Mock and Spy as much as possible to avoid
+      getting in the way of AUTOLOAD.
+    - Added tests to make sure we keep the namespacees clean.
+    - Resolved failing tests in t/called_ok.t caused by Test::More v0.98.
+      The issue was resolved in Test::More v0.98_05.
+    - Stop skipping test_out(qr//) tests for newer versions of
+      Test::Builder::Tester. The issue was resolved in Test::More v0.99_01.
+
 0.62    2015-07-24
 
-    - Added spy() for creating spies.
+    - Introducing: spy() for creating spies.
     - Restructured internals to use proper methods instead of avoiding
-      polluting the namespace of mock objects.
+      polluting namespace of mock objects. Their names begin with 2 underscores
+      to mark them as private to the distribution.
 
 0.61    2015-04-23
 

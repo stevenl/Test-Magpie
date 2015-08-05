@@ -10,7 +10,7 @@ Test::Mocha - Test double framework with method stubs and behaviour verification
 
 =head1 VERSION
 
-version 0.62
+version 0.62_01
 
 =head1 SYNOPSIS
 
