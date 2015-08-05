@@ -8,6 +8,7 @@ use warnings;
 use Carp 1.22 ();
 use Scalar::Util ();
 use Test::Mocha::MethodCall;
+use Test::Mocha::MethodStub;
 use Test::Mocha::Util ();
 use Types::Standard   ();
 use UNIVERSAL::ref;
