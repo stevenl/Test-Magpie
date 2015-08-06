@@ -243,15 +243,17 @@ sub stub (&@) {
           if ref ne 'CODE';
     }
 
-    # add stub to mock
-    my $method_call =
-      Test::Mocha::Mock->__capture_method_call( $coderef, 'stub' );
-    unshift @{ $method_call->invocant->__stubs->{ $method_call->name } },
-      $method_call;
+    my @method_calls =
+      Test::Mocha::Mock->__capture_method_calls( $coderef, 'stub' );
+    for my $method_call (@method_calls) {
+        # add stub to mock
+        unshift @{ $method_call->invocant->__stubs->{ $method_call->name } },
+          $method_call;
 
-    # add response to stub
-    Test::Mocha::MethodStub->cast($method_call);
-    push @{ $method_call->__responses }, @responses;
+        # add response to stub
+        Test::Mocha::MethodStub->cast($method_call);
+        push @{ $method_call->__responses }, @responses;
+    }
     return;
 }
 
@@ -364,13 +366,13 @@ sub called_ok (&;@) {
         $test_name = shift;
     }
 
-    my $method_call =
-      Test::Mocha::Mock->__capture_method_call( $coderef, 'verify' );
+    my @method_calls =
+      Test::Mocha::Mock->__capture_method_calls( $coderef, 'verify' );
 
     ## no critic (ProhibitAmpersandSigils)
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     $called_ok ||= &times(1);  # default if no times() is specified
-    $called_ok->( $method_call, $test_name );
+    $called_ok->( $_, $test_name ) for @method_calls;
     return;
 }
 ## use critic
@@ -454,12 +456,16 @@ They are also string overloaded with the value from C<stringify>.
 
 sub inspect (&) {
     my ($coderef) = @_;
-    my $method_call =
-      Test::Mocha::Mock->__capture_method_call( $coderef, 'inspect' );
+    my @method_calls =
+      Test::Mocha::Mock->__capture_method_calls( $coderef, 'inspect' );
 
-    return
-      grep { $method_call->__satisfied_by($_) }
-      @{ $method_call->invocant->__calls };
+    my @to_inspect = map {
+        my $method_call = $_;
+        grep { $method_call->__satisfied_by($_) }
+          @{ $method_call->invocant->__calls };
+    } @method_calls;
+
+    return @to_inspect;
 }
 
 =func inspect_all

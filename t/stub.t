@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 45;
+use Test::More tests => 46;
 use Test::Fatal;
 use Types::Standard qw( Any Int slurpy );
 
@@ -42,20 +42,6 @@ foreach my $subj ( $mock, $spy ) {
         like( $e, qr/at \Q$FILE\E/,
             '... and error traces back to this script' );
     };
-
-    subtest
-      'stub() coderef may not contain multiple method call specifications' =>
-      sub {
-        like(
-            my $e = exception {
-                stub { $subj->get; $subj->set };
-            },
-            qr/Coderef must not have multiple methods invoked on a mock or spy object/,
-            'error is thrown'
-        );
-        like( $e, qr/at \Q$FILE\E/,
-            '... and error traces back to this script' );
-      };
 
     subtest 'create stub that returns a scalar' => sub {
         stub { $subj->test_method(1) } returns 4;
@@ -172,11 +158,22 @@ foreach my $subj ( $mock, $spy ) {
         stub { $subj->next } returns(1), returns(2), returns(3),
           throws('exhausted');
 
-        ok( $subj->next == 1 );
-        ok( $subj->next == 2 );
-        ok( $subj->next == 3 );
+        is( $subj->next, 1 );
+        is( $subj->next, 2 );
+        is( $subj->next, 3 );
         like( exception { $subj->next }, qr/exhausted/ );
     };
+
+    subtest 'stub() coderef may contain multiple method call specifications' =>
+      sub {
+        stub {
+            $subj->test_method(8);
+            $subj->test_method(9);
+        }
+        returns 1;
+        is( $subj->test_method(8), 1 );
+        is( $subj->test_method(9), 1 );
+      };
 
     subtest 'stub with callback' => sub {
         my @returns = qw( first second );
@@ -259,3 +256,15 @@ foreach my $subj ( $mock, $spy ) {
             '... and error traces back to this script' );
     };
 }
+
+subtest
+  'stub() coderef may contain multiple method call specifications for multiple objects'
+  => sub {
+    stub {
+        $mock->test_method(10);
+        $spy->test_method(11);
+    }
+    returns 1;
+    is( $mock->test_method(10), 1 );
+    is( $spy->test_method(11),  1 );
+  };

@@ -8,8 +8,7 @@ use Carp 1.22 ();
 
 # class attributes
 our $__CaptureMode = q{};
-my $NumMethodCalls = 0;
-my $LastMethodCall;
+my @CapturedMethodCalls;
 
 ## no critic (NamingConventions::Capitalization)
 sub __CaptureMode {
@@ -17,22 +16,10 @@ sub __CaptureMode {
     return $__CaptureMode;
 }
 
-sub __NumMethodCalls {
-    my ( $class, $value ) = @_;
-
-    if ( defined $value ) {
-        $NumMethodCalls = $value;
-    }
-    return $NumMethodCalls;
-}
-
-sub __LastMethodCall {
-    my ( $class, $value ) = @_;
-
-    if ( defined $value ) {
-        $LastMethodCall = $value;
-    }
-    return $LastMethodCall;
+sub __CaptureMethodCall {
+    my ( $class, $method_call ) = @_;
+    push @CapturedMethodCalls, $method_call;
+    return;
 }
 ## use critic
 
@@ -70,7 +57,7 @@ sub __find_stub {
     return;
 }
 
-sub __capture_method_call {
+sub __capture_method_calls {
     # """
     # Get the last method called on a mock object,
     # removes it from the invocation history,
@@ -79,22 +66,19 @@ sub __capture_method_call {
     my ( $class, $coderef, $action ) = @_;
 
     ### assert: !$__CaptureMode
-    $NumMethodCalls = 0;
-    $LastMethodCall = undef;
     {
         # Execute the coderef. This should in turn include a method call on
         # mock, which should be handled by its AUTOLOAD method.
         local $__CaptureMode = $action;
         $coderef->();
     }
-
     Carp::croak 'Coderef must have a method invoked on a mock or spy object'
-      if $NumMethodCalls == 0;
-    Carp::croak
-      'Coderef must not have multiple methods invoked on a mock or spy object'
-      if $NumMethodCalls > 1;
+      if @CapturedMethodCalls == 0;
 
-    return $LastMethodCall;
+    my @method_calls = @CapturedMethodCalls;
+    @CapturedMethodCalls = ();
+
+    return @method_calls;
 }
 
 1;

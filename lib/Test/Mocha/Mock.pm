@@ -102,8 +102,7 @@ sub AUTOLOAD {
     );
 
     if ( $self->__CaptureMode ) {
-        $self->__NumMethodCalls( $self->__NumMethodCalls + 1 );
-        $self->__LastMethodCall($method_call);
+        $self->__CaptureMethodCall($method_call);
         return;
     }
 
