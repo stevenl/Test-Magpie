@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More 0.99 tests => 61;
+use Test::More 0.99 tests => 64;
 use Test::Fatal;
 use Test::Builder::Tester;
 use Types::Standard qw( Any slurpy );
@@ -310,6 +310,13 @@ ERR
         test_test();
     };
 
+    subtest 'called_ok() with multiple method calls to verify' => sub {
+        my $test_name = 'multiple 1';
+        test_out("ok 1 - $test_name\n    ok 2 - $test_name");
+        called_ok { $subj->once; $subj->twice } between( 1, 2 ), $test_name;
+        test_test();
+    };
+
     # -----------------
     # called_ok() with type constraint arguments
 
@@ -397,3 +404,17 @@ OUT
         test_test();
     };
 }
+
+subtest
+  'called_ok() with multiple method calls from multiple objects to verify' =>
+  sub {
+    my $test_name = 'multiple 2';
+    test_out("ok 1 - $test_name\n    ok 2 - $test_name\n    ok 3 - $test_name");
+    called_ok {
+        $mock->once;
+        $mock->twice;
+        $spy->twice;
+    }
+    between( 1, 2 ), $test_name;
+    test_test();
+  };
