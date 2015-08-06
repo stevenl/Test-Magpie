@@ -459,13 +459,13 @@ sub inspect (&) {
     my @method_calls =
       Test::Mocha::Mock->__capture_method_calls( $coderef, 'inspect' );
 
-    my @to_inspect = map {
-        my $method_call = $_;
-        grep { $method_call->__satisfied_by($_) }
+    my @inspect;
+    foreach my $method_call (@method_calls) {
+        push @inspect,
+          grep { $method_call->__satisfied_by($_) }
           @{ $method_call->invocant->__calls };
-    } @method_calls;
-
-    return @to_inspect;
+    }
+    return @inspect;
 }
 
 =func inspect_all
