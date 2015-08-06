@@ -7,8 +7,8 @@ use warnings;
 use Carp 1.22 ();
 
 # class attributes
-our $__CaptureMode = q{};
-my @CapturedMethodCalls;
+our $__CaptureMode         = q{};
+our @__CapturedMethodCalls = ();
 
 ## no critic (NamingConventions::Capitalization)
 sub __CaptureMode {
@@ -18,7 +18,7 @@ sub __CaptureMode {
 
 sub __CaptureMethodCall {
     my ( $class, $method_call ) = @_;
-    push @CapturedMethodCalls, $method_call;
+    push @__CapturedMethodCalls, $method_call;
     return;
 }
 ## use critic
@@ -66,17 +66,20 @@ sub __capture_method_calls {
     my ( $class, $coderef, $action ) = @_;
 
     ### assert: !$__CaptureMode
+    my @method_calls;
     {
+        local $__CaptureMode         = $action;
+        local @__CapturedMethodCalls = ();
+
         # Execute the coderef. This should in turn include a method call on
         # mock, which should be handled by its AUTOLOAD method.
-        local $__CaptureMode = $action;
         $coderef->();
-    }
-    Carp::croak 'Coderef must have a method invoked on a mock or spy object'
-      if @CapturedMethodCalls == 0;
 
-    my @method_calls = @CapturedMethodCalls;
-    @CapturedMethodCalls = ();
+        Carp::croak 'Coderef must have a method invoked on a mock or spy object'
+          if @__CapturedMethodCalls == 0;
+
+        @method_calls = @__CapturedMethodCalls;
+    }
 
     return @method_calls;
 }
