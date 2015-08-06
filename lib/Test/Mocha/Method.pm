@@ -9,8 +9,8 @@ use 5.010001;
 use experimental 'smartmatch';
 
 use Carp 'croak';
+use Devel::PartialDump 0.17 ();
 use Scalar::Util qw( blessed looks_like_number refaddr );
-use Test::Mocha::PartialDump;
 use Test::Mocha::Types qw( Matcher Slurpy );
 use Test::Mocha::Util 'check_slurpy_arg';
 use Types::Standard qw( ArrayRef HashRef Str );
@@ -18,7 +18,7 @@ use Types::Standard qw( ArrayRef HashRef Str );
 use overload '""' => \&stringify, fallback => 1;
 
 # cause string overloaded objects (Matchers) to be stringified
-my $Dumper = Test::Mocha::PartialDump->new( objects => 0, stringify => 1 );
+my $Dumper = Devel::PartialDump->new( objects => 0, stringify => 1 );
 
 sub new {
     # uncoverable pod
