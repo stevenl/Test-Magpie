@@ -148,7 +148,7 @@ sub can {
     my ( $self, $method_name ) = @_;
 
     # Handle can('CARP_TRACE') for internal croak()'s (Carp v1.32+)
-    #return if $method_name eq 'CARP_TRACE';
+    return if $method_name eq 'CARP_TRACE';
 
     $AUTOLOAD = 'can';
     goto &AUTOLOAD;
