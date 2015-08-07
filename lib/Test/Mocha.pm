@@ -232,6 +232,15 @@ The last stubbed response will persist until it is overridden.
     stub { $warehouse->has_inventory($item, 10) } returns '';
     print( $warehouse->has_inventory($item, 10) ) for 1 .. 5; # nothing printed
 
+You can apply a stub to multiple method calls in one go to set them with the
+same responses.
+
+    stub {
+        $mock1->method1(1);
+        $mock2->method2(1);
+        $spy->method3(2);
+    } returns(2), returns(1);
+
 =cut
 
 sub stub (&@) {
@@ -350,6 +359,14 @@ of the default.
 
     called_ok { $warehouse->remove_inventory($item, 50) } times(0), 'inventory not removed';
     # prints "ok 2 - inventory not removed"
+
+You can verify multiple method calls in one go.
+
+    called_ok {
+        $mock1->method1(1);
+        $mock2->method2(1);
+        $spy->method3(2);
+    } times(2);
 
 =cut
 

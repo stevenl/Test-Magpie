@@ -264,7 +264,11 @@ subtest
         $mock->test_method(10);
         $spy->test_method(11);
     }
-    returns 1;
+    returns(2), returns(1);
+
+    is( $mock->test_method(10), 2 );
+    is( $spy->test_method(11),  2 );
+
     is( $mock->test_method(10), 1 );
     is( $spy->test_method(11),  1 );
   };
