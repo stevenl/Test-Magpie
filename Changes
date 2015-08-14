@@ -2,6 +2,12 @@ Revision history for Test-Mocha
 
 {{$NEXT}}
 
+0.62_02 2015-08-14
+
+    - Use Devel::PartialDump again, since bug fixes have been released.
+    - Enable multiple method calls from multiple mocks/spies to be captured
+      simultaneously in stub(), called_ok(), or inspect().
+
 0.62_01 2015-08-05
 
     - Cleared out the namespaces of Mock and Spy as much as possible to avoid
