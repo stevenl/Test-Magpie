@@ -2,6 +2,10 @@ Revision history for Test-Mocha
 
 {{$NEXT}}
 
+0.63    2015-09-05
+
+    Make the latest development release official.
+
 0.62_02 2015-08-14
 
     - Use Devel::PartialDump again, since bug fixes have been released.
