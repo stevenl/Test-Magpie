@@ -669,7 +669,15 @@ for Java and Python by Szczepan Faber.
 It is not associated with the Javascript test framework for node.js called
 Mocha. I named Test::Mocha before that came about.
 
-The C<class_mock()> function was contributed by Scott Davis.
+Thanks to the following people who have contributed to Test::Mocha:
+
+=over
+
+Scott Davis for adding the C<class_mock()> function.
+
+Chad Granum <exodist@cpan.org>
+
+=back
 
 =head1 SEE ALSO
 
