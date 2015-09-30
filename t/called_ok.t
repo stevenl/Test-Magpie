@@ -365,16 +365,12 @@ ERR
 
     subtest 'called_ok() in a TODO block' => sub {
         my $test_name = 'test_method() was called 1 time(s)';
-        my $line      = __LINE__ + 14;
+        my $line      = __LINE__ + 10;
 
         chomp( my $out = <<"OUT" );
 not ok 1 - $test_name # TODO should fail
     #   Failed (TODO) test '$test_name'
     #   at $FILE line $line.
-    # Error: unexpected number of calls to 'test_method()'
-    #          got: 0 time(s)
-    #     expected: 1 time(s)
-$diag_call_history
 OUT
         test_out($out);
       TODO: {
