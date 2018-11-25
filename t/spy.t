@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 20;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -71,6 +71,18 @@ subtest 'spy does not can(any_method)' => sub {
         $spy->__calls->[-1]->stringify_long,
         qq{can("foo") called at $FILE line $line},
         '... and method call is recorded'
+    );
+};
+
+# ----------------------
+# spy is passed to real object's methods
+
+subtest 'spy invokes a stubbed method indirectly' => sub {
+    stub { $spy->indirect } returns('stubbed indirect');
+    is(
+        $spy->direct,
+        'stubbed indirect',
+        '... and invokes the method'
     );
 };
 

@@ -107,15 +107,20 @@ sub AUTOLOAD {
         return $stub->execute_next_response( $self, @args );
     }
 
+    # invoke unstubbed isa() and DOES() directly on the real object
+    return $self->__object->$method_name(@args) if $method_name eq 'isa' || $method_name eq 'DOES';
+
     # delegate the method call to the real object
+    my $method = $self->__object->can($method_name);
     Carp::croak(
         sprintf
           qq{Can't call object method "%s" because it can't be located via package "%s"},
         $method_name,
         ref( $self->__object )
-    ) if !$self->__object->can($method_name);
+    ) if !$method;
 
-    return $self->__object->$method_name(@args);
+    # invoke real object's method, but pass spy as self
+    return $method->($self, @args);
 }
 
 sub isa {
