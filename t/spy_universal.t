@@ -8,7 +8,7 @@ use Test::More tests => 18;
 use lib 't/lib';
 use TestClass;
 
-BEGIN { use_ok 'Test::Mocha' }
+use ok 'Test::Mocha';
 
 my $spy = spy( TestClass->new );
 

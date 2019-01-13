@@ -12,7 +12,7 @@ use MyNonThrowable;
 use MyThrowable;
 use TestClass;
 
-BEGIN { use_ok 'Test::Mocha' }
+use ok 'Test::Mocha';
 
 # setup
 my $FILE = __FILE__;

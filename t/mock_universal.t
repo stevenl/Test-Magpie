@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 23;
 
-BEGIN { use_ok 'Test::Mocha' }
+use ok 'Test::Mocha';
 
 my $mock = mock;
 
