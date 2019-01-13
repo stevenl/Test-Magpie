@@ -677,6 +677,8 @@ Scott Davis for adding the C<class_mock()> function.
 
 Chad Granum <exodist@cpan.org>
 
+Bob Showalter <showaltb@gmail.com>
+
 =back
 
 =head1 SEE ALSO
