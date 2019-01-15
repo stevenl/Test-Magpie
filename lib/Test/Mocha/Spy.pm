@@ -9,6 +9,7 @@ use Carp 1.22 ();
 use Scalar::Util ();
 use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
+use Test::Mocha::SpyHash;
 use Test::Mocha::Util ();
 use Types::Standard   ();
 use UNIVERSAL::ref;
@@ -49,8 +50,8 @@ my %DEFAULT_STUBS = (
 sub __new {
     # uncoverable pod
     my ( $class, $object ) = @_;
-    Carp::croak "Can't spy on an unblessed reference"
-      if !Scalar::Util::blessed($object);
+    Carp::croak 'Can only spy on a blessed HASH reference'
+      if !Scalar::Util::blessed($object) || Scalar::Util::reftype($object) ne 'HASH';
 
     my $args = $class->SUPER::__new;
 
@@ -59,12 +60,18 @@ sub __new {
         map { $_ => [ $DEFAULT_STUBS{$_} ] }
           keys %DEFAULT_STUBS
     };
-    return bless $args, $class;
+
+    my $self = {};
+    ## no critic (Miscellanea::ProhibitTies)
+    tie %{$self}, 'Test::Mocha::SpyHash', $args;
+
+    return bless $self, $class;
 }
 
 sub __object {
     my ($self) = @_;
-    return $self->{object};
+    my $args = tied(%{$self}) ? tied(%{$self})->[1] : $self;
+    return $args->{object};
 }
 
 sub AUTOLOAD {

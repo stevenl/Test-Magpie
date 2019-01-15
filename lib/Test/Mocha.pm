@@ -500,7 +500,7 @@ sub inspect_all ($) {
     croak 'inspect_all() must be given a mock or spy object'
       if !$mock->isa('Test::Mocha::SpyBase');
 
-    return @{ $mock->{calls} };
+    return @{ $mock->__calls };
 }
 
 =func clear
