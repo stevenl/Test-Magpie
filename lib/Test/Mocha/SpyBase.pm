@@ -33,12 +33,14 @@ sub __new {
 
 sub __calls {
     my ($self) = @_;
-    return $self->{calls};
+    my $args = tied(%{$self}) ? tied(%{$self})->[1] : $self;
+    return $args->{calls};
 }
 
 sub __stubs {
     my ($self) = @_;
-    return $self->{stubs};
+    my $args = tied(%{$self}) ? tied(%{$self})->[1] : $self;
+    return $args->{stubs};
 }
 
 sub __find_stub {

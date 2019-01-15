@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -22,10 +22,10 @@ my $spy = spy($obj);
 ok( $spy, 'spy($obj) creates a simple spy' );
 is( $spy->__object, $obj, 'spy wraps object' );
 
-subtest 'spy() must be given a blessed object' => sub {
+subtest 'spy() must be given a blessed HASH reference' => sub {
     like(
         my $e = exception { spy(1) },
-        qr{^Can't spy on an unblessed reference},
+        qr{^Can only spy on a blessed HASH reference},
         'error is thrown'
     );
     like( $e, qr{at \Q$FILE\E}, '... and error traces back to this file' );
@@ -71,6 +71,30 @@ subtest 'spy does not can(any_method)' => sub {
         $spy->__calls->[-1]->stringify_long,
         qq{can("foo") called at $FILE line $line},
         '... and method call is recorded'
+    );
+};
+
+
+# ----------------------
+# spy delegates hash access to the real object
+
+subtest 'spy accesses the real object hash' => sub {
+    $obj->{foo} = 'FOO';
+    is(
+        'FOO',
+        $spy->{foo},
+        '...for fetching values',
+    );
+    $spy->{bar} = 'BAR';
+    is(
+        'FOO',
+        $obj->{foo},
+        '...for storing values',
+    );
+    is_deeply(
+        ['bar', 'foo'],
+        [sort keys %$spy],
+        '...for retrieving keys',
     );
 };
 
