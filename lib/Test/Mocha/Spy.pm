@@ -11,7 +11,7 @@ use Test::Mocha::MethodCall;
 use Test::Mocha::MethodStub;
 use Test::Mocha::Util ();
 use Types::Standard   ();
-use UNIVERSAL::ref;
+use if $] lt '5.025', 'UNIVERSAL::ref';
 
 our $AUTOLOAD;
 

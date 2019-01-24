@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More 0.88;
 use Test::Fatal;
 #use Scalar::Util qw( blessed );
 
@@ -38,7 +38,11 @@ ok( $spy->isa('TestClass'),  'spy isa(TestClass)' );
 ok( $spy->does('TestClass'), 'spy does(TestClass)' );
 ok( $spy->DOES('TestClass'), 'spy DOES(TestClass)' );
 
-is( ref($spy), 'TestClass', 'ref(spy)' );
+SKIP: {
+    skip 'UNIVERSAL::ref not compatible with Perl version >= 5.025', 1
+        if $] ge '5.025';
+    is( ref($spy), 'TestClass', 'ref(spy)' );
+}
 #iis( blessed($spy), 'TestClass' );
 
 ok( !$spy->isa('Foo'),  'spy does not isa(Anything)' );
@@ -134,3 +138,5 @@ subtest 'spy does not inspect methods it cannot delegate' => sub {
 $spy->DESTROY;
 isnt( $spy->__calls->[-1]->stringify,
     'DESTROY()', 'DESTROY() is not AUTOLOADed' );
+
+done_testing;
