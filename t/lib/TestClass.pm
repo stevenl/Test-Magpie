@@ -8,7 +8,7 @@ sub new {
     return bless {}, $class;
 }
 
-sub test_method {
+sub echo {
     my ( $self, $value ) = @_;
     return $value;
 }

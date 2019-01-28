@@ -50,18 +50,17 @@ ok( !$spy->DOES('Baz'), 'spy does not DOES(Anything)' );
 # ----------------------
 # spy delegates method calls to the real object
 
-is( $spy->test_method( bar => 1 ),
-    'bar', 'spy accepts methods that it can delegate' );
+is( $spy->echo('bar'), 'bar', 'spy accepts methods that it can delegate' );
 
-subtest 'spy can(test_method)' => sub {
-    ok( my $coderef = $spy->can('test_method'), 'can() returns positively' );
+subtest 'spy can(echo)' => sub {
+    ok( my $coderef = $spy->can('echo'), 'can() returns positively' );
     is( ref($coderef), 'CODE', '... and return value is a coderef' );
     is( $coderef->( $spy, 5 ),
         5, '... and coderef delegates method call by default' );
     my $line = __LINE__ - 2;
     is(
         $spy->__calls->[-1]->stringify_long,
-        qq{test_method(5) called at $FILE line $line},
+        qq{echo(5) called at $FILE line $line},
         '... and method call is recorded'
     );
 };
