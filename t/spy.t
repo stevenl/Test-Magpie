@@ -35,7 +35,6 @@ subtest 'spy() must be given a blessed object' => sub {
 # spy acts as a wrapper to the real object
 
 ok( $spy->isa('TestClass'),  'spy isa(TestClass)' );
-ok( $spy->does('TestClass'), 'spy does(TestClass)' );
 ok( $spy->DOES('TestClass'), 'spy DOES(TestClass)' );
 
 SKIP: {
@@ -46,7 +45,6 @@ SKIP: {
 #iis( blessed($spy), 'TestClass' );
 
 ok( !$spy->isa('Foo'),  'spy does not isa(Anything)' );
-ok( !$spy->does('Bar'), 'spy does not does(Anything)' );
 ok( !$spy->DOES('Baz'), 'spy does not DOES(Anything)' );
 
 # ----------------------

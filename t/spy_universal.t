@@ -22,11 +22,6 @@ is( ( inspect { $spy->DOES('TestClass') } )[0],
     'DOES("TestClass")', '... and inspected' );
 called_ok { $spy->DOES('TestClass') } '... and verified';
 
-ok( $spy->does('TestClass'), 'does() called' );
-is( ( inspect { $spy->does('TestClass') } )[0],
-    'does("TestClass")', '... and inspected' );
-called_ok { $spy->does('TestClass') } '... and verified';
-
 ok( $spy->can('get'), 'can() called' );
 is( ( inspect { $spy->can('get') } )[0], 'can("get")', '... and inspected' );
 called_ok { $spy->can('get') } '... and verified';

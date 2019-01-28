@@ -13,11 +13,6 @@ sub test_method {
     return $value;
 }
 
-sub does {
-    my ( $class, $role ) = @_;
-    return $class->DOES($role);
-}
-
 sub get  { }
 sub set  { }
 sub next { }
