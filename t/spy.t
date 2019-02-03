@@ -76,18 +76,6 @@ subtest 'spy does not can(any_method)' => sub {
 };
 
 # ----------------------
-# spy is passed to real object's methods
-
-subtest 'spy invokes a stubbed method indirectly' => sub {
-    stub { $spy->indirect } returns('stubbed indirect');
-    is(
-        $spy->direct,
-        'stubbed indirect',
-        '... and invokes the method'
-    );
-};
-
-# ----------------------
 # spy doesn't handle method calls it can't handle
 
 subtest 'spy does not accept calls to methods it cannot delegate' => sub {

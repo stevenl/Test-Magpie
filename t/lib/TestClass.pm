@@ -21,10 +21,4 @@ sub once   { }
 sub twice  { }
 sub thrice { }
 
-sub direct {
-    my $self = shift;
-    $self->indirect
-}
-sub indirect { 'indirect' }
-
 1;
