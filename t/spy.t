@@ -51,6 +51,7 @@ ok( !$spy->DOES('Baz'), 'spy does not DOES(Anything)' );
 # spy delegates method calls to the real object
 
 is( $spy->echo('bar'), 'bar', 'spy accepts methods that it can delegate' );
+is( $spy->getter('foo'), 'bar', '... and the method is invoked on the real object' );
 
 subtest 'spy can(echo)' => sub {
     ok( my $coderef = $spy->can('echo'), 'can() returns positively' );

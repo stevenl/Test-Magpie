@@ -5,7 +5,12 @@ use warnings;
 
 sub new {
     my ($class) = @_;
-    return bless {}, $class;
+    return bless { foo => 'bar' }, $class;
+}
+
+sub getter {
+    my ($self, $attr) = @_;
+    return $self->{$attr};
 }
 
 sub echo {
