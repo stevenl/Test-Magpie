@@ -87,8 +87,8 @@ subtest 'spy accesses the real object hash' => sub {
     );
     $spy->{bar} = 'BAR';
     is(
-        'FOO',
-        $obj->{foo},
+        'BAR',
+        $obj->{bar},
         '...for storing values',
     );
     is_deeply(
