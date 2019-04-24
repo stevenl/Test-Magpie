@@ -9,7 +9,7 @@ use Tie::Hash ();
 use parent -norequire, 'Tie::ExtraHash';
 
 # pass spy attributes hashref. the tied hash will access the real object.
-# access the the spy attributes is available through tied(%$spy)->[1].
+# access to the spy attributes is available through tied(%$spy)->[1].
 sub TIEHASH
 {
     my ($class, $args) = @_;
